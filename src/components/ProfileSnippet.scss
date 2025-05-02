@@ -1,0 +1,13 @@
+.profile-snippet{
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  &__info{
+    margin-right: 10px;
+    text-align:right;
+  }
+  &__avatar{
+    width: 65px;
+    height: 65px;
+  }
+}
