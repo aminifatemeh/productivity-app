@@ -1,0 +1,55 @@
+.pomodoro-clock {
+  width: 250px;
+  height: 250px;
+  border-radius: 100%;
+  background-color: #5ecea8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  &__white-bg {
+    width: 220px;
+    height: 220px;
+    border-radius:100%;
+    background-color: #f6f6f1;
+  }
+  &__play-button{
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-color: #2C868B;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  &__triangle{
+    width: 0;
+    height: 0;
+    border-top: 15px solid transparent;
+    border-left: 25px solid #F6F6F1;
+    border-bottom: 15px solid transparent;
+    margin-left: 5px;
+  }
+  &__minute{
+    position: absolute;
+    &:nth-child(3){
+      bottom: 30px;
+    }
+    &:nth-child(4){
+      top: 110px;
+      left: 25px;
+    }
+    &:nth-child(5){
+      top: 30px;
+    }
+    &:nth-child(6){
+      right: 25px;
+    }
+  }
+  &__timer{
+    position: absolute;
+    bottom: -40px;
+  }
+}
+

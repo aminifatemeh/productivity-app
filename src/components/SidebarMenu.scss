@@ -1,6 +1,5 @@
 .sidebar{
   width: 321px;
-  position: fixed;
   top: 0;
   right: 0;
   height: 100vh;
@@ -21,11 +20,24 @@
         text-decoration: none;
         color: black;
       }
-      .sidebar__icons{
-        width: 30px;
-        height: 30px;
-        margin-left: 10px;
-      }
     }
+  }
+  &__icons{
+    width: 30px;
+    height: 30px;
+    margin-left: 10px;
+  }
+  &__logout{
+    display: flex;
+    height: 150px;
+    align-items: end;
+    button{
+      width: 260px;
+      height: 60px;
+      border-radius: 15px;
+      border: none;
+      background-color: #80D084;
+    }
+
   }
 }

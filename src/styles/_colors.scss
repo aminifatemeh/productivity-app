@@ -1,0 +1,51 @@
+// colors.scss
+
+$colors: (
+  // 🟢 Greens
+        green-1:    #0ED400FF,
+        green-2:    #34AA7BFF,
+        green-3:    #57CC99FF,
+        green-4:    #7FD083FF,
+        green-5:    #80ED99FF,
+        green-6:    #90E5C3FF,
+        green-7:    #BEE8D7FF,
+        green-8:    #E9FFEAFF,
+        green-9:    #5ECEA8D9,
+
+  // 🔴 Reds / Pinks
+        red-1:      #A60808FF,
+        red-3:      #DA348CFF,
+
+  // 🟡 Yellows
+        yellow-1:   #E1F396FF,
+
+  // 🔵 Blues / Cyans / Teals
+        blue-1:     #458FE4FF,
+        teal-1:     #2B868BFF,
+        teal-2:     #38A3A5FF,
+        teal-3:     #1D976CFF,
+        teal-4:     #094C4FFF,
+        teal-5:     #094C4F75,
+
+  // ⚫️ Greys / Blacks / Neutrals
+        black:      #000000FF,
+        grey-1:     #4D5B55F0,
+        grey-2:     #7F7373FF,
+        grey-3:     #9F9F9FFF,
+        grey-4:     #D9D9D9FF,
+        grey-5:     #DCEFE7FF,
+        grey-6:     #F6F6F0FF,
+
+
+  // 🔵 Deep blue-green
+        deep-teal:  #01575CFF,
+
+  // ⬜️ Whites / Transparent
+        white:      #FFFFFFFF,
+        transparent: #FFFFFF00
+);
+
+// تابع فراخوانی
+@function color($name) {
+  @return map-get($colors, $name);
+}
