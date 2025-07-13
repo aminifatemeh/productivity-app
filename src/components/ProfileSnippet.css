@@ -1,0 +1,15 @@
+.profile-snippet {
+  display: flex;
+  justify-content: right;
+  align-items: center;
+}
+.profile-snippet__info {
+  margin-right: 10px;
+  text-align: right;
+}
+.profile-snippet__avatar {
+  width: 65px;
+  height: 65px;
+}
+
+/*# sourceMappingURL=ProfileSnippet.css.map */

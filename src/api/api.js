@@ -1,27 +1,32 @@
-import axios from 'axios'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-const api = axios.create({
-    baseURL: 'http://localhost:8000/api/',
-})
+function TaskComponent() {
+    const [task, setTask] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-})
+    useEffect(() => {
+        axios.get('http://192.168.1.10:8000/api/tasks/khak_khorde/\n')
+            .then(response => {
+                setTask(response.data);
+                setLoading(false);
+            })
+            .catch(err => {
+                setError(err.message);
+                setLoading(false);
+            });
+    }, []);
 
-export const login = async (username, password) => {
-    const response = await api.post('token/', {username, password})
-    localStorage.setItem('access_token', response.data.token)
-    localStorage.setItem('refresh_token', response.data.refresh)
-    return response.data
+    if (loading) return <div>در حال بارگذاری...</div>;
+    if (error) return <div>خطا: {error}</div>;
+
+    return (
+        <div>
+            <h2>اطلاعات تسک</h2>
+            <pre>{JSON.stringify(task, null, 2)}</pre>
+        </div>
+    );
 }
 
-export const getTasks = async () => {
-    const response = await api.post('tasks')
-    return response.data;
-};
-
-export default api
+export default TaskComponent;

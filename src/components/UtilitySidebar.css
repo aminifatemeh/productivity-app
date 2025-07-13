@@ -1,0 +1,57 @@
+.utility-sidebar {
+  width: 321px;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  padding: 2rem;
+  position: relative;
+  background-image: url("/assets/images/utility-bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.utility-sidebar__gradient {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  background: linear-gradient(180deg, rgba(4, 70, 98, 0.6) 0%, rgba(94, 206, 168, 0.51) 100%);
+}
+.utility-sidebar__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 350px;
+}
+.utility-sidebar__content-add-task {
+  width: 250px;
+  height: 50px;
+  border-radius: 45px;
+  background-color: #E1F396;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+.utility-sidebar__content-add-task .circle {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  background-color: #01575C;
+  position: absolute;
+  left: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.utility-sidebar__content-add-task .circle img {
+  width: 10px;
+  height: 10px;
+}
+.utility-sidebar__content-add-task span {
+  text-align: center;
+}
+
+/*# sourceMappingURL=UtilitySidebar.css.map */

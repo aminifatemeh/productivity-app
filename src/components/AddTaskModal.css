@@ -1,0 +1,36 @@
+.AddTaskModal {
+  width: 455px;
+  height: 100%;
+  position: relative;
+  background-color: #F6F6F1;
+  border-radius: 19px;
+  padding: 40px;
+}
+.AddTaskModal-border {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border: 1px solid #000;
+  border-radius: 19px;
+  pointer-events: none;
+}
+.AddTaskModal-title {
+  background-color: #F6F6F1;
+  position: absolute;
+  width: 120px;
+  text-align: center;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.AddTaskModal-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: lightblue;
+}
+
+/*# sourceMappingURL=AddTaskModal.css.map */

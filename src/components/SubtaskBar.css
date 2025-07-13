@@ -1,0 +1,25 @@
+.subtaskbar {
+  width: 100%;
+  height: 25px;
+  background-color: #DDF0E7;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  cursor: grab;
+  transition: box-shadow 0.2s ease;
+}
+.subtaskbar img {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+.subtaskbar.done {
+  background-color: #DDF0E7;
+}
+.subtaskbar.not-done {
+  background-color: #E0E0E0;
+}
+
+/*# sourceMappingURL=SubtaskBar.css.map */

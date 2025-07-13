@@ -1,0 +1,19 @@
+.progressbar-container {
+  height: 20px;
+  border-radius: 16px;
+  background-color: #D9D9D9;
+  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+.progressbar-container .progressbar {
+  height: 20px;
+  background: linear-gradient(90deg, #64CDE6 0%, #34AA7B 100%);
+  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 16px;
+  transition: width 0.4s ease-in-out;
+}
+.progressbar-container .progressbar-percentage {
+  font-size: 12px;
+  float: left;
+}
+
+/*# sourceMappingURL=ProgressBar.css.map */

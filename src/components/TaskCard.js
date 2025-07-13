@@ -44,11 +44,29 @@ function TaskCard() {
     setSubtasks(newTasks);
   };
 
+  const doneCount = subtasks.filter((t)=> t.isDone).length;
+  const progressPercent = subtasks.length === 0 ? 0 : Math.round((doneCount/subtasks.length) * 100);
+
   return (
     <div
       className={`TaskCard ${expanded ? "expanded" : ""}`}
       onClick={toggleCard}
     >
+      <div className="TaskCard__description">
+        <div className="TaskCard__description-titles">
+          <span>مطالعه سه فصل آخر کتاب</span>
+          <span>آمادگی برای آزمون پایان ترم</span>
+          <span>تاریخ انقضا: 15 فروردین 1404</span>
+        </div>
+        <div className="TaskCard__description-labels">
+          <div className="task-icons">
+            <img src="/assets/icons/edit.svg" alt="" />
+            <img src="/assets/icons/trash-bin.svg" alt="" />
+            <img src="/assets/icons/green-tick.svg" alt="" />
+          </div>
+          <div className="task-label">امتحانات ترم</div>
+        </div>
+      </div>
       <div className="TaskCard__divider--top" />
       <div className="TaskCard__divider" />
 
@@ -57,12 +75,12 @@ function TaskCard() {
         <div className="TaskCard__expanded-area">
           {subtasks.map((subtask, index) => (
             <div
-                key={subtask.id}
+              key={subtask.id}
               draggable
               onDragStart={() => handleDragStart(index)}
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(index)}
-                className='w-100'
+              className="w-100"
             >
               <SubtaskBar
                 title={subtask.title}
@@ -74,7 +92,10 @@ function TaskCard() {
           ))}
         </div>
       )}
-      <ProgressBar className='TaskCard__progressBar'/>
+      <ProgressBar
+        className="TaskCard__progressBar"
+        progress={`${progressPercent}%`}
+      />
     </div>
   );
 }

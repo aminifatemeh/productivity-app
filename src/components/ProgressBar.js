@@ -1,11 +1,11 @@
 import React from "react";
 import './ProgressBar.scss'
 
-function ProgressBar({ className }) {
+function ProgressBar({ className, progress }) {
   return (
-    <div className={`Progressbar-container ${className || ""}`}>
-      <div className="progressbar"></div>
-      <span className="progressbar-percentage"></span>
+    <div className={`progressbar-container ${className || ""}`}>
+      <div className="progressbar" style={{width: `${progress}`}}></div>
+      <span className="progressbar-percentage">{progress}</span>
     </div>
   );
 }
