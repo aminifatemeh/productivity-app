@@ -20,18 +20,18 @@ function TaskManagementPage() {
         {/* Header Section */}
         <div style={{ height: "100px", backgroundColor: "lightcoral" }}></div>
         <div style={{ height: "100px", backgroundColor: "lightcoral" }}></div>
-          <TaskComponent/>
+        <TaskComponent />
 
         {/* Grid Section */}
         <div
-            ref={gridSectionRef}
+          ref={gridSectionRef}
           className="flex-grow-1 d-flex flex-column"
           style={{
             margin: "30px",
             padding: "20px",
             overflowY: "auto",
             overflowX: "hidden",
-              position: "relative",
+            position: "relative",
           }}
         >
           <div className="row gy-4">
@@ -45,12 +45,12 @@ function TaskManagementPage() {
                 <div
                     className="d-flex justify-content-center align-items-center"
                     style={{
-                        position: "absolute",
+                        position: "fixed",
                         inset: 0,
                         backgroundColor: "rgba(77, 91, 85, 0.94)",
-                        borderRadius: '8px',
                         zIndex: 10,
-                        padding: '20px 0'
+                        padding: '40px',
+                        overflow: 'auto'
                     }}
                 >
                     <AddTaskModal isOpen={showModal} onClose={() => setShowModal(false)} />
@@ -75,7 +75,7 @@ function TaskManagementPage() {
         </div>
       </div>
     </div>
-        );
+  );
 }
 
 export default TaskManagementPage;

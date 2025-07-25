@@ -7,7 +7,7 @@ function TaskComponent() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        axios.get('http://192.168.1.10:8000/api/tasks/khak_khorde/\n')
+        axios.get('http://156.253.5.245:8000/api/tasks/khak_khorde/')
             .then(response => {
                 setTask(response.data);
                 setLoading(false);
