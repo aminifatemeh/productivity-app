@@ -2,15 +2,20 @@ import React, { useState } from "react";
 import "./TaskCard.scss";
 import SubtaskBar from "./SubtaskBar";
 import ProgressBar from "./ProgressBar";
+import AddTaskModal from "./AddTaskModal";
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
-function TaskCard() {
+function TaskCard({ task, onUpdateTask, onDeleteTask }) {
   const [expanded, setExpanded] = useState(false);
-  const [subtasks, setSubtasks] = useState([
-    { id: 1, title: "فصل 1", isDone: false },
-    { id: 2, title: "فصل 2", isDone: false },
-    { id: 3, title: "فصل 3", isDone: false },
-  ]);
-
+  const [subtasks, setSubtasks] = useState(
+      task.subtasks.map((subtask) => ({
+        id: subtask.id,
+        title: subtask.title,
+        isDone: !!subtask.done_date,
+      }))
+  );
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
 
   const handleDragStart = (index) => {
@@ -29,74 +34,151 @@ function TaskCard() {
     newSubTasks.splice(index, 0, draggedItem);
     setSubtasks(newSubTasks);
     setDraggedIndex(null);
+    // Update parent task with new subtask order
+    onUpdateTask({ ...task, subtasks: newSubTasks });
   };
 
   const toggleSubtaskDone = (index) => {
     const updated = [...subtasks];
     updated[index].isDone = !updated[index].isDone;
     setSubtasks(updated);
+    // Update parent task with updated subtasks
+    onUpdateTask({ ...task, subtasks: updated });
+  };
+
+  const handleDeleteSubtask = (index) => {
+    const newSubtasks = subtasks.filter((_, i) => i !== index);
+    setSubtasks(newSubtasks);
+    // Update parent task with new subtasks
+    onUpdateTask({ ...task, subtasks: newSubtasks });
   };
 
   const toggleCard = () => setExpanded(!expanded);
 
-  const handleDelete = (index) => {
-    const newTasks = subtasks.filter((_, i) => i !== index);
-    setSubtasks(newTasks);
+  const handleEdit = () => {
+    setIsEditModalOpen(true);
   };
 
-  const doneCount = subtasks.filter((t)=> t.isDone).length;
-  const progressPercent = subtasks.length === 0 ? 0 : Math.round((doneCount/subtasks.length) * 100);
+  const handleDelete = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDeleteTask(task.id);
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleUpdateTask = (updatedTask) => {
+    onUpdateTask(updatedTask);
+    setIsEditModalOpen(false);
+  };
+
+  const doneCount = subtasks.filter((t) => t.isDone).length;
+  const progressPercent = subtasks.length === 0 ? 0 : Math.round((doneCount / subtasks.length) * 100);
 
   return (
-    <div
-      className={`TaskCard ${expanded ? "expanded" : ""}`}
-      onClick={toggleCard}
-    >
-      <div className="TaskCard__description">
-        <div className="TaskCard__description-titles">
-          <span>مطالعه سه فصل آخر کتاب</span>
-          <span>آمادگی برای آزمون پایان ترم</span>
-          <span>تاریخ انقضا: 15 فروردین 1404</span>
-        </div>
-        <div className="TaskCard__description-labels">
-          <div className="task-icons">
-            <img src="/assets/icons/edit.svg" alt="" />
-            <img src="/assets/icons/trash-bin.svg" alt="" />
-            <img src="/assets/icons/green-tick.svg" alt="" />
-          </div>
-          <div className="task-label">امتحانات ترم</div>
-        </div>
-      </div>
-      <div className="TaskCard__divider--top" />
-      <div className="TaskCard__divider" />
-
-      {/* فقط وقتی باز شد، محتوای اضافه رو نشون بده */}
-      {expanded && (
-        <div className="TaskCard__expanded-area">
-          {subtasks.map((subtask, index) => (
-            <div
-              key={subtask.id}
-              draggable
-              onDragStart={() => handleDragStart(index)}
-              onDragOver={handleDragOver}
-              onDrop={() => handleDrop(index)}
-              className="w-100"
-            >
-              <SubtaskBar
-                title={subtask.title}
-                isDone={subtask.isDone}
-                onToggle={() => toggleSubtaskDone(index)}
-                onDelete={() => handleDelete(index)}
-              />
+      <>
+        <div className={`TaskCard ${expanded ? "expanded" : ""}`} onClick={toggleCard}>
+          <div className="TaskCard__description">
+            <div className="TaskCard__description-titles">
+              <span>{task.title}</span>
+              <span>{task.description}</span>
+              <span>تاریخ انقضا: {task.deadline_date}</span>
             </div>
-          ))}
+            <div className="TaskCard__description-labels">
+              <div className="task-icons">
+                <img
+                    src="/assets/icons/edit.svg"
+                    alt="ویرایش"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit();
+                    }}
+                    style={{ cursor: "pointer" }}
+                />
+                <img
+                    src="/assets/icons/trash-bin.svg"
+                    alt="حذف"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete();
+                    }}
+                    style={{ cursor: "pointer" }}
+                />
+                <img
+                    src="/assets/icons/green-tick.svg"
+                    alt="تکمیل"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ cursor: "pointer" }}
+                />
+              </div>
+              <div className="task-label">
+                {task.tags && task.tags.length > 0 ? (
+                    task.tags.map((tag, index) => (
+                        <span
+                            key={index}
+                            className="task-tag"
+                            style={{
+                              backgroundColor: tag.color || "#D9D9D9",
+                              marginRight: "5px",
+                              padding: "2px 8px",
+                              borderRadius: "3px",
+                              color: "white",
+                              fontSize: "12px",
+                              display: "inline-block",
+                              width: "70px",
+                              height: "21px",
+                              textAlign: "center",
+                            }}
+                        >
+                    {tag.name}
+                  </span>
+                    ))
+                ) : (
+                    <></>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="TaskCard__divider--top" />
+          <div className="TaskCard__divider" />
+          {expanded && (
+              <div className="TaskCard__expanded-area">
+                <div className="task-label-spacer" />
+                {subtasks.map((subtask, index) => (
+                    <div
+                        key={subtask.id}
+                        draggable
+                        onDragStart={() => handleDragStart(index)}
+                        onDragOver={handleDragOver}
+                        onDrop={() => handleDrop(index)}
+                        className="w-100"
+                    >
+                      <SubtaskBar
+                          title={subtask.title}
+                          isDone={subtask.isDone}
+                          onToggle={() => toggleSubtaskDone(index)}
+                          onDelete={() => handleDeleteSubtask(index)}
+                      />
+                    </div>
+                ))}
+              </div>
+          )}
+          <ProgressBar className="TaskCard__progressBar" progress={`${progressPercent}%`} />
         </div>
-      )}
-      <ProgressBar
-        className="TaskCard__progressBar"
-        progress={`${progressPercent}%`}
-      />
-    </div>
+        <AddTaskModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            onTaskAdded={handleUpdateTask}
+            initialTask={task}
+        />
+        <ConfirmDeleteModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={handleConfirmDelete}
+            taskTitle={task.title}
+        />
+      </>
   );
 }
 
