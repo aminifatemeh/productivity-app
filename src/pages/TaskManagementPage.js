@@ -9,6 +9,7 @@ function TaskManagementPage() {
     const [showModal, setShowModal] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
+    const [editTask, setEditTask] = useState(null); // برای مدیریت تسک در حال ویرایش
 
     const defaultTasks = [
         {
@@ -56,7 +57,6 @@ function TaskManagementPage() {
         if (error || !Array.isArray(fetchedTasks) || fetchedTasks.length === 0) {
             setTasks(defaultTasks);
         } else {
-            // Ensure fetched tasks have all required fields
             const normalizedTasks = fetchedTasks.map(task => ({
                 ...task,
                 hour: task.hour || "00:00",
@@ -76,11 +76,16 @@ function TaskManagementPage() {
     const handleUpdateTask = (updatedTask) => {
         console.log('Task updated:', updatedTask);
         setTasks(prevTasks => prevTasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
+        setEditTask(null); // بستن مدال ویرایش
     };
 
     const handleDeleteTask = (taskId) => {
         console.log('Task deleted:', taskId);
         setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    };
+
+    const handleEditTask = (task) => {
+        setEditTask(task); // باز کردن مدال ویرایش با تسک انتخاب‌شده
     };
 
     const categories = [
@@ -119,7 +124,7 @@ function TaskManagementPage() {
                 </div>
                 <TaskComponent category={selectedCategory} onTasksFetched={handleTasksFetched} />
                 <div
-                    className={`flex-grow-1 d-flex flex-column tasks-grid ${showModal ? 'overflow-hidden' : ''}`}
+                    className={`flex-grow-1 d-flex flex-column tasks-grid ${showModal || editTask ? 'overflow-hidden' : ''}`}
                 >
                     {tasks.length === 0 ? (
                         <div className="empty-message">
@@ -131,7 +136,7 @@ function TaskManagementPage() {
                                 .filter((task) => {
                                     if (selectedCategory === 'nobatesh_mishe') return task.flag_tuNobat;
                                     if (selectedCategory === 'rumiz') return !task.flag_tuNobat;
-                                    if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat; // TODO: Differentiate rumiz and khak_khorde
+                                    if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat;
                                     return true;
                                 })
                                 .map((task) => (
@@ -140,17 +145,28 @@ function TaskManagementPage() {
                                             task={task}
                                             onUpdateTask={handleUpdateTask}
                                             onDeleteTask={handleDeleteTask}
+                                            onEditTask={handleEditTask}
                                         />
                                     </div>
                                 ))}
                         </div>
                     )}
                     {showModal && (
-                        <div className="d-flex justify-content-center align-items-center modal-overlay">
+                        <div className="modal-overlay">
                             <AddTaskModal
                                 isOpen={showModal}
                                 onClose={() => setShowModal(false)}
                                 onTaskAdded={handleTaskAdded}
+                            />
+                        </div>
+                    )}
+                    {editTask && (
+                        <div className="modal-overlay">
+                            <AddTaskModal
+                                isOpen={!!editTask}
+                                onClose={() => setEditTask(null)}
+                                onTaskAdded={handleUpdateTask}
+                                initialTask={editTask}
                             />
                         </div>
                     )}

@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import "./TaskCard.scss";
 import SubtaskBar from "./SubtaskBar";
 import ProgressBar from "./ProgressBar";
-import AddTaskModal from "./AddTaskModal";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
-function TaskCard({ task, onUpdateTask, onDeleteTask }) {
+function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
   const [expanded, setExpanded] = useState(false);
   const [subtasks, setSubtasks] = useState(
       task.subtasks.map((subtask) => ({
@@ -14,7 +13,6 @@ function TaskCard({ task, onUpdateTask, onDeleteTask }) {
         isDone: !!subtask.done_date,
       }))
   );
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
 
@@ -34,7 +32,6 @@ function TaskCard({ task, onUpdateTask, onDeleteTask }) {
     newSubTasks.splice(index, 0, draggedItem);
     setSubtasks(newSubTasks);
     setDraggedIndex(null);
-    // Update parent task with new subtask order
     onUpdateTask({ ...task, subtasks: newSubTasks });
   };
 
@@ -42,21 +39,19 @@ function TaskCard({ task, onUpdateTask, onDeleteTask }) {
     const updated = [...subtasks];
     updated[index].isDone = !updated[index].isDone;
     setSubtasks(updated);
-    // Update parent task with updated subtasks
     onUpdateTask({ ...task, subtasks: updated });
   };
 
   const handleDeleteSubtask = (index) => {
     const newSubtasks = subtasks.filter((_, i) => i !== index);
     setSubtasks(newSubtasks);
-    // Update parent task with new subtasks
     onUpdateTask({ ...task, subtasks: newSubtasks });
   };
 
   const toggleCard = () => setExpanded(!expanded);
 
   const handleEdit = () => {
-    setIsEditModalOpen(true);
+    onEditTask(task);
   };
 
   const handleDelete = () => {
@@ -66,11 +61,6 @@ function TaskCard({ task, onUpdateTask, onDeleteTask }) {
   const handleConfirmDelete = () => {
     onDeleteTask(task.id);
     setIsDeleteModalOpen(false);
-  };
-
-  const handleUpdateTask = (updatedTask) => {
-    onUpdateTask(updatedTask);
-    setIsEditModalOpen(false);
   };
 
   const doneCount = subtasks.filter((t) => t.isDone).length;
@@ -166,12 +156,6 @@ function TaskCard({ task, onUpdateTask, onDeleteTask }) {
           )}
           <ProgressBar className="TaskCard__progressBar" progress={`${progressPercent}%`} />
         </div>
-        <AddTaskModal
-            isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
-            onTaskAdded={handleUpdateTask}
-            initialTask={task}
-        />
         <ConfirmDeleteModal
             isOpen={isDeleteModalOpen}
             onClose={() => setIsDeleteModalOpen(false)}

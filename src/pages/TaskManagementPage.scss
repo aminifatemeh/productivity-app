@@ -71,9 +71,15 @@
 
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background-color: rgba(77, 91, 85, 0.94);
-  z-index: 10;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); // پس‌زمینه مشکی با اپاسیتی 50%
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
   padding: 40px;
   overflow: auto;
 }

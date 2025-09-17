@@ -1,30 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AddTaskModal.scss';
 
-const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
+const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [subtaskCount, setSubtaskCount] = useState(task ? task.subtasks.length : 0);
-    const [subtasks, setSubtasks] = useState(task ? task.subtasks.map(st => st.title) : []);
-    const [isRoutine, setIsRoutine] = useState(task ? task.flag_tuNobat : false);
-    const [selectedDays, setSelectedDays] = useState(task ? task.selectedDays || [] : []);
+    const [subtaskCount, setSubtaskCount] = useState(0);
+    const [subtasks, setSubtasks] = useState([]);
+    const [isRoutine, setIsRoutine] = useState(false);
+    const [selectedDays, setSelectedDays] = useState([]);
     const modalRef = useRef(null);
-    const [tags, setTags] = useState(
-        task
-            ? task.tags.map(t => ({ ...t, selected: true }))
-            : [
-                { name: 'ورزش', color: '#34AA7B', selected: false },
-                { name: 'کار', color: '#DA348D', selected: false },
-                { name: 'کلاس', color: '#4690E4', selected: false },
-            ]
-    );
+    const [tags, setTags] = useState([
+        { name: 'ورزش', color: '#34AA7B', selected: false },
+        { name: 'کار', color: '#DA348D', selected: false },
+        { name: 'کلاس', color: '#4690E4', selected: false }
+    ]);
     const [newTag, setNewTag] = useState('');
     const [showNewTagInput, setShowNewTagInput] = useState(false);
     const [editingTag, setEditingTag] = useState(null);
-    const [name, setName] = useState(task ? task.title : '');
-    const [hour, setHour] = useState(task ? task.deadline_date.split('T')[1]?.slice(0, 5) || '' : '');
-    const [dueDate, setDueDate] = useState(task ? task.deadline_date.split('T')[0] : '');
-    const [description, setDescription] = useState(task ? task.description : '');
+    const [name, setName] = useState('');
+    const [hour, setHour] = useState('');
+    const [dueDate, setDueDate] = useState('');
+    const [description, setDescription] = useState('');
     const [errors, setErrors] = useState({ name: '', hour: '', dueDate: '' });
+
+    useEffect(() => {
+        if (initialTask) {
+            setName(initialTask.title || '');
+            setDescription(initialTask.description || '');
+            setHour(initialTask.hour || '');
+            setDueDate(initialTask.deadline_date || '');
+            setIsRoutine(initialTask.flag_tuNobat || false);
+            setSelectedDays(initialTask.selectedDays || []);
+            setSubtaskCount(initialTask.subtasks?.length || 0);
+            setSubtasks(initialTask.subtasks?.map(subtask => subtask.title) || []);
+            setTags((prevTags) =>
+                prevTags.map(tag => ({
+                    ...tag,
+                    selected: initialTask.tags?.some(t => t.name === tag.name) || false
+                }))
+            );
+        }
+    }, [initialTask]);
 
     const handleSubtaskChange = (index, value) => {
         const newSubtasks = [...subtasks];
@@ -68,7 +83,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
 
     const addNewTag = () => {
         if (newTag.trim()) {
-            setTags([...tags, { name: newTag, color: getRandomColor(), selected: true }]);
+            setTags([...tags, { name: newTag, color: getRandomColor(), selected: false }]);
             setNewTag('');
             setShowNewTagInput(false);
         }
@@ -89,23 +104,25 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
         if (!name.trim()) newErrors.name = 'این فیلد الزامی است';
         if (!hour.trim()) newErrors.hour = 'این فیلد الزامی است';
         if (!dueDate.trim()) newErrors.dueDate = 'این فیلد الزامی است';
+
         if (Object.values(newErrors).some(error => error)) {
             setErrors(newErrors);
         } else {
             const selectedTags = tags.filter(tag => tag.selected).map(tag => ({ name: tag.name, color: tag.color }));
             const newTask = {
-                id: task ? task.id : Date.now(),
+                id: initialTask?.id || Date.now(),
                 title: name,
                 description: description,
-                deadline_date: `${dueDate}T${hour}:00`,
+                deadline_date: dueDate,
                 flag_tuNobat: isRoutine,
+                hour: hour,
+                selectedDays: selectedDays,
                 subtasks: subtasks.map((subtask, index) => ({
-                    id: task && task.subtasks[index] ? task.subtasks[index].id : index + 1,
+                    id: initialTask?.subtasks[index]?.id || index + 1,
                     title: subtask,
-                    done_date: task && task.subtasks[index] ? task.subtasks[index].done_date : null,
+                    done_date: initialTask?.subtasks[index]?.done_date || null,
                 })),
                 tags: selectedTags,
-                selectedDays,
             };
             onTaskAdded(newTask);
             onClose();
@@ -137,18 +154,19 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
                 });
             }
         };
+
         updateBorderHeight();
         window.addEventListener('resize', updateBorderHeight);
         return () => window.removeEventListener('resize', updateBorderHeight);
     }, [subtaskCount, showAdvanced, subtasks, isRoutine, selectedDays, tags]);
 
-    if (!isOpen) return null;
+    if (!isOpen) return <></>;
 
     return (
         <div className="AddTaskModal" ref={modalRef}>
             <div className="AddTaskModal-border"></div>
-            <span className="AddTaskModal-title">{task ? 'ویرایش تسک' : 'افزودن تسک'}</span>
-            <div className="AddTaskModal-content">
+            <span className="AddTaskModal-title">{initialTask ? 'ویرایش تسک' : 'افزودن تسک'}</span>
+            <form action="" className="AddTaskModal-form" onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label>نام <span className="required-star">★</span></label>
                     <input
@@ -197,6 +215,14 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
                             className="custom-checkbox"
                             checked={isRoutine}
                             onChange={(e) => setIsRoutine(e.target.checked)}
+                        /> دوست داری تو بخش نوبتش میشه ببینی؟
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            className="custom-checkbox"
+                            checked={isRoutine}
+                            onChange={(e) => setIsRoutine(e.target.checked)}
                         /> آیا کارت یک روتینه؟
                     </label>
                 </div>
@@ -225,7 +251,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
                 {showAdvanced && (
                     <div className="mt-3">
                         <label className="subtask-label">
-                            این کارت رو به چند قسمت تقسیم می‌کنی؟
+                            این کارت رو به چند قسمت تقسیم می‌کنی?
                             <button
                                 type="button"
                                 className="btn-circle btn-decrease"
@@ -242,6 +268,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
                                 +
                             </button>
                         </label>
+
                         {subtasks.map((value, index) => (
                             <div className="form-group" key={index}>
                                 <input
@@ -273,8 +300,8 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
                                             />
                                         ) : (
                                             <span onClick={(e) => { e.stopPropagation(); handleTagEdit(index); }}>
-                        {tag.name}
-                      </span>
+                                                {tag.name}
+                                            </span>
                                         )}
                                     </div>
                                 ))}
@@ -300,20 +327,16 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, task }) => {
                         </div>
                     </div>
                 )}
+
                 <div className="d-flex justify-content-end mt-4 gap-2">
                     <button type="button" className="btn btn-secondary" onClick={onClose}>
                         بستن
                     </button>
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={handleSubmit}
-                        disabled={!name.trim() || !hour.trim() || !dueDate.trim()}
-                    >
-                        {task ? 'به‌روزرسانی تسک' : 'ذخیره تسک'}
+                    <button type="submit" className="btn btn-primary" disabled={!name.trim() || !hour.trim() || !dueDate.trim()}>
+                        {initialTask ? 'ذخیره تغییرات' : 'ذخیره تسک'}
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     );
 };
