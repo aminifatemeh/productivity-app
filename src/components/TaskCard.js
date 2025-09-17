@@ -48,7 +48,12 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
     onUpdateTask({ ...task, subtasks: newSubtasks });
   };
 
-  const toggleCard = () => setExpanded(!expanded);
+  const toggleCard = () => {
+    // فقط در صورتی که ساب‌تسک وجود داشته باشد، کارت باز یا بسته شود
+    if (subtasks.length > 0) {
+      setExpanded(!expanded);
+    }
+  };
 
   const handleEdit = () => {
     onEditTask(task);
@@ -63,12 +68,21 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
     setIsDeleteModalOpen(false);
   };
 
+  const handleToggleDone = () => {
+    const updatedTask = { ...task, isDone: !task.isDone };
+    setSubtasks(updatedTask.subtasks.map(subtask => ({
+      ...subtask,
+      isDone: updatedTask.isDone ? true : !!subtask.done_date,
+    })));
+    onUpdateTask(updatedTask);
+  };
+
   const doneCount = subtasks.filter((t) => t.isDone).length;
   const progressPercent = subtasks.length === 0 ? 0 : Math.round((doneCount / subtasks.length) * 100);
 
   return (
       <>
-        <div className={`TaskCard ${expanded ? "expanded" : ""}`} onClick={toggleCard}>
+        <div className={`TaskCard ${expanded ? "expanded" : ""} ${task.isDone ? "done" : ""}`} onClick={toggleCard}>
           <div className="TaskCard__description">
             <div className="TaskCard__description-titles">
               <span>{task.title}</span>
@@ -98,8 +112,11 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
                 <img
                     src="/assets/icons/green-tick.svg"
                     alt="تکمیل"
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: "pointer" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleDone();
+                    }}
+                    style={{ cursor: "pointer", opacity: task.isDone ? 0.5 : 1 }}
                 />
               </div>
               <div className="task-label">
@@ -119,6 +136,7 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
                               width: "70px",
                               height: "21px",
                               textAlign: "center",
+                              opacity: task.isDone ? 0.5 : 1,
                             }}
                         >
                     {tag.name}
@@ -132,7 +150,7 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
           </div>
           <div className="TaskCard__divider--top" />
           <div className="TaskCard__divider" />
-          {expanded && (
+          {expanded && subtasks.length > 0 && (
               <div className="TaskCard__expanded-area">
                 <div className="task-label-spacer" />
                 {subtasks.map((subtask, index) => (

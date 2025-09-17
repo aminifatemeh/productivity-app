@@ -6,6 +6,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
     const [subtaskCount, setSubtaskCount] = useState(0);
     const [subtasks, setSubtasks] = useState([]);
     const [isRoutine, setIsRoutine] = useState(false);
+    const [isInNobat, setIsInNobat] = useState(false);
     const [selectedDays, setSelectedDays] = useState([]);
     const modalRef = useRef(null);
     const [tags, setTags] = useState([
@@ -29,9 +30,14 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
             setHour(initialTask.hour || '');
             setDueDate(initialTask.deadline_date || '');
             setIsRoutine(initialTask.flag_tuNobat || false);
+            setIsInNobat(initialTask.flag_tuNobat || false);
             setSelectedDays(initialTask.selectedDays || []);
             setSubtaskCount(initialTask.subtasks?.length || 0);
-            setSubtasks(initialTask.subtasks?.map(subtask => subtask.title) || []);
+            setSubtasks(initialTask.subtasks?.map((subtask, index) => ({
+                id: subtask.id || index + 1, // اطمینان از وجود id
+                title: subtask.title,
+                done_date: subtask.done_date || null
+            })) || []);
             setTags((prevTags) =>
                 prevTags.map(tag => ({
                     ...tag,
@@ -43,13 +49,13 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
 
     const handleSubtaskChange = (index, value) => {
         const newSubtasks = [...subtasks];
-        newSubtasks[index] = value;
+        newSubtasks[index] = { ...newSubtasks[index], title: value };
         setSubtasks(newSubtasks);
     };
 
     const increaseCount = () => {
         setSubtaskCount((prev) => prev + 1);
-        setSubtasks((prevSubs) => [...prevSubs, '']);
+        setSubtasks((prevSubs) => [...prevSubs, { id: Date.now() + prevSubs.length, title: '', done_date: null }]);
     };
 
     const decreaseCount = () => {
@@ -114,13 +120,13 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
                 title: name,
                 description: description,
                 deadline_date: dueDate,
-                flag_tuNobat: isRoutine,
+                flag_tuNobat: isInNobat,
                 hour: hour,
                 selectedDays: selectedDays,
                 subtasks: subtasks.map((subtask, index) => ({
-                    id: initialTask?.subtasks[index]?.id || index + 1,
-                    title: subtask,
-                    done_date: initialTask?.subtasks[index]?.done_date || null,
+                    id: subtask.id || index + 1,
+                    title: subtask.title,
+                    done_date: subtask.done_date || null,
                 })),
                 tags: selectedTags,
             };
@@ -138,6 +144,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
         setSubtaskCount(0);
         setSubtasks([]);
         setIsRoutine(false);
+        setIsInNobat(false);
         setSelectedDays([]);
         setTags(tags.map(tag => ({ ...tag, selected: false })));
         setErrors({ name: '', hour: '', dueDate: '' });
@@ -158,7 +165,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
         updateBorderHeight();
         window.addEventListener('resize', updateBorderHeight);
         return () => window.removeEventListener('resize', updateBorderHeight);
-    }, [subtaskCount, showAdvanced, subtasks, isRoutine, selectedDays, tags]);
+    }, [subtaskCount, showAdvanced, subtasks, isRoutine, isInNobat, selectedDays, tags]);
 
     if (!isOpen) return <></>;
 
@@ -213,8 +220,8 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
                         <input
                             type="checkbox"
                             className="custom-checkbox"
-                            checked={isRoutine}
-                            onChange={(e) => setIsRoutine(e.target.checked)}
+                            checked={isInNobat}
+                            onChange={(e) => setIsInNobat(e.target.checked)}
                         /> دوست داری تو بخش نوبتش میشه ببینی؟
                     </label>
                     <label>
@@ -251,7 +258,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
                 {showAdvanced && (
                     <div className="mt-3">
                         <label className="subtask-label">
-                            این کارت رو به چند قسمت تقسیم می‌کنی?
+                            این کارت رو به چند قسمت تقسیم می‌کنی؟
                             <button
                                 type="button"
                                 className="btn-circle btn-decrease"
@@ -269,12 +276,12 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask }) => {
                             </button>
                         </label>
 
-                        {subtasks.map((value, index) => (
-                            <div className="form-group" key={index}>
+                        {subtasks.map((subtask, index) => (
+                            <div className="form-group" key={subtask.id || index}>
                                 <input
                                     type="text"
                                     className="form-control subtask-input"
-                                    value={value}
+                                    value={subtask.title || ''}
                                     onChange={(e) => handleSubtaskChange(index, e.target.value)}
                                     placeholder={`ساب‌تسک ${index + 1}`}
                                 />

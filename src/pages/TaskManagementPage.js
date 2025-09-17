@@ -3,13 +3,13 @@ import './TaskManagementPage.scss';
 import SidebarMenu from "../components/SidebarMenu";
 import TaskCard from "../components/TaskCard";
 import AddTaskModal from "../components/AddTaskModal";
-import TaskComponent from "../api/api";
+import TaskComponentApi from "../api/TaskComponentApi";
 
-function TaskManagementPage() {
+function TaskManagementPage({ useApi = true }) {
     const [showModal, setShowModal] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
-    const [editTask, setEditTask] = useState(null); // برای مدیریت تسک در حال ویرایش
+    const [editTask, setEditTask] = useState(null);
 
     const defaultTasks = [
         {
@@ -25,6 +25,7 @@ function TaskManagementPage() {
                 { id: 1, title: "ساب‌تسک ۱", done_date: null },
                 { id: 2, title: "ساب‌تسک ۲", done_date: "۱۴۰۴/۰۵/۳۰" },
             ],
+            isDone: false,
         },
         {
             id: 2,
@@ -38,6 +39,7 @@ function TaskManagementPage() {
             subtasks: [
                 { id: 3, title: "ساب‌تسک ۳", done_date: null },
             ],
+            isDone: false,
         },
         {
             id: 3,
@@ -49,34 +51,38 @@ function TaskManagementPage() {
             selectedDays: [],
             tags: [],
             subtasks: [],
+            isDone: false,
         },
     ];
 
     const handleTasksFetched = (fetchedTasks, error = false) => {
         console.log('Tasks fetched:', fetchedTasks, 'Error:', error);
-        if (error || !Array.isArray(fetchedTasks) || fetchedTasks.length === 0) {
-            setTasks(defaultTasks);
-        } else {
-            const normalizedTasks = fetchedTasks.map(task => ({
-                ...task,
-                hour: task.hour || "00:00",
-                selectedDays: task.selectedDays || [],
-                tags: task.tags || [],
-                subtasks: task.subtasks || [],
-            }));
-            setTasks(normalizedTasks);
-        }
+        const normalizedTasks = fetchedTasks.map(task => ({
+            ...task,
+            hour: task.hour || "00:00",
+            selectedDays: task.selectedDays || [],
+            tags: task.tags || [],
+            subtasks: task.subtasks?.map(subtask => ({
+                ...subtask,
+                done_date: subtask.done_date || null
+            })) || [],
+            isDone: task.isDone || false,
+        }));
+        setTasks(normalizedTasks);
     };
 
     const handleTaskAdded = (newTask) => {
         console.log('New task added:', newTask);
-        setTasks(prevTasks => [...prevTasks, newTask]);
+        setTasks(prevTasks => [...prevTasks, { ...newTask, isDone: false }]);
     };
 
     const handleUpdateTask = (updatedTask) => {
         console.log('Task updated:', updatedTask);
-        setTasks(prevTasks => prevTasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
-        setEditTask(null); // بستن مدال ویرایش
+        setTasks(prevTasks => {
+            const otherTasks = prevTasks.filter(task => task.id !== updatedTask.id);
+            return [...otherTasks, { ...updatedTask, subtasks: updatedTask.subtasks || [] }];
+        });
+        setEditTask(null);
     };
 
     const handleDeleteTask = (taskId) => {
@@ -85,13 +91,13 @@ function TaskManagementPage() {
     };
 
     const handleEditTask = (task) => {
-        setEditTask(task); // باز کردن مدال ویرایش با تسک انتخاب‌شده
+        setEditTask({ ...task, subtasks: task.subtasks || [] });
     };
 
     const categories = [
-        { id: 'nobatesh_mishe', label: 'نوبتش میشه', icon: "/assets/icons/nobatesh_mishe_icon.svg" },
-        { id: 'rumiz', label: 'رومیزی', icon: "/assets/icons/rumiz_icon.svg" },
         { id: 'khak_khorde', label: 'خاک خورده', icon: "/assets/icons/khakhorde_icon.svg" },
+        { id: 'rumiz', label: 'رومیزی', icon: "/assets/icons/rumiz_icon.svg" },
+        { id: 'nobatesh_mishe', label: 'نوبتش میشه', icon: "/assets/icons/nobatesh_mishe_icon.svg" },
     ];
 
     return (
@@ -122,7 +128,12 @@ function TaskManagementPage() {
                         ))}
                     </div>
                 </div>
-                <TaskComponent category={selectedCategory} onTasksFetched={handleTasksFetched} />
+                <TaskComponentApi
+                    category={selectedCategory}
+                    onTasksFetched={handleTasksFetched}
+                    useApi={useApi}
+                    defaultTasks={defaultTasks}
+                />
                 <div
                     className={`flex-grow-1 d-flex flex-column tasks-grid ${showModal || editTask ? 'overflow-hidden' : ''}`}
                 >
@@ -134,9 +145,8 @@ function TaskManagementPage() {
                         <div className="row gy-4">
                             {tasks
                                 .filter((task) => {
-                                    if (selectedCategory === 'nobatesh_mishe') return task.flag_tuNobat;
-                                    if (selectedCategory === 'rumiz') return !task.flag_tuNobat;
-                                    if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat;
+                                    if (selectedCategory === 'nobatesh_mishe') return task.flag_tuNobat && !task.isDone;
+                                    if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat && !task.isDone;
                                     return true;
                                 })
                                 .map((task) => (

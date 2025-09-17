@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
-function TaskComponent({ category, onTasksFetched }) {
+function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const isFetching = useRef(false); // برای جلوگیری از درخواست‌های مکرر
@@ -24,6 +24,14 @@ function TaskComponent({ category, onTasksFetched }) {
     };
 
     const fetchTasks = async () => {
+        if (!useApi) {
+            // اگر از API استفاده نمی‌کنیم، داده‌های پیش‌فرض را برگردان
+            setLoading(false);
+            setError(null);
+            onTasksFetched(defaultTasks || [], false);
+            return;
+        }
+
         if (isFetching.current) return; // جلوگیری از درخواست‌های همزمان
         isFetching.current = true;
         setLoading(true);
@@ -93,8 +101,9 @@ function TaskComponent({ category, onTasksFetched }) {
 
     useEffect(() => {
         fetchTasks();
-    }, [category]); // فقط با تغییر category اجرا شود
+    }, [category, useApi]); // اضافه کردن useApi به وابستگی‌ها
 
+    if (!useApi) return null; // اگر از API استفاده نمی‌کنیم، چیزی رندر نشود
     if (loading) return <div>در حال بارگذاری...</div>;
     if (error) return (
         <div>
@@ -108,4 +117,4 @@ function TaskComponent({ category, onTasksFetched }) {
     return null;
 }
 
-export default TaskComponent;
+export default TaskComponentApi;

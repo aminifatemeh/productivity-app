@@ -10,7 +10,8 @@ function App() {
             <Routes>
                 <Route path='/login' element={<LoginForm/>}></Route>
                 <Route path='/' element={<DashboardPage/>}></Route>
-                <Route path='/task-management' element={<TaskManagementPage/>}></Route>
+                <Route path='/task-management' element={<TaskManagementPage useApi={false} />}></Route>
+                {/*<TaskManagementPage useApi={true} />*/}
             </Routes>
         </Router>
     );
