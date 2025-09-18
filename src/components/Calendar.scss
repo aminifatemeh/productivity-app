@@ -1,0 +1,107 @@
+.calendar-container-wrapper {
+  width: 300px; /* عرض ثابت، کمی کمتر از نمودار برای تناسب */
+  height: 300px; /* ارتفاع ثابت برای هماهنگی با نمودار */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.calendar-container {
+  width: 100%;
+  font-family: Arial, sans-serif;
+  direction: rtl;
+  background-color: #F6F6F1;
+  border-radius: 22px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 0;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.calendar-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.calendar-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-button {
+  width: 40px;
+  height: 24px;
+  background-color: #57CC99;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.nav-button:hover {
+  background-color: #4ab87e;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-day {
+  text-align: center;
+  font-weight: bold;
+  padding: 5px;
+  background-color: #e8e8e3;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #333;
+}
+
+.calendar-date {
+  text-align: center;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+}
+
+
+.calendar-date.selected {
+  background-color: #57CC99;
+  color: white;
+  border-radius: 4px;
+}
+
+.calendar-date.empty {
+  cursor: default;
+}
+
+
+.selected-date {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+}
+
+.test-date {
+  font-size: 12px;
+  color: gray;
+  text-align: center;
+  margin-top: 10px;
+}

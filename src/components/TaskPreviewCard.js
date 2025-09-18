@@ -50,7 +50,7 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
                     <img
                         src="/assets/icons/Polygon.svg"
                         alt="Select Task"
-                        className="cursor-pointer"
+                        className="cursor-pointer polygon-icon"
                         onClick={() => setSelectedTask(task)}
                     />
                   </div>

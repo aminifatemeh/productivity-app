@@ -1,0 +1,13 @@
+/* Define Vazir font */
+@font-face {
+    font-family: 'Vazir';
+    src: url('../public/assets/fonts/Vazirmatn-Regular.woff2') format('woff2'),
+    url('../public/assets/fonts/Vazirmatn-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Apply Vazir font globally */
+* {
+    font-family: 'Vazir', sans-serif !important;
+}

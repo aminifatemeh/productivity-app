@@ -1,0 +1,14 @@
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 400px; // عرض ثابت برای هماهنگی با تقویم
+  height: 300px; // ارتفاع ثابت برای هماهنگی با تقویم
+  margin: 0;
+  padding: 0;
+}
+
+.recharts-wrapper {
+  margin: 0 !important;
+  padding: 0 !important;
+}
