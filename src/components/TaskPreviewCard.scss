@@ -1,4 +1,4 @@
-.task-preview__card{
+.task-preview__card {
     width: 230px;
     height: 270px;
     border-radius: 20px;
@@ -7,15 +7,20 @@
     flex-direction: column;
     justify-content: start;
     padding: 25px 15px;
-    img{
+    img {
         width: 30px;
         height: 30px;
         margin-left: 5px;
     }
-    &-task{
+    &-tasks {
+        flex-grow: 1;
+        overflow-y: auto; /* اجازه اسکرول عمودی برای تسک‌های زیاد */
+        padding-right: 5px; /* فاصله برای جلوگیری از تداخل با اسکرول */
+    }
+    &-task {
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between; /* بهبود توزیع فضا */
         width: 100%;
         height: 30px;
         margin-top: 20px;
@@ -23,7 +28,8 @@
         position: relative;
         border-radius: 4px;
         box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-        .circle{
+        padding: 0 35px 0 25px; /* فضای کافی برای دایره و آیکون */
+        .circle {
             border-radius: 100%;
             width: 10px;
             height: 10px;
@@ -32,11 +38,32 @@
             position: absolute;
             right: 15px;
         }
-        img{
+        img {
             width: 20px;
             height: 20px;
             position: absolute;
             left: 15px;
         }
+        span {
+            flex-grow: 1;
+            white-space: nowrap; /* جلوگیری از شکستن خط */
+            overflow: hidden; /* مخفی کردن متن اضافی */
+            text-overflow: ellipsis; /* افزودن سه‌نقطه برای متن طولانی */
+            text-align: right; /* تراز متن به راست برای فارسی */
+            font-size: 0.9rem; /* کاهش اندازه فونت برای خوانایی */
+            padding: 15px;
+        }
     }
+}
+
+/* اسکرول‌بار زیبا برای مرورگرهای مدرن */
+.task-preview__card-tasks::-webkit-scrollbar {
+    width: 8px;
+}
+.task-preview__card-tasks::-webkit-scrollbar-track {
+    background: transparent;
+}
+.task-preview__card-tasks::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
 }

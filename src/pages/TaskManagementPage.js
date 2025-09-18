@@ -1,56 +1,96 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import './TaskManagementPage.scss';
 import SidebarMenu from "../components/SidebarMenu";
 import TaskCard from "../components/TaskCard";
 import AddTaskModal from "../components/AddTaskModal";
 import TaskComponentApi from "../api/TaskComponentApi";
+import { TaskContext } from "../components/TaskContext";
 
 function TaskManagementPage({ useApi = true }) {
+    const { tasks, setTasks } = useContext(TaskContext);
     const [showModal, setShowModal] = useState(false);
-    const [tasks, setTasks] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
     const [editTask, setEditTask] = useState(null);
 
     const defaultTasks = [
         {
             id: 1,
-            title: "تسک نمونه ۱",
-            description: "این یک تسک نمونه است",
-            deadline_date: "۱۴۰۴/۰۶/۳۱",
+            title: "تهیه گزارش ماهانه پروژه",
+            description: "جمع‌آوری داده‌های فروش و تهیه گزارش برای جلسه تیم مدیریت",
+            deadline_date: "۱۴۰۴/۰۷/۱۰",
             flag_tuNobat: false,
-            hour: "10:00",
+            hour: "09:30",
             selectedDays: [],
             tags: [{ name: "کار", color: "#DA348D", selected: true }],
             subtasks: [
-                { id: 1, title: "ساب‌تسک ۱", done_date: null },
-                { id: 2, title: "ساب‌تسک ۲", done_date: "۱۴۰۴/۰۵/۳۰" },
+                { id: 1, title: "جمع‌آوری داده‌های فروش", done_date: null },
+                { id: 2, title: "تحلیل داده‌ها", done_date: null },
+                { id: 3, title: "طراحی اسلایدها", done_date: "۱۴۰۴/۰۶/۳۰" },
             ],
             isDone: false,
         },
         {
             id: 2,
-            title: "تسک نمونه ۲",
-            description: "این یک تسک نمونه دیگر است",
+            title: "تمرین برنامه‌نویسی پایتون",
+            description: "تمرین پروژه جنگو برای بهبود مهارت‌های کدنویسی",
             deadline_date: "۱۴۰۴/۰۷/۱۵",
             flag_tuNobat: true,
-            hour: "14:00",
-            selectedDays: ["ش", "ی"],
-            tags: [{ name: "ورزش", color: "#34AA7B", selected: true }],
+            hour: "18:00",
+            selectedDays: ["ش", "د", "چ"],
+            tags: [
+                { name: "تحصیل", color: "#4690E4", selected: true },
+                { name: "برنامه‌نویسی", color: "#34AA7B", selected: true },
+            ],
             subtasks: [
-                { id: 3, title: "ساب‌تسک ۳", done_date: null },
+                { id: 4, title: "یادگیری مدل‌های جنگو", done_date: null },
+                { id: 5, title: "ساخت یک API ساده", done_date: null },
             ],
             isDone: false,
         },
         {
             id: 3,
-            title: "تسک نمونه ۳",
-            description: "تسک نمونه برای تست",
-            deadline_date: "۱۴۰۴/۰۸/۰۱",
+            title: "خرید مواد غذایی هفتگی",
+            description: "خرید مواد لازم برای آشپزی هفته آینده",
+            deadline_date: "۱۴۰۴/۰۶/۳۱",
             flag_tuNobat: false,
-            hour: "09:00",
+            hour: "16:00",
             selectedDays: [],
-            tags: [],
-            subtasks: [],
+            tags: [{ name: "شخصی", color: "#FFCA28", selected: true }],
+            subtasks: [
+                { id: 6, title: "تهیه لیست خرید", done_date: "۱۴۰۴/۰۶/۲۹" },
+                { id: 7, title: "بازدید از سوپرمارکت", done_date: null },
+            ],
+            isDone: true,
+        },
+        {
+            id: 4,
+            title: "تمرین بدنسازی",
+            description: "جلسه تمرین در باشگاه برای تقویت عضلات",
+            deadline_date: "۱۴۰۴/۰۷/۱۲",
+            flag_tuNobat: true,
+            hour: "17:30",
+            selectedDays: ["ی", "س", "پ"],
+            tags: [{ name: "ورزش", color: "#34AA7B", selected: true }],
+            subtasks: [
+                { id: 8, title: "گرم کردن", done_date: null },
+                { id: 9, title: "تمرینات بالاتنه", done_date: null },
+                { id: 10, title: "سرد کردن", done_date: null },
+            ],
+            isDone: false,
+        },
+        {
+            id: 5,
+            title: "مطالعه کتاب مدیریت زمان",
+            description: "خواندن فصل‌های ۵ تا ۷ برای امتحان هفته آینده",
+            deadline_date: "۱۴۰۴/۰۷/۰۸",
+            flag_tuNobat: false,
+            hour: "20:00",
+            selectedDays: [],
+            tags: [{ name: "تحصیل", color: "#4690E4", selected: true }],
+            subtasks: [
+                { id: 11, title: "خواندن فصل ۵", done_date: "۱۴۰۴/۰۶/۲۸" },
+                { id: 12, title: "یادداشت‌برداری فصل ۶", done_date: null },
+            ],
             isDone: false,
         },
     ];
@@ -147,6 +187,7 @@ function TaskManagementPage({ useApi = true }) {
                                 .filter((task) => {
                                     if (selectedCategory === 'nobatesh_mishe') return task.flag_tuNobat && !task.isDone;
                                     if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat && !task.isDone;
+                                    if (selectedCategory === 'rumiz') return !task.isDone; // فقط تسک‌های غیرتکمیل‌شده
                                     return true;
                                 })
                                 .map((task) => (

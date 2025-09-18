@@ -1,56 +1,72 @@
 .pomodoro-clock {
   width: 250px;
   height: 250px;
-  border-radius: 100%;
-  background-color: #5ecea8;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5ecea8 0%, #2C868B 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 .pomodoro-clock__white-bg {
   width: 220px;
   height: 220px;
-  border-radius: 100%;
+  border-radius: 50%;
   background-color: #f6f6f1;
-}
-.pomodoro-clock__play-button {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  background-color: #2C868B;
-  border-radius: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  overflow: hidden;
 }
-.pomodoro-clock__triangle {
-  width: 0;
-  height: 0;
-  border-top: 15px solid transparent;
-  border-left: 25px solid #F6F6F1;
-  border-bottom: 15px solid transparent;
-  margin-left: 5px;
-}
-.pomodoro-clock__minute {
+.pomodoro-clock__timer-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: conic-gradient(#2C868B 0% 25%, #5ecea8 25% 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
+  top: 10px;
+  left: 10px;
 }
-.pomodoro-clock__minute:nth-child(3) {
-  bottom: 30px;
+.pomodoro-clock__time {
+  width: 100px;
+  height: 40px;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 30px;
+  font-weight: bold;
+  color: #333;
+  z-index: 2;
+  background-color: #fff;
 }
-.pomodoro-clock__minute:nth-child(4) {
-  top: 110px;
-  left: 25px;
-}
-.pomodoro-clock__minute:nth-child(5) {
-  top: 30px;
-}
-.pomodoro-clock__minute:nth-child(6) {
-  right: 25px;
-}
-.pomodoro-clock__timer {
+.pomodoro-clock__controls {
   position: absolute;
-  bottom: -40px;
+  bottom: -60px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+.pomodoro-clock__play-pause, .pomodoro-clock__stop {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  background-color: #2C868B;
+  color: #f6f6f1;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.pomodoro-clock__play-pause:hover, .pomodoro-clock__stop:hover {
+  transform: scale(1.1);
 }
 
 /*# sourceMappingURL=PomodoroClock.css.map */

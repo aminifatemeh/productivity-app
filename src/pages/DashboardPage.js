@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import TaskPreviewCard from "../components/TaskPreviewCard";
 import UtilitySidebar from "../components/UtilitySidebar";
 import SidebarMenu from "../components/SidebarMenu";
 import TaskProgressChart from "../components/TaskProgressChart";
 import Example from "../components/Calendar";
+import { TaskContext } from "../components/TaskContext";
 
 function DashboardPage() {
+    const { tasks } = useContext(TaskContext);
+    const [selectedTask, setSelectedTask] = useState(null);
+
     const weeklyProgress = [
         { day: "Saturday", progress: 80 },
         { day: "Sunday", progress: 60 },
@@ -17,22 +21,22 @@ function DashboardPage() {
     ];
 
     return (
-      <div className="d-flex">
-        <SidebarMenu />
-        <main className="d-flex flex-column align-items-center w-100 gap-4">
-          <div className="d-flex justify-content-center gap-4 mt-5">
-            <TaskPreviewCard cardName="active" />
-            <TaskPreviewCard cardName="upNext" />
-            <TaskPreviewCard cardName="archived" />
-          </div>
-          <span className="mb-2">نمودار وضعیت - تقویم</span>
-          <div className="w-100 d-flex align-items-start me-5">
-            <TaskProgressChart data={weeklyProgress} />
-            <Example />
-          </div>
-        </main>
-        <UtilitySidebar />
-      </div>
+        <div className="d-flex" style={{ marginLeft: "321px" }}>
+            <UtilitySidebar selectedTask={selectedTask} />
+            <SidebarMenu />
+            <main className="d-flex flex-column align-items-center w-100 gap-4">
+                <div className="d-flex justify-content-center gap-4 mt-5">
+                    <TaskPreviewCard cardName="active" tasks={tasks} setSelectedTask={setSelectedTask} />
+                    <TaskPreviewCard cardName="upNext" tasks={tasks} setSelectedTask={setSelectedTask} />
+                    <TaskPreviewCard cardName="archived" tasks={tasks} setSelectedTask={setSelectedTask} />
+                </div>
+                <span className="mb-2">نمودار وضعیت - تقویم</span>
+                <div className="w-100 d-flex align-items-start me-5">
+                    <TaskProgressChart data={weeklyProgress} />
+                    <Example />
+                </div>
+            </main>
+        </div>
     );
 }
 
