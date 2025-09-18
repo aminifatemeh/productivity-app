@@ -51,7 +51,7 @@ export const TaskProvider = ({ children }) => {
                 { id: 6, title: "تهیه لیست خرید", done_date: "۱۴۰۴/۰۶/۲۹" },
                 { id: 7, title: "بازدید از سوپرمارکت", done_date: null },
             ],
-            isDone: true, // برای نمایش در archived
+            isDone: true,
         },
         {
             id: 4,

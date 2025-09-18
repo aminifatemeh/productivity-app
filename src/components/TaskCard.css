@@ -35,6 +35,7 @@
 .TaskCard__description-labels {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 25px;
 }
 .TaskCard__description-labels .task-icons img:nth-child(1) {
@@ -48,7 +49,7 @@
 .TaskCard__description-labels .task-label {
   display: flex;
   flex-wrap: wrap;
-  max-width: 150px;
+  max-width: 70px;
   gap: 5px;
   background-color: transparent;
   padding: 0;

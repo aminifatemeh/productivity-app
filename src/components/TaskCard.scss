@@ -35,6 +35,7 @@
     &-labels {
       display: flex;
       flex-direction: column;
+      justify-content: center;
       gap: 25px;
       .task-icons {
         img:nth-child(1) {
@@ -49,7 +50,7 @@
       .task-label {
         display: flex;
         flex-wrap: wrap; // اجازه می‌ده تگ‌ها به ردیف‌های مختلف برن
-        max-width: 150px; // حداکثر عرض برای چیدمان افقی
+        max-width: 70px; // حداکثر عرض برای چیدمان افقی
         gap: 5px; // فاصله بین تگ‌ها
         background-color: transparent; // حذف پس‌زمینه سبز
         padding: 0;

@@ -22,8 +22,13 @@
 .utility-sidebar__content {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 100px;
+  height: 100%;
+  gap: 20px;
+}
+.utility-sidebar__top-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 .utility-sidebar__content-add-task {
   width: 250px;
@@ -35,6 +40,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1;
+  margin: auto auto 20px;
 }
 .utility-sidebar__content-add-task .circle {
   height: 40px;
@@ -55,6 +61,7 @@
   text-align: center;
 }
 .utility-sidebar .task-details__rectangle {
+  margin-top: 80px;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
   padding: 16px;
@@ -75,6 +82,20 @@
 .utility-sidebar .task-details__description {
   font-size: 14px;
   color: #333;
+}
+.utility-sidebar .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 40px;
+  overflow: auto;
 }
 
 /*# sourceMappingURL=UtilitySidebar.css.map */

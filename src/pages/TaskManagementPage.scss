@@ -1,93 +1,149 @@
 .task-management-page {
-  height: 100vh;
-}
+  min-height: 100vh;
 
-.header-placeholder {
-  height: 50px;
-}
+  .header-placeholder {
+    height: 60px; /* برای هدر */
+  }
 
-.tab-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50px;
-  background-color: #EAFFEB;
-  border-radius: 23px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  margin: 0 30px;
-}
+  .tab-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* وسط‌چین عمودی */
+    align-items: center; /* وسط‌چین افقی */
+    padding: 1rem;
+    background-color: #EAFFEB;
+    margin: 20px; /* وسط‌چین کردن با فاصله از چپ و راست */
+    max-width: 1200px; /* عرض محدود */
+    border-radius: 23px; /* بردردیوس ۲۳ پیکسل */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* باکس شدو */
+    min-height: 80px; /* ارتفاع حداقل برای اطمینان از فضای کافی */
+  }
 
-.tabs-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
+  .tabs-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* وسط‌چین عمودی تب‌ها */
+    gap: 10px;
+    margin-bottom: 10px;
+    position: relative; /* برای موقعیت‌دهی شبه‌المنت */
+  }
 
-.tab-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  color: #000000;
-  font-weight: normal;
+  .tab-button {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* وسط‌چین افقی متن و آیکون */
+    padding: 10px 20px;
+    border: none;
+    background-color: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    position: relative;
+    z-index: 1; /* برای اطمینان از اینکه تب‌ها بالای مستطیل متحرک هستند */
+    height: 100%; /* اطمینان از اینکه تب‌ها ارتفاع کامل tabs-wrapper را بگیرند */
 
-  &.active {
-    color: #1D976C;
+    &.active {
+      color: #01575c;
+    }
+
+    .tab-icon {
+      width: 24px;
+      height: 24px;
+      margin: 0 8px;
+    }
+  }
+
+  /* مستطیل متحرک */
+  .tabs-wrapper::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: var(--slider-left, 0); /* موقعیت افقی مستطیل */
+    width: var(--slider-width, 0); /* عرض مستطیل */
+    height: 100%; /* ارتفاع کامل تب */
+    background-color: #e1f396;
+    border-radius: 45px;
+    transition: all 0.3s ease; /* انیمیشن برای عرض و موقعیت */
+    z-index: 0; /* پشت تب‌ها */
+  }
+
+  .tab-separator {
+    width: 1px;
+    height: 30px;
+    background-color: #ccc;
+    align-self: center;
+    z-index: 1; /* بالای مستطیل متحرک */
+  }
+
+  .date-filter-info {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* وسط‌چین افقی */
+    gap: 10px;
+    font-size: 14px;
+    color: #333;
+    margin-top: 10px;
+
+    .clear-date-filter-btn {
+      padding: 5px 10px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #e55a5a;
+      }
+    }
+  }
+
+  .tasks-grid {
+    padding: 2rem;
+    flex-grow: 1;
+
+    &.overflow-hidden {
+      overflow: hidden;
+    }
+
+    .empty-message {
+      text-align: center;
+      font-size: 18px;
+      color: #666;
+      margin-top: 50px;
+    }
+  }
+
+  .add-task-button {
+    padding: 10px 100px;
+    background-color: #e1f396;
+    color: #01575c;
+    border: none;
+    border-radius: 45px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
     font-weight: bold;
+
+    &:hover {
+      background-color: #d1e386;
+    }
   }
-}
 
-.tab-icon {
-  width: 35px;
-  height: 35px;
-}
-
-.tab-separator {
-  width: 1px;
-  height: 32px;
-  background-color: #000000;
-}
-
-.tasks-grid {
-  margin: 30px;
-  padding: 20px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative;
-
-  &.overflow-hidden {
-    overflow-y: hidden;
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 40px;
+    overflow: auto;
   }
-}
-
-.empty-message {
-  text-align: center;
-  color: #666;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5); // پس‌زمینه مشکی با اپاسیتی 50%
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 40px;
-  overflow: auto;
-}
-
-.add-task-button {
-  width: 320px;
-  height: 50px;
-  background-color: #80D084;
-  border: none;
-  border-radius: 28px;
-  margin-bottom: 20px;
 }
