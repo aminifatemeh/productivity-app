@@ -1,27 +1,29 @@
 import React, { useContext } from "react";
 import "./TaskPreviewCard.scss";
 import { TaskContext } from "../components/TaskContext";
+import { LanguageContext } from "../context/LanguageContext";
 
 const cardConfigs = {
   active: {
     color: "#38A3A5",
     icon: "/assets/icons/active.svg",
-    label: "نوبتش میشه",
+    labelKey: "taskPreviewCard.active",
   },
   upNext: {
     color: "#57CC99",
     icon: "/assets/icons/up-next.svg",
-    label: "روی میز",
+    labelKey: "taskPreviewCard.upNext",
   },
   archived: {
     color: "#80ED99",
     icon: "/assets/icons/archived.svg",
-    label: "خاک خورده",
+    labelKey: "taskPreviewCard.archived",
   },
 };
 
 function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
   const { timers, initialDuration, startTimer, stopTimer } = useContext(TaskContext);
+  const { t } = useContext(LanguageContext);
   const config = cardConfigs[cardName];
 
   const filteredTasks = tasks.filter((task) => {
@@ -51,11 +53,11 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
       <div className="task-preview__card" style={{ backgroundColor: config.color }}>
         <div>
           <img src={config.icon} alt="" />
-          <span>{config.label}</span>
+          <span>{t(config.labelKey)}</span>
         </div>
         <div className="task-preview__card-tasks">
           {filteredTasks.length === 0 ? (
-              <span>هیچ تسکی موجود نیست</span>
+              <span>{t("taskPreviewCard.noTasks")}</span>
           ) : (
               filteredTasks.map((task) => {
                 const timer = timers[task.id] || { remaining: initialDuration, isRunning: false };

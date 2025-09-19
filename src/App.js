@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { TaskProvider } from "./components/TaskContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import LoginForm from "./pages/LoginPage";
 import RegisterForm from "./pages/RegisterForm";
 import DashboardPage from "./pages/DashboardPage";
@@ -9,6 +10,7 @@ import SettingsPage from "./pages/SettingsPage";
 
 function App() {
     return (
+        <LanguageProvider>
         <TaskProvider>
             <Router>
                 <Routes>
@@ -23,6 +25,7 @@ function App() {
                 </Routes>
             </Router>
         </TaskProvider>
+        </LanguageProvider>
     );
 }
 

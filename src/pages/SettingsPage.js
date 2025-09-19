@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import SidebarMenu from "../components/SidebarMenu";
+import { LanguageContext } from "../context/LanguageContext";
 import "./SettingsPage.scss";
 
 function SettingsPage() {
     const navigate = useNavigate();
+    const { language, setLanguage, t } = useContext(LanguageContext);
     const [userInfo, setUserInfo] = useState({
         username: localStorage.getItem("username") || "",
         email: "",
         password: "",
     });
     const [appSettings, setAppSettings] = useState({
-        language: "fa",
+        language: localStorage.getItem("language") || "fa",
         theme: "light",
         timerDuration: localStorage.getItem("timerDuration") || "5",
     });
@@ -32,6 +34,9 @@ function SettingsPage() {
     const handleAppSettingsChange = (e) => {
         const { name, value } = e.target;
         setAppSettings((prev) => ({ ...prev, [name]: value }));
+        if (name === "language") {
+            setLanguage(value);
+        }
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
@@ -39,47 +44,46 @@ function SettingsPage() {
         e.preventDefault();
         const newErrors = { username: "", email: "", password: "", timerDuration: "" };
 
-        // اعتبارسنجی مدت زمان تایمر
-        if (appSettings.timerDuration && (isNaN(appSettings.timerDuration) || appSettings.timerDuration < 5 || appSettings.timerDuration > 120)) {
-            newErrors.timerDuration = "مدت زمان باید بین ۵ تا ۱۲۰ دقیقه باشد";
+        if (
+            appSettings.timerDuration &&
+            (isNaN(appSettings.timerDuration) || appSettings.timerDuration < 5 || appSettings.timerDuration > 120)
+        ) {
+            newErrors.timerDuration = t("settings.timerError");
         }
 
         if (Object.values(newErrors).some((error) => error)) {
             setErrors(newErrors);
         } else {
-            // ذخیره تنظیمات در localStorage
             if (userInfo.username) localStorage.setItem("username", userInfo.username);
             if (appSettings.timerDuration) localStorage.setItem("timerDuration", appSettings.timerDuration);
+            localStorage.setItem("language", appSettings.language);
 
-            // نمایش مدال با SweetAlert2
             Swal.fire({
-                title: "موفقیت!",
-                text: "تغییرات با موفقیت ذخیره شد!",
+                title: t("settings.successTitle"),
+                text: t("settings.successMessage"),
                 icon: "success",
-                confirmButtonText: "باشه",
+                confirmButtonText: t("settings.confirmButton"),
                 timer: 2000,
                 timerProgressBar: true,
             }).then(() => {
-                // انتقال به صفحه داشبورد با ارسال timerDuration به‌عنوان state
                 navigate("/", { state: { timerDuration: appSettings.timerDuration } });
             });
         }
     };
 
     const handleCancel = () => {
-        navigate("/"); // بازگشت به داشبورد
+        navigate("/");
     };
 
     return (
-        <div className="d-flex settings-page">
-            <SidebarMenu />
-            <div className="d-flex flex-column flex-grow-1">
+        <div className="settings-page d-flex">
+            <div className="main-content d-flex flex-column flex-grow-1">
                 <div className="settings-container">
-                    <span className="settings-title">تنظیمات</span>
+                    <span className="settings-title">{t("settings.title")}</span>
                     <div className="settings-section">
-                        <h3 className="section-title">اطلاعات کاربر</h3>
+                        <h3 className="section-title">{t("settings.userInfo")}</h3>
                         <div className="form-group">
-                            <label>نام کاربری</label>
+                            <label>{t("settings.username")}</label>
                             <input
                                 type="text"
                                 name="username"
@@ -87,12 +91,10 @@ function SettingsPage() {
                                 onChange={handleUserInfoChange}
                                 className="form-control"
                             />
-                            {errors.username && (
-                                <span className="error-message">{errors.username}</span>
-                            )}
+                            {errors.username && <span className="error-message">{errors.username}</span>}
                         </div>
                         <div className="form-group">
-                            <label>ایمیل</label>
+                            <label>{t("settings.email")}</label>
                             <input
                                 type="email"
                                 name="email"
@@ -100,12 +102,10 @@ function SettingsPage() {
                                 onChange={handleUserInfoChange}
                                 className="form-control"
                             />
-                            {errors.email && (
-                                <span className="error-message">{errors.email}</span>
-                            )}
+                            {errors.email && <span className="error-message">{errors.email}</span>}
                         </div>
                         <div className="form-group">
-                            <label>رمز عبور جدید</label>
+                            <label>{t("settings.password")}</label>
                             <input
                                 type="password"
                                 name="password"
@@ -113,39 +113,37 @@ function SettingsPage() {
                                 onChange={handleUserInfoChange}
                                 className="form-control"
                             />
-                            {errors.password && (
-                                <span className="error-message">{errors.password}</span>
-                            )}
+                            {errors.password && <span className="error-message">{errors.password}</span>}
                         </div>
                     </div>
                     <div className="settings-section">
-                        <h3 className="section-title">تنظیمات برنامه</h3>
+                        <h3 className="section-title">{t("settings.appSettings")}</h3>
                         <div className="form-group">
-                            <label>زبان</label>
+                            <label>{t("settings.language")}</label>
                             <select
                                 name="language"
                                 value={appSettings.language}
                                 onChange={handleAppSettingsChange}
                                 className="form-control"
                             >
-                                <option value="fa">فارسی</option>
-                                <option value="en">انگلیسی</option>
+                                <option value="fa">{t("settings.language.fa")}</option>
+                                <option value="en">{t("settings.language.en")}</option>
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>تم</label>
+                            <label>{t("settings.theme")}</label>
                             <select
                                 name="theme"
                                 value={appSettings.theme}
                                 onChange={handleAppSettingsChange}
                                 className="form-control"
                             >
-                                <option value="light">روشن</option>
-                                <option value="dark">تیره</option>
+                                <option value="light">{t("settings.theme.light")}</option>
+                                <option value="dark">{t("settings.theme.dark")}</option>
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>مدت زمان تایمر (دقیقه)</label>
+                            <label>{t("settings.timerDuration")}</label>
                             <input
                                 type="number"
                                 name="timerDuration"
@@ -155,21 +153,20 @@ function SettingsPage() {
                                 min="5"
                                 max="120"
                             />
-                            {errors.timerDuration && (
-                                <span className="error-message">{errors.timerDuration}</span>
-                            )}
+                            {errors.timerDuration && <span className="error-message">{errors.timerDuration}</span>}
                         </div>
                     </div>
                     <div className="settings-actions">
                         <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-                            لغو
+                            {t("settings.cancel")}
                         </button>
                         <button type="button" className="btn btn-primary" onClick={handleSave}>
-                            ذخیره تغییرات
+                            {t("settings.save")}
                         </button>
                     </div>
                 </div>
             </div>
+            <SidebarMenu />
         </div>
     );
 }

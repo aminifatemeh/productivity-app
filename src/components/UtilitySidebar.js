@@ -4,9 +4,11 @@ import "./UtilitySidebar.scss";
 import PomodoroClock from "./PomodoroClock";
 import AddTaskModal from "./AddTaskModal";
 import { TaskContext } from "./TaskContext";
+import { LanguageContext } from "../context/LanguageContext";
 import moment from "jalali-moment";
 
 function UtilitySidebar({ selectedTask, selectedDate }) {
+    const { t } = useContext(LanguageContext);
     const [showModal, setShowModal] = useState(false);
     const { setTasks } = useContext(TaskContext);
     const navigate = useNavigate();
@@ -35,7 +37,7 @@ function UtilitySidebar({ selectedTask, selectedDate }) {
                         <div className="task-details__rectangle">
                             <h3 className="task-details__title">{selectedTask.title}</h3>
                             <p className="task-details__description">
-                                {selectedTask.description || "بدون توضیحات"}
+                                {selectedTask.description || t("utilitySidebar.noDescription")}
                             </p>
                         </div>
                     )}
@@ -44,9 +46,9 @@ function UtilitySidebar({ selectedTask, selectedDate }) {
                     className="utility-sidebar__content-add-task"
                     onClick={() => setShowModal(true)}
                 >
-                    <span className="ms-4">اضافه کردن تسک جدید</span>
+                    <span>{t("utilitySidebar.addTask")}</span>
                     <div className="circle">
-                        <img src="/assets/icons/plus.svg" alt="" />
+                        <img src="/assets/icons/plus.svg" alt="add" />
                     </div>
                 </button>
                 {showModal && (

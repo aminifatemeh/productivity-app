@@ -1,13 +1,19 @@
+@charset "UTF-8";
 .sidebar {
   width: 321px;
   top: 0;
-  right: 0;
+  inset-inline-start: 0; /* در فارسی به راست، در انگلیسی به چپ */
   height: 100vh;
   padding: 2rem;
-  background-color: #EAFFEB;
+  background-color: #eaffeb;
+  position: fixed;
+  z-index: 1000;
+}
+.sidebar__title {
+  text-align: start;
 }
 .sidebar__items {
-  text-align: right;
+  text-align: start;
   list-style: none;
 }
 .sidebar__items li {
@@ -16,7 +22,7 @@
 }
 .sidebar__items li:hover {
   border-radius: 5px;
-  background-color: #A7E9AA;
+  background-color: #a7e9aa;
   transition: all 0.2s;
 }
 .sidebar__items li a {
@@ -26,7 +32,7 @@
 .sidebar__icons {
   width: 30px;
   height: 30px;
-  margin-left: 10px;
+  margin-inline-end: 10px;
 }
 .sidebar__logout {
   display: flex;
@@ -38,7 +44,11 @@
   height: 60px;
   border-radius: 15px;
   border: none;
-  background-color: #80D084;
+  background-color: #80d084;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 /*# sourceMappingURL=SidebarMenu.css.map */

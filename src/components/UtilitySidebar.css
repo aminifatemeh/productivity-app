@@ -1,7 +1,8 @@
+@charset "UTF-8";
 .utility-sidebar {
   width: 321px;
   top: 0;
-  left: 0;
+  inset-inline-end: 0; /* در فارسی به چپ، در انگلیسی به راست */
   height: 100vh;
   padding: 2rem;
   position: fixed;
@@ -16,7 +17,7 @@
   width: 100%;
   height: 100vh;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   background: linear-gradient(180deg, rgba(4, 70, 98, 0.6) 0%, rgba(94, 206, 168, 0.51) 100%);
 }
 .utility-sidebar__content {
@@ -34,10 +35,9 @@
   width: 250px;
   height: 50px;
   border-radius: 45px;
-  background-color: #E1F396;
+  background-color: #e1f396;
   border: none;
   display: flex;
-  justify-content: center;
   align-items: center;
   z-index: 1;
   margin: auto auto 20px;
@@ -46,9 +46,9 @@
   height: 40px;
   width: 40px;
   border-radius: 50%;
-  background-color: #01575C;
+  background-color: #01575c;
   position: absolute;
-  left: 50px;
+  inset-inline-start: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,6 +58,7 @@
   height: 10px;
 }
 .utility-sidebar__content-add-task span {
+  flex-grow: 1;
   text-align: center;
 }
 .utility-sidebar .task-details__rectangle {
@@ -77,16 +78,18 @@
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 8px;
-  color: #01575C;
+  color: #01575c;
+  text-align: start;
 }
 .utility-sidebar .task-details__description {
   font-size: 14px;
   color: #333;
+  text-align: start;
 }
 .utility-sidebar .modal-overlay {
   position: fixed;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);

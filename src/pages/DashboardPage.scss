@@ -1,0 +1,12 @@
+.dashboard-page {
+  min-height: 100vh;
+  direction: inherit;
+}
+
+.main-content {
+  margin-inline-start: 321px; /* فاصله از UtilitySidebar */
+  margin-inline-end: 321px; /* فاصله از SidebarMenu */
+  flex-grow: 1;
+  padding: 20px;
+  box-sizing: border-box;
+}

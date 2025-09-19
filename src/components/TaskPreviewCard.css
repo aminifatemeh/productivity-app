@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .task-preview__card {
   width: 230px;
   height: 270px;
@@ -7,43 +8,44 @@
   flex-direction: column;
   justify-content: start;
   padding: 25px 15px;
+  box-sizing: border-box;
 }
 .task-preview__card img {
   width: 30px;
   height: 30px;
-  margin-left: 5px;
+  margin-inline-start: 5px; /* جایگزین margin-left */
 }
 .task-preview__card-tasks {
   flex-grow: 1;
-  overflow-y: auto; /* Allow vertical scroll for many tasks */
-  padding-right: 5px; /* Space to avoid scrollbar overlap */
+  overflow-y: auto;
+  padding-inline-end: 5px; /* جایگزین padding-right */
 }
 .task-preview__card-task {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Improved space distribution */
+  justify-content: space-between;
   width: 100%;
   height: 30px;
   margin-top: 20px;
-  background: linear-gradient(to left, #d2d2d2 var(--progress), #ffffff 0%); /* Progress bar effect from right to left */
+  background: linear-gradient(to left, #d2d2d2 var(--progress), #ffffff 0%); /* گرادیان در RTL/LTR به درستی کار می‌کند */
   position: relative;
   border-radius: 4px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-  padding: 0 0px 0 20px; /* Space for circle and icon */
+  padding: 0 20px; /* تنظیم پدینگ برای RTL/LTR */
 }
 .task-preview__card-task img {
   width: 20px;
   height: 20px;
   position: absolute;
-  left: 5px;
+  inset-inline-start: 5px; /* جایگزین left */
 }
 .task-preview__card-task span {
   flex-grow: 1;
-  white-space: nowrap; /* Prevent line breaks */
-  overflow: hidden; /* Hide overflow text */
-  text-overflow: ellipsis; /* Add ellipsis for long text */
-  text-align: right; /* Right-align for Persian */
-  font-size: 0.9rem; /* Smaller font for readability */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: start; /* جایگزین text-align: right */
+  font-size: 0.9rem;
   padding: 15px;
 }
 

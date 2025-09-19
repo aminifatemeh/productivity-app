@@ -1,65 +1,76 @@
-import React from "react";
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { LanguageContext } from "../context/LanguageContext";
 import "./SidebarMenu.scss";
 import ProfileSnippet from "./ProfileSnippet";
 
 function SidebarMenu() {
+  const { t } = useContext(LanguageContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('username');
-    navigate('/'); // Redirect to dashboard
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("username");
+    navigate("/");
   };
 
   const handleNavigation = (e, path) => {
-    e.preventDefault(); // Prevent default to ensure no event bubbling issues
+    e.preventDefault();
     navigate(path);
   };
 
   return (
       <nav className="sidebar">
         <ProfileSnippet />
-        <h5 className="mt-5 text-end">خانه</h5>
+        <h5 className="mt-5 sidebar__title">{t("sidebarMenu.home")}</h5>
         <ul className="sidebar__items">
           <li>
             <img
                 className="sidebar__icons"
                 src="/assets/icons/dashboard.svg"
-                alt=""
+                alt="dashboard"
             />
-            <Link to="/" onClick={(e) => handleNavigation(e, '/')}>داشبورد</Link>
+            <Link to="/" onClick={(e) => handleNavigation(e, "/")}>
+              {t("sidebarMenu.dashboard")}
+            </Link>
           </li>
           <li>
             <img
                 className="sidebar__icons"
                 src="/assets/icons/task-management.svg"
-                alt=""
+                alt="task-management"
             />
-            <Link to="/task-management" onClick={(e) => handleNavigation(e, '/task-management')}>مدیریت تسک</Link>
+            <Link
+                to="/task-management"
+                onClick={(e) => handleNavigation(e, "/task-management")}
+            >
+              {t("sidebarMenu.taskManagement")}
+            </Link>
           </li>
           <li>
             <img
                 className="sidebar__icons"
                 src="/assets/icons/performance-graph.svg"
-                alt=""
+                alt="charts"
             />
-            <a href="#">نمودارها</a>
+            <a href="#">{t("sidebarMenu.charts")}</a>
           </li>
           <li>
             <img
                 className="sidebar__icons"
                 src="/assets/icons/settings.svg"
-                alt=""
+                alt="settings"
             />
-            <Link to="/settings" onClick={(e) => handleNavigation(e, '/settings')}>تنظیمات</Link>
+            <Link to="/settings" onClick={(e) => handleNavigation(e, "/settings")}>
+              {t("sidebarMenu.settings")}
+            </Link>
           </li>
         </ul>
         <div className="sidebar__logout">
           <button onClick={handleLogout}>
-            <img className='sidebar__icons' src="/assets/icons/exit.svg" alt="exit" />
-            <span>خروج</span>
+            <img className="sidebar__icons" src="/assets/icons/exit.svg" alt="exit" />
+            <span>{t("sidebarMenu.logout")}</span>
           </button>
         </div>
       </nav>
