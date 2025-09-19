@@ -5,9 +5,6 @@ import { TaskContext } from "./TaskContext";
 const PomodoroClock = ({ selectedTask }) => {
     const { timers, startTimer, stopTimer, resetTimerForTask, initialDuration } = useContext(TaskContext);
 
-
-
-
     // Derive currentTimer safely
     const currentTimer = selectedTask && timers[selectedTask.id]
         ? timers[selectedTask.id]
@@ -16,22 +13,23 @@ const PomodoroClock = ({ selectedTask }) => {
     const time = currentTimer.remaining;
     const isActive = currentTimer.isRunning;
 
-
-
+    // به‌روزرسانی تایمر هنگام تغییر initialDuration یا selectedTask
     useEffect(() => {
-        if (selectedTask && !timers[selectedTask.id]) {
-
-            resetTimerForTask(selectedTask.id); // Initialize timer if it doesn't exist
+        if (selectedTask) {
+            if (!timers[selectedTask.id]) {
+                resetTimerForTask(selectedTask.id); // Initialize timer if it doesn't exist
+            } else if (timers[selectedTask.id].remaining === 0 || timers[selectedTask.id].remaining > initialDuration) {
+                // اگر تایمر صفر شده یا از initialDuration بیشتر است، آن را ریست کن
+                resetTimerForTask(selectedTask.id);
+            }
         }
-    }, [selectedTask, resetTimerForTask, timers]);
+    }, [selectedTask, initialDuration, resetTimerForTask, timers]);
 
     const toggleTimer = () => {
         if (selectedTask) {
             if (isActive) {
-
                 stopTimer(selectedTask.id); // Pause the timer
             } else {
-
                 startTimer(selectedTask.id); // Start or resume the timer
             }
         }
@@ -39,7 +37,6 @@ const PomodoroClock = ({ selectedTask }) => {
 
     const resetTimer = () => {
         if (selectedTask) {
-
             resetTimerForTask(selectedTask.id); // Reset the timer to initial duration
         }
     };

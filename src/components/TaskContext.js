@@ -1,54 +1,82 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useRef } from "react";
+import axios from 'axios';
 
 export const TaskContext = createContext();
+const API_BASE = 'http://171.22.24.204:8000';
 
 export const TaskProvider = ({ children }) => {
-    const initialDuration = 20 * 60; // 20 minutes in seconds
-    const [tasks, setTasks] = useState([
-        {
-            id: "1",
-            title: "خرید مواد غذایی",
-            description: "خرید نان، شیر، میوه و سبزیجات",
-            flag_tuNobat: true,
-            isDone: false,
-            subtasks: [
-                { id: "1-1", title: "خرید نان سنگک", done_date: null },
-                { id: "1-2", title: "خرید شیر کم چرب", done_date: null }
-            ],
-            tags: [{ name: "خانه", color: "#34AA7B" }],
-            deadline_date: "1404/06/29",
-            hour: "10:00",
-            selectedDays: ["ش", "د"],
-            originalIndex: 0
-        },
-        {
-            id: "2",
-            title: "تمرین ورزش صبحگاهی",
-            description: "30 دقیقه دویدن و نرمش",
-            flag_tuNobat: false,
-            isDone: false,
-            subtasks: [],
-            tags: [{ name: "ورزش", color: "#4690E4" }],
-            deadline_date: "1404/06/29",
-            hour: "07:00",
-            selectedDays: ["ی", "س", "چ"],
-            originalIndex: 1
-        },
-        {
-            id: "3",
-            title: "تماس با پزشک",
-            description: "گرفتن وقت برای چکاپ",
-            flag_tuNobat: false,
-            isDone: true,
-            subtasks: [],
-            tags: [{ name: "سلامتی", color: "#DA348D" }],
-            deadline_date: "1404/06/28",
-            hour: "14:00",
-            selectedDays: [],
-            originalIndex: 2
-        }
-    ]);
+    // خواندن مقدار تایمر از localStorage با مقدار پیش‌فرض 5 دقیقه
+    const [initialDuration, setInitialDuration] = useState((parseInt(localStorage.getItem("timerDuration")) || 5) * 60); // تبدیل دقیقه به ثانیه
+    const [tasks, setTasks] = useState([]);
     const [timers, setTimers] = useState({});
+    const isTicking = useRef(false);
+
+    // به‌روزرسانی initialDuration هنگام تغییر timerDuration در localStorage
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const newDuration = (parseInt(localStorage.getItem("timerDuration")) || 5) * 60;
+            setInitialDuration(newDuration);
+            // ریست تمام تایمرها به مقدار جدید
+            setTimers((prev) => {
+                const updatedTimers = {};
+                Object.keys(prev).forEach((taskId) => {
+                    updatedTimers[taskId] = { remaining: newDuration, isRunning: false };
+                });
+                return updatedTimers;
+            });
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
+
+    const fetchTasks = async () => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return;
+        }
+
+        try {
+            const response = await axios.get(`${API_BASE}/tasks/all_tasks/`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTasks(response.data.map((task, index) => ({
+                id: task.id.toString(),
+                title: task.title,
+                description: task.description || '',
+                flag_tuNobat: task.flag_tuNobat || false,
+                isDone: task.isDone || false,
+                subtasks: task.subtasks || [],
+                tags: task.tags || [],
+                deadline_date: task.deadline_date || '',
+                hour: task.hour || '',
+                selectedDays: task.selectedDays || [],
+                originalIndex: index,
+            })));
+        } catch (err) {
+            if (err.response?.status === 401) {
+                const refreshed = await refreshToken();
+                if (refreshed) fetchTasks();
+            }
+        }
+    };
+
+    const refreshToken = async () => {
+        const refresh = localStorage.getItem('refreshToken');
+        if (!refresh) return false;
+
+        try {
+            const response = await axios.post(`${API_BASE}/api/token/refresh/`, { refresh });
+            localStorage.setItem('accessToken', response.data.access);
+            return true;
+        } catch (err) {
+            return false;
+        }
+    };
+
+    useEffect(() => {
+        fetchTasks();
+    }, []);
 
     const startTimer = (taskId) => {
         setTimers((prev) => {
@@ -71,64 +99,99 @@ export const TaskProvider = ({ children }) => {
     };
 
     const resetTimerForTask = (taskId) => {
-        setTimers((prev) => ({
-            ...prev,
-            [taskId]: { remaining: initialDuration, isRunning: false },
-        }));
-    };
-
-    const addTask = (newTask) => {
-        setTasks((prev) => [
-            ...prev,
-            {
-                id: `${Date.now()}`,
-                title: newTask.title,
-                description: newTask.description || '',
-                deadline_date: newTask.deadline_date,
-                flag_tuNobat: newTask.flag_tuNobat || false,
-                hour: newTask.hour || '',
-                selectedDays: newTask.selectedDays || [],
-                subtasks: newTask.subtasks || [],
-                tags: newTask.tags || [],
-                isDone: false,
-                originalIndex: prev.length
-            }
-        ]);
-    };
-
-    const updateTask = (updatedTask) => {
-        setTasks((prev) => {
-            const otherTasks = prev.filter((task) => task.id !== updatedTask.id);
-            if (updatedTask.isDone) {
-                return [...otherTasks, updatedTask];
-            } else {
-                const insertIndex = Math.min(updatedTask.originalIndex || 0, otherTasks.length);
-                return [
-                    ...otherTasks.slice(0, insertIndex),
-                    updatedTask,
-                    ...otherTasks.slice(insertIndex)
-                ];
-            }
+        setTimers((prev) => {
+            return {
+                ...prev,
+                [taskId]: { remaining: initialDuration, isRunning: false },
+            };
         });
+    };
+
+    const addTask = async (newTask) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return;
+        }
+
+        try {
+            const response = await axios.post(`${API_BASE}/tasks/add_task/`, newTask, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTasks((prev) => [
+                ...prev,
+                {
+                    id: response.data.id.toString(),
+                    title: newTask.title,
+                    description: newTask.description || '',
+                    deadline_date: newTask.deadline_date,
+                    flag_tuNobat: newTask.flag_tuNobat || false,
+                    hour: newTask.hour || '',
+                    selectedDays: newTask.selectedDays || [],
+                    subtasks: newTask.subtasks || [],
+                    tags: newTask.tags || [],
+                    isDone: false,
+                    originalIndex: prev.length,
+                },
+            ]);
+        } catch (err) {
+        }
+    };
+
+    const updateTask = async (updatedTask) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return;
+        }
+
+        try {
+            await axios.put(`${API_BASE}/tasks/${updatedTask.id}/edit_task/`, updatedTask, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTasks((prev) => {
+                const otherTasks = prev.filter((task) => task.id !== updatedTask.id);
+                if (updatedTask.isDone) {
+                    return [...otherTasks, updatedTask];
+                } else {
+                    const insertIndex = Math.min(updatedTask.originalIndex || 0, otherTasks.length);
+                    return [
+                        ...otherTasks.slice(0, insertIndex),
+                        updatedTask,
+                        ...otherTasks.slice(insertIndex),
+                    ];
+                }
+            });
+        } catch (err) {
+        }
     };
 
     useEffect(() => {
         const interval = setInterval(() => {
+            if (isTicking.current) {
+                return;
+            }
+            isTicking.current = true;
             setTimers((prev) => {
                 const updatedTimers = { ...prev };
+                let hasChanges = false;
                 Object.keys(updatedTimers).forEach((id) => {
                     const timer = updatedTimers[id];
                     if (timer.isRunning && timer.remaining > 0) {
-                        timer.remaining -= 1;
-                        if (timer.remaining <= 0) {
-                            timer.isRunning = false;
-                        }
+                        timer.remaining = Math.max(0, timer.remaining - 1);
+                        hasChanges = true;
+                    }
+                    if (timer.remaining <= 0 && timer.isRunning) {
+                        timer.isRunning = false;
+                        hasChanges = true;
                     }
                 });
-                return updatedTimers;
+                isTicking.current = false;
+                return hasChanges ? updatedTimers : prev;
             });
         }, 1000);
-        return () => clearInterval(interval);
+
+        return () => {
+            clearInterval(interval);
+        };
     }, []);
 
     return (
@@ -142,7 +205,7 @@ export const TaskProvider = ({ children }) => {
                 stopTimer,
                 resetTimerForTask,
                 addTask,
-                updateTask
+                updateTask,
             }}
         >
             {children}

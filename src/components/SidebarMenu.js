@@ -53,7 +53,7 @@ function SidebarMenu() {
                 src="/assets/icons/settings.svg"
                 alt=""
             />
-            <a href="#">تنظیمات</a>
+            <Link to="/settings" onClick={(e) => handleNavigation(e, '/settings')}>تنظیمات</Link>
           </li>
         </ul>
         <div className="sidebar__logout">

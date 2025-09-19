@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './LoginPage.scss';
+import './RegisterPage.scss';
 
 const API_BASE = 'http://171.22.24.204:8000';
 
-function LoginForm() {
+function RegisterForm() {
     const [username, setUsername] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -17,9 +18,17 @@ function LoginForm() {
         setError('');
         setIsLoading(true);
 
+        // Basic phone number validation (Iran format: 11 digits)
+        if (!/^\d{11}$/.test(phoneNumber)) {
+            setError('شماره تلفن باید ۱۱ رقم باشد');
+            setIsLoading(false);
+            return;
+        }
+
         try {
-            const response = await axios.post(`${API_BASE}/login/`, {
+            const response = await axios.post(`${API_BASE}/register/`, {
                 username,
+                phone_number: phoneNumber,
                 password,
             }, {
                 headers: {
@@ -32,30 +41,19 @@ function LoginForm() {
             localStorage.setItem('refreshToken', refresh);
             localStorage.setItem('userId', user_id);
             localStorage.setItem('username', username);
-            console.log('Login successful:', { access, refresh, user_id });
+            console.log('Registration successful:', { access, refresh, user_id });
             navigate('/');
         } catch (err) {
-            console.error('Login error:', err.response?.data || err.message);
-            // Fallback to offline login (optional, remove if not needed)
-            if (username === 'admin' && password === '123') {
-                localStorage.setItem('accessToken', 'offline_access_token');
-                localStorage.setItem('refreshToken', 'offline_refresh_token');
-                localStorage.setItem('username', username);
-                localStorage.setItem('userId', 'offline_user');
-                console.log('Offline login used for admin');
-                navigate('/');
-            } else {
-                setError(err.response?.data?.detail || 'نام کاربری یا رمز عبور اشتباه است');
-            }
-        } finally {
+            console.error('Registration error:', err.response?.data || err.message);
+            setError(err.response?.data?.detail || 'خطایی در ثبت‌نام رخ داد');
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <h2 className="login-title">ورود به سیستم</h2>
+        <div className="register-container">
+            <div className="register-card">
+                <h2 className="register-title">ثبت‌نام در سیستم</h2>
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -69,6 +67,22 @@ function LoginForm() {
                             onChange={(e) => setUsername(e.target.value)}
                             className="form-input"
                             placeholder="نام کاربری خود را وارد کنید"
+                            disabled={isLoading}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="phoneNumber" className="form-label">
+                            شماره تلفن
+                        </label>
+                        <input
+                            id="phoneNumber"
+                            type="tel"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                            className="form-input"
+                            placeholder="09123456789"
+                            maxLength={11}
                             disabled={isLoading}
                             required
                         />
@@ -94,18 +108,17 @@ function LoginForm() {
                             className="submit-button"
                             disabled={isLoading}
                         >
-                            {isLoading ? 'در حال ورود...' : 'ورود'}
+                            {isLoading ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
                         </button>
                     </div>
-                    <div className="form-group register-link">
-                        <span>حساب ندارید؟ </span>
+                    <div className="form-group">
                         <button
                             type="button"
-                            className="link-button"
-                            onClick={() => navigate('/register')}
+                            className="submit-button secondary"
+                            onClick={() => navigate('/login')}
                             disabled={isLoading}
                         >
-                            ثبت‌نام کنید
+                            بازگشت به ورود
                         </button>
                     </div>
                 </form>
@@ -114,4 +127,4 @@ function LoginForm() {
     );
 }
 
-export default LoginForm;
+export default RegisterForm;

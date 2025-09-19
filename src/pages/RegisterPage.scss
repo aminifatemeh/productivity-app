@@ -1,4 +1,4 @@
-.login-container {
+.register-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7,7 +7,7 @@
   padding: 20px;
 }
 
-.login-card {
+.register-card {
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -16,7 +16,7 @@
   max-width: 400px;
 }
 
-.login-title {
+.register-title {
   font-size: 24px;
   font-weight: 600;
   color: #333;
@@ -87,28 +87,11 @@
   cursor: not-allowed;
 }
 
-.register-link {
-  text-align: center;
-  font-size: 14px;
-  color: #555;
+.submit-button.secondary {
+  background-color: #6c757d;
+  margin-top: 12px;
 }
 
-.link-button {
-  background: none;
-  border: none;
-  color: #2c868b;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-}
-
-.link-button:hover:not(:disabled) {
-  color: #256d72;
-}
-
-.link-button:disabled {
-  color: #a0a0a0;
-  cursor: not-allowed;
+.submit-button.secondary:hover:not(:disabled) {
+  background-color: #5a6268;
 }

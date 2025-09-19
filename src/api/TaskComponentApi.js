@@ -1,17 +1,22 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
+const API_BASE = 'http://171.22.24.204:8000';
+
 function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const isFetching = useRef(false); // برای جلوگیری از درخواست‌های مکرر
+    const isFetching = useRef(false); // Prevent concurrent requests
 
     const refreshToken = async () => {
         const refresh = localStorage.getItem('refreshToken');
-        if (!refresh) return false;
+        if (!refresh) {
+            console.log('No refresh token available');
+            return false;
+        }
 
         try {
-            const response = await axios.post('http://82.115.17.58:8000/api/token/refresh/', {
+            const response = await axios.post(`${API_BASE}/api/token/refresh/`, {
                 refresh,
             });
             localStorage.setItem('accessToken', response.data.access);
@@ -25,14 +30,17 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
 
     const fetchTasks = async () => {
         if (!useApi) {
-            // اگر از API استفاده نمی‌کنیم، داده‌های پیش‌فرض را برگردان
             setLoading(false);
             setError(null);
             onTasksFetched(defaultTasks || [], false);
             return;
         }
 
-        if (isFetching.current) return; // جلوگیری از درخواست‌های همزمان
+        if (isFetching.current) {
+            console.log('Fetch in progress, skipping...');
+            return;
+        }
+
         isFetching.current = true;
         setLoading(true);
         setError(null);
@@ -49,16 +57,16 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
         let endpoint;
         switch (category) {
             case 'khak_khorde':
-                endpoint = 'http://82.115.17.58:8000/api/tasks/khak_khorde/';
+                endpoint = `${API_BASE}/tasks/khak_khorde/`;
                 break;
             case 'rumiz':
-                endpoint = 'http://82.115.17.58:8000/api/tasks/rumiz/';
+                endpoint = `${API_BASE}/tasks/rumiz/`;
                 break;
             case 'nobatesh_mishe':
-                endpoint = 'http://82.115.17.58:8000/api/tasks/nobatesh_mishe/';
+                endpoint = `${API_BASE}/tasks/nobatesh_mishe/`;
                 break;
             default:
-                endpoint = 'http://82.115.17.58:8000/api/tasks/khak_khorde/';
+                endpoint = `${API_BASE}/tasks/all_tasks/`;
         }
 
         try {
@@ -76,12 +84,13 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
             if (err.response?.status === 401) {
                 const refreshed = await refreshToken();
                 if (refreshed) {
-                    fetchTasks(); // تلاش مجدد با توکن جدید
+                    fetchTasks(); // Retry with new token
                 } else {
                     setError('لطفاً دوباره وارد سیستم شوید');
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('refreshToken');
                     localStorage.removeItem('username');
+                    localStorage.removeItem('userId');
                     setLoading(false);
                     onTasksFetched([], true);
                 }
@@ -90,20 +99,20 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
                 setLoading(false);
                 onTasksFetched([], true);
             } else {
-                setError(err.message || 'خطایی در دریافت تسک‌ها رخ داد');
+                setError(err.response?.data?.detail || 'خطایی در دریافت تسک‌ها رخ داد');
                 setLoading(false);
                 onTasksFetched([], true);
             }
         } finally {
-            isFetching.current = false; // آزاد کردن قفل
+            isFetching.current = false;
         }
     };
 
     useEffect(() => {
         fetchTasks();
-    }, [category, useApi]); // اضافه کردن useApi به وابستگی‌ها
+    }, [category, useApi]);
 
-    if (!useApi) return null; // اگر از API استفاده نمی‌کنیم، چیزی رندر نشود
+    if (!useApi) return null;
     if (loading) return <div>در حال بارگذاری...</div>;
     if (error) return (
         <div>
