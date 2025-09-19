@@ -65,6 +65,10 @@
   cursor: pointer;
   transition: transform 0.2s;
 }
+.pomodoro-clock__play-pause img, .pomodoro-clock__stop img {
+  width: 20px;
+  height: 20px;
+}
 .pomodoro-clock__play-pause:hover, .pomodoro-clock__stop:hover {
   transform: scale(1.1);
 }

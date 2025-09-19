@@ -7,19 +7,18 @@ import TaskManagementPage from "./pages/TaskManagementPage";
 
 function App() {
   return (
-    <TaskProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginForm />}></Route>
-          <Route path="/" element={<DashboardPage />}></Route>
-          <Route
-            path="/task-management"
-            element={<TaskManagementPage useApi={false} />}
-          ></Route>
-          {/*<TaskManagementPage useApi={true} />*/}
-        </Routes>
-      </Router>
-    </TaskProvider>
+      <TaskProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/" element={<DashboardPage />} />
+            <Route
+                path="/task-management"
+                element={<TaskManagementPage useApi={true} />}
+            />
+          </Routes>
+        </Router>
+      </TaskProvider>
   );
 }
 

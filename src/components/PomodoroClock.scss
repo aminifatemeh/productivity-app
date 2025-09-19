@@ -71,6 +71,11 @@
     cursor: pointer;
     transition: transform 0.2s;
 
+    img{
+      width: 20px;
+      height: 20px;
+    }
+
     &:hover {
       transform: scale(1.1);
     }

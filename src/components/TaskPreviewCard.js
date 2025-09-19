@@ -21,10 +21,9 @@ const cardConfigs = {
 };
 
 function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
-  const { timers, initialDuration } = useContext(TaskContext);
+  const { timers, initialDuration, startTimer, stopTimer } = useContext(TaskContext);
   const config = cardConfigs[cardName];
 
-  // Filter tasks based on cardName
   const filteredTasks = tasks.filter((task) => {
     if (cardName === "active") return task.flag_tuNobat && !task.isDone;
     if (cardName === "upNext") return !task.flag_tuNobat && !task.isDone;
@@ -32,11 +31,20 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
     return false;
   });
 
-  // Helper to format remaining time as MM:SS
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleTaskClick = (task) => {
+    const timer = timers[task.id] || { remaining: initialDuration, isRunning: false };
+    if (timer.isRunning) {
+      stopTimer(task.id);
+    } else {
+      startTimer(task.id);
+    }
+    setSelectedTask(task);
   };
 
   return (
@@ -50,7 +58,7 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
               <span>هیچ تسکی موجود نیست</span>
           ) : (
               filteredTasks.map((task) => {
-                const timer = timers[task.id] || { remaining: initialDuration };
+                const timer = timers[task.id] || { remaining: initialDuration, isRunning: false };
                 const progress = initialDuration > 0
                     ? Math.min(((initialDuration - timer.remaining) / initialDuration) * 100, 100)
                     : 0;
@@ -63,10 +71,13 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
                       <div className="circle"></div>
                       <span>{task.title}</span>
                       <img
-                          src="/assets/icons/Polygon.svg"
-                          alt="Select Task"
+                          src={timer.isRunning ? "/assets/icons/pause.svg" : "/assets/icons/Polygon.svg"}
+                          alt={timer.isRunning ? "Pause" : "Play"}
                           className="cursor-pointer polygon-icon"
-                          onClick={() => setSelectedTask(task)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTaskClick(task);
+                          }}
                       />
                     </div>
                 );

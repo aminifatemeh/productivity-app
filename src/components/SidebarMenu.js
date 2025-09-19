@@ -13,6 +13,11 @@ function SidebarMenu() {
     navigate('/'); // Redirect to dashboard
   };
 
+  const handleNavigation = (e, path) => {
+    e.preventDefault(); // Prevent default to ensure no event bubbling issues
+    navigate(path);
+  };
+
   return (
       <nav className="sidebar">
         <ProfileSnippet />
@@ -24,7 +29,7 @@ function SidebarMenu() {
                 src="/assets/icons/dashboard.svg"
                 alt=""
             />
-            <Link to="/">داشبورد</Link>
+            <Link to="/" onClick={(e) => handleNavigation(e, '/')}>داشبورد</Link>
           </li>
           <li>
             <img
@@ -32,7 +37,7 @@ function SidebarMenu() {
                 src="/assets/icons/task-management.svg"
                 alt=""
             />
-            <Link to="/task-management">مدیریت تسک</Link>
+            <Link to="/task-management" onClick={(e) => handleNavigation(e, '/task-management')}>مدیریت تسک</Link>
           </li>
           <li>
             <img

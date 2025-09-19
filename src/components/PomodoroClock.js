@@ -1,44 +1,46 @@
 import React, { useContext, useEffect } from "react";
 import "./PomodoroClock.scss";
-import { TaskContext } from "../components/TaskContext";
+import { TaskContext } from "./TaskContext";
 
 const PomodoroClock = ({ selectedTask }) => {
     const { timers, startTimer, stopTimer, resetTimerForTask, initialDuration } = useContext(TaskContext);
-    const totalTime = initialDuration; // Use initialDuration from context
 
-    // Get current timer state for the selected task
-    const currentTimer = selectedTask ? timers[selectedTask.id] || { remaining: initialDuration, isRunning: false } : null;
-    const time = currentTimer ? currentTimer.remaining : initialDuration;
-    const isActive = currentTimer ? currentTimer.isRunning : false;
+
+
+
+    // Derive currentTimer safely
+    const currentTimer = selectedTask && timers[selectedTask.id]
+        ? timers[selectedTask.id]
+        : { remaining: initialDuration, isRunning: false };
+
+    const time = currentTimer.remaining;
+    const isActive = currentTimer.isRunning;
+
+
 
     useEffect(() => {
-        if (selectedTask) {
-            // Start the timer if it's not running
-            startTimer(selectedTask.id);
+        if (selectedTask && !timers[selectedTask.id]) {
+
+            resetTimerForTask(selectedTask.id); // Initialize timer if it doesn't exist
         }
-        return () => {
-            if (selectedTask) {
-                // Pause the timer when component unmounts or task changes
-                stopTimer(selectedTask.id);
-            }
-        };
-    }, [selectedTask, startTimer, stopTimer]);
+    }, [selectedTask, resetTimerForTask, timers]);
 
     const toggleTimer = () => {
         if (selectedTask) {
             if (isActive) {
-                stopTimer(selectedTask.id);
+
+                stopTimer(selectedTask.id); // Pause the timer
             } else {
-                startTimer(selectedTask.id);
+
+                startTimer(selectedTask.id); // Start or resume the timer
             }
         }
     };
 
     const resetTimer = () => {
-        if (selectedTask && resetTimerForTask) {
-            resetTimerForTask(selectedTask.id);
-        } else {
-            console.warn("resetTimerForTask is not available or no task selected");
+        if (selectedTask) {
+
+            resetTimerForTask(selectedTask.id); // Reset the timer to initial duration
         }
     };
 
@@ -48,8 +50,7 @@ const PomodoroClock = ({ selectedTask }) => {
         return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     };
 
-    // Calculate the conic-gradient percentage based on elapsed time
-    const progressPercentage = initialDuration ? ((initialDuration - time) / initialDuration) * 100 : 0;
+    const progressPercentage = initialDuration && time ? ((initialDuration - time) / initialDuration) * 100 : 0;
 
     return (
         <div className="pomodoro-clock">
@@ -65,10 +66,10 @@ const PomodoroClock = ({ selectedTask }) => {
             </div>
             <div className="pomodoro-clock__controls">
                 <button className="pomodoro-clock__play-pause" onClick={toggleTimer} disabled={!selectedTask}>
-                    {isActive ? "⏸" : "▶"}
+                    {isActive ? <img src="/assets/icons/pause.svg" alt="Pause" /> : <img src="/assets/icons/Polygon.svg" alt="Play" />}
                 </button>
                 <button className="pomodoro-clock__stop" onClick={resetTimer} disabled={!selectedTask}>
-                    ■
+                    <img src="/assets/icons/stop.svg" alt="Stop" />
                 </button>
             </div>
         </div>

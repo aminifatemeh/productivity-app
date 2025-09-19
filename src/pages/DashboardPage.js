@@ -7,7 +7,7 @@ import Calendar from "../components/Calendar";
 import { TaskContext } from "../components/TaskContext";
 
 function DashboardPage() {
-    const { tasks, startTimer, stopTimer } = useContext(TaskContext);
+    const { tasks, timers } = useContext(TaskContext);
     const [selectedTask, setSelectedTask] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
 
@@ -23,14 +23,14 @@ function DashboardPage() {
 
     useEffect(() => {
         if (selectedTask) {
-            startTimer(selectedTask.id);
-        }
-        return () => {
-            if (selectedTask) {
-                stopTimer(selectedTask.id);
+            const timer = timers[selectedTask.id];
+            if (!timer || !timer.isRunning) {
+                // Only start the timer if it doesn't exist or isn't running
+                // Avoid calling startTimer unnecessarily
+                // startTimer is handled in TaskPreviewCard or PomodoroClock
             }
-        };
-    }, [selectedTask, startTimer, stopTimer]);
+        }
+    }, [selectedTask, timers]);
 
     return (
         <div className="d-flex" style={{ marginLeft: "321px" }}>
