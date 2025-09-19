@@ -7,11 +7,13 @@ import ConfirmDeleteModal from "./ConfirmDeleteModal";
 function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
   const [expanded, setExpanded] = useState(false);
   const [subtasks, setSubtasks] = useState(
-      task.subtasks.map((subtask) => ({
-        id: subtask.id,
-        title: subtask.title,
-        isDone: !!subtask.done_date,
-      }))
+      task.subtasks
+          ? task.subtasks.map((subtask) => ({
+            id: subtask.id,
+            title: subtask.title,
+            isDone: !!subtask.done_date,
+          }))
+          : []
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
@@ -49,7 +51,6 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
   };
 
   const toggleCard = () => {
-    // فقط در صورتی که ساب‌تسک وجود داشته باشد، کارت باز یا بسته شود
     if (subtasks.length > 0) {
       setExpanded(!expanded);
     }
@@ -69,12 +70,19 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
   };
 
   const handleToggleDone = () => {
-    const updatedTask = { ...task, isDone: !task.isDone };
-    setSubtasks(updatedTask.subtasks.map(subtask => ({
+    const isBecomingDone = !task.isDone;
+    const updatedTask = { ...task, isDone: isBecomingDone };
+    const updatedSubtasks = task.subtasks.map((subtask) => ({
       ...subtask,
-      isDone: updatedTask.isDone ? true : !!subtask.done_date,
-    })));
-    onUpdateTask(updatedTask);
+      done_date: isBecomingDone ? new Date().toISOString().split('T')[0] : null,
+    }));
+    const updatedTaskWithSubs = { ...updatedTask, subtasks: updatedSubtasks };
+    const updatedLocalSubtasks = subtasks.map((subtask) => ({
+      ...subtask,
+      isDone: isBecomingDone,
+    }));
+    setSubtasks(updatedLocalSubtasks);
+    onUpdateTask(updatedTaskWithSubs);
   };
 
   const doneCount = subtasks.filter((t) => t.isDone).length;
@@ -98,7 +106,7 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
                       e.stopPropagation();
                       handleEdit();
                     }}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", opacity: task.isDone ? 0.5 : 1 }}
                 />
                 <img
                     src="/assets/icons/trash-bin.svg"
@@ -107,7 +115,7 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
                       e.stopPropagation();
                       handleDelete();
                     }}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", opacity: task.isDone ? 0.5 : 1 }}
                 />
                 <img
                     src="/assets/icons/green-tick.svg"
@@ -116,7 +124,7 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
                       e.stopPropagation();
                       handleToggleDone();
                     }}
-                    style={{ cursor: "pointer", opacity: task.isDone ? 0.5 : 1 }}
+                    style={{ cursor: "pointer" }}
                 />
               </div>
               <div className="task-label">
@@ -139,8 +147,8 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
                               opacity: task.isDone ? 0.5 : 1,
                             }}
                         >
-                    {tag.name}
-                  </span>
+                            {tag.name}
+                        </span>
                     ))
                 ) : (
                     <></>

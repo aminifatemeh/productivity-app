@@ -76,7 +76,7 @@ function TaskManagementPage() {
         }
         if (selectedCategory === 'nobatesh_mishe') return task.flag_tuNobat && !task.isDone;
         if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat && !task.isDone;
-        if (selectedCategory === 'rumiz') return !task.isDone;
+        if (selectedCategory === 'rumiz') return task.isDone;
         return true;
     });
 

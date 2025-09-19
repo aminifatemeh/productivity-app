@@ -8,9 +8,19 @@
   transition: height 0.3s ease, background-color 0.3s ease, opacity 0.3s ease;
 
   &.done {
-    background-color: #e0e0e0; // رنگ خاکستری برای حالت انجام‌شده
-    opacity: 0.7; // کاهش شفافیت برای حالت غیرفعال
-    pointer-events: auto; // همچنان قابل کلیک باشد
+    background-color: #e0e0e0;
+    opacity: 0.7;
+    pointer-events: auto;
+
+    .TaskCard__description-titles,
+    .TaskCard__description-labels .task-label,
+    .TaskCard__progressBar {
+      opacity: 0.7;
+    }
+
+    .task-icons img:not([alt="تکمیل"]) {
+      opacity: 0.5;
+    }
   }
 
   &__description {
@@ -49,10 +59,10 @@
       }
       .task-label {
         display: flex;
-        flex-wrap: wrap; // اجازه می‌ده تگ‌ها به ردیف‌های مختلف برن
-        max-width: 70px; // حداکثر عرض برای چیدمان افقی
-        gap: 5px; // فاصله بین تگ‌ها
-        background-color: transparent; // حذف پس‌زمینه سبز
+        flex-wrap: wrap;
+        max-width: 70px;
+        gap: 5px;
+        background-color: transparent;
         padding: 0;
       }
     }
@@ -66,7 +76,7 @@
     background-color: rgba(127, 116, 116, 0.7);
     transform: scaleY(0.3);
     transform-origin: top;
-    z-index: 1; // افزایش z-index برای قرار گرفتن روی محتوای اسکرول‌پذیر
+    z-index: 1;
   }
 
   &__divider--top {
@@ -78,15 +88,15 @@
     transform-origin: top;
     top: calc(100% - 60px);
     transition: top 0.3s ease;
-    z-index: 1; // افزایش z-index برای قرار گرفتن روی محتوای اسکرول‌پذیر
+    z-index: 1;
   }
 
   &__expanded-area {
     width: 100%;
-    max-height: calc(100% - 110px - 60px); // محاسبه حداکثر ارتفاع برای جلوگیری از عبور از divider پایین
+    max-height: calc(100% - 110px - 60px);
     position: absolute;
-    top: 115px; // شروع از زیر divider--top (110px + 5px فاصله)
-    overflow-y: auto; // فعال کردن اسکرول عمودی
+    top: 115px;
+    overflow-y: auto;
     transition: opacity 0.3s ease, transform 0.3s ease;
     display: flex;
     flex-direction: column;
@@ -94,17 +104,17 @@
     gap: 15px;
     transform: scale(0.95);
     animation: expandIn 0.3s ease forwards;
-    padding: 10px 10px 20px 10px; // افزایش padding-bottom به 20px
-    box-sizing: border-box; // اطمینان از اینکه padding در محاسبات ارتفاع لحاظ شود
-    z-index: 0; // z-index پایین‌تر از dividerها
+    padding: 10px 10px 20px 10px;
+    box-sizing: border-box;
+    z-index: 0;
 
-    & > div:last-child { // اضافه کردن margin-bottom به ساب‌تسک آخر
-      margin-bottom: 15px; // فاصله 15px از پایین
+    & > div:last-child {
+      margin-bottom: 15px;
     }
   }
 
   .task-label-spacer {
-    height: 10px; // فاصله بین برچسب‌ها و ساب‌تسک‌ها
+    height: 10px;
   }
 
   .TaskCard__progressBar {
@@ -112,7 +122,7 @@
     position: absolute;
     bottom: 25px;
     margin: 0 20px;
-    z-index: 1; // افزایش z-index برای قرار گرفتن روی محتوای اسکرول‌پذیر
+    z-index: 1;
   }
 
   &.expanded {
@@ -141,6 +151,6 @@
     font-weight: normal;
     text-align: center;
     margin-right: 5px;
-    opacity: inherit; // opacity تگ‌ها از کارت ارث‌بری می‌کند
+    opacity: inherit;
   }
 }

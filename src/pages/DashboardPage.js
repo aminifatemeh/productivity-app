@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import TaskPreviewCard from "../components/TaskPreviewCard";
 import UtilitySidebar from "../components/UtilitySidebar";
 import SidebarMenu from "../components/SidebarMenu";
@@ -7,7 +7,7 @@ import Calendar from "../components/Calendar";
 import { TaskContext } from "../components/TaskContext";
 
 function DashboardPage() {
-    const { tasks } = useContext(TaskContext);
+    const { tasks, startTimer, stopTimer } = useContext(TaskContext);
     const [selectedTask, setSelectedTask] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
 
@@ -20,6 +20,17 @@ function DashboardPage() {
         { day: "Thursday", progress: 100 },
         { day: "Friday", progress: 40 },
     ];
+
+    useEffect(() => {
+        if (selectedTask) {
+            startTimer(selectedTask.id);
+        }
+        return () => {
+            if (selectedTask) {
+                stopTimer(selectedTask.id);
+            }
+        };
+    }, [selectedTask, startTimer, stopTimer]);
 
     return (
         <div className="d-flex" style={{ marginLeft: "321px" }}>

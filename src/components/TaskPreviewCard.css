@@ -1,4 +1,3 @@
-@charset "UTF-8";
 .task-preview__card {
   width: 230px;
   height: 270px;
@@ -16,21 +15,21 @@
 }
 .task-preview__card-tasks {
   flex-grow: 1;
-  overflow-y: auto; /* اجازه اسکرول عمودی برای تسک‌های زیاد */
-  padding-right: 5px; /* فاصله برای جلوگیری از تداخل با اسکرول */
+  overflow-y: auto; /* Allow vertical scroll for many tasks */
+  padding-right: 5px; /* Space to avoid scrollbar overlap */
 }
 .task-preview__card-task {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* بهبود توزیع فضا */
+  justify-content: space-between; /* Improved space distribution */
   width: 100%;
   height: 30px;
   margin-top: 20px;
-  background-color: #fff;
+  background: linear-gradient(to left, #d2d2d2 var(--progress), #ffffff 0%); /* Progress bar effect from right to left */
   position: relative;
   border-radius: 4px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-  padding: 0 0px 0 20px; /* فضای کافی برای دایره و آیکون */
+  padding: 0 0px 0 20px; /* Space for circle and icon */
 }
 .task-preview__card-task img {
   width: 20px;
@@ -40,15 +39,15 @@
 }
 .task-preview__card-task span {
   flex-grow: 1;
-  white-space: nowrap; /* جلوگیری از شکستن خط */
-  overflow: hidden; /* مخفی کردن متن اضافی */
-  text-overflow: ellipsis; /* افزودن سه‌نقطه برای متن طولانی */
-  text-align: right; /* تراز متن به راست برای فارسی */
-  font-size: 0.9rem; /* کاهش اندازه فونت برای خوانایی */
+  white-space: nowrap; /* Prevent line breaks */
+  overflow: hidden; /* Hide overflow text */
+  text-overflow: ellipsis; /* Add ellipsis for long text */
+  text-align: right; /* Right-align for Persian */
+  font-size: 0.9rem; /* Smaller font for readability */
   padding: 15px;
 }
 
-/* اسکرول‌بار زیبا برای مرورگرهای مدرن */
+/* Custom scrollbar for modern browsers */
 .task-preview__card-tasks::-webkit-scrollbar {
   width: 8px;
 }

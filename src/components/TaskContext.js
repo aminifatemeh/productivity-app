@@ -1,94 +1,153 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from "react";
 
 export const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
+    const initialDuration = 20 * 60; // 20 minutes in seconds
     const [tasks, setTasks] = useState([
         {
-            id: 1,
-            title: "تهیه گزارش ماهانه پروژه",
-            description: "جمع‌آوری داده‌های فروش و تهیه گزارش برای جلسه تیم مدیریت",
-            deadline_date: "۱۴۰۴/۰۷/۱۰",
-            flag_tuNobat: false,
-            hour: "09:30",
-            selectedDays: [],
-            tags: [{ name: "کار", color: "#DA348D", selected: true }],
-            subtasks: [
-                { id: 1, title: "جمع‌آوری داده‌های فروش", done_date: null },
-                { id: 2, title: "تحلیل داده‌ها", done_date: null },
-                { id: 3, title: "طراحی اسلایدها", done_date: "۱۴۰۴/۰۶/۳۰" },
-            ],
-            isDone: false,
-        },
-        {
-            id: 2,
-            title: "تمرین برنامه‌نویسی پایتون",
-            description: "تمرین پروژه جنگو برای بهبود مهارت‌های کدنویسی",
-            deadline_date: "۱۴۰۴/۰۷/۱۵",
+            id: "1",
+            title: "خرید مواد غذایی",
+            description: "خرید نان، شیر، میوه و سبزیجات",
             flag_tuNobat: true,
-            hour: "18:00",
-            selectedDays: ["ش", "د", "چ"],
-            tags: [
-                { name: "تحصیل", color: "#4690E4", selected: true },
-                { name: "برنامه‌نویسی", color: "#34AA7B", selected: true },
-            ],
-            subtasks: [
-                { id: 4, title: "یادگیری مدل‌های جنگو", done_date: null },
-                { id: 5, title: "ساخت یک API ساده", done_date: null },
-            ],
             isDone: false,
+            subtasks: [
+                { id: "1-1", title: "خرید نان سنگک", done_date: null },
+                { id: "1-2", title: "خرید شیر کم چرب", done_date: null }
+            ],
+            tags: [{ name: "خانه", color: "#34AA7B" }],
+            deadline_date: "1404/06/29",
+            hour: "10:00",
+            selectedDays: ["ش", "د"],
+            originalIndex: 0
         },
         {
-            id: 3,
-            title: "خرید مواد غذایی هفتگی",
-            description: "خرید مواد لازم برای آشپزی هفته آینده",
-            deadline_date: "۱۴۰۴/۰۶/۳۱",
+            id: "2",
+            title: "تمرین ورزش صبحگاهی",
+            description: "30 دقیقه دویدن و نرمش",
             flag_tuNobat: false,
-            hour: "16:00",
-            selectedDays: [],
-            tags: [{ name: "شخصی", color: "#FFCA28", selected: true }],
-            subtasks: [
-                { id: 6, title: "تهیه لیست خرید", done_date: "۱۴۰۴/۰۶/۲۹" },
-                { id: 7, title: "بازدید از سوپرمارکت", done_date: null },
-            ],
+            isDone: false,
+            subtasks: [],
+            tags: [{ name: "ورزش", color: "#4690E4" }],
+            deadline_date: "1404/06/29",
+            hour: "07:00",
+            selectedDays: ["ی", "س", "چ"],
+            originalIndex: 1
+        },
+        {
+            id: "3",
+            title: "تماس با پزشک",
+            description: "گرفتن وقت برای چکاپ",
+            flag_tuNobat: false,
             isDone: true,
-        },
-        {
-            id: 4,
-            title: "تمرین بدنسازی",
-            description: "جلسه تمرین در باشگاه برای تقویت عضلات",
-            deadline_date: "۱۴۰۴/۰۷/۱۲",
-            flag_tuNobat: true,
-            hour: "17:30",
-            selectedDays: ["ی", "س", "پ"],
-            tags: [{ name: "ورزش", color: "#34AA7B", selected: true }],
-            subtasks: [
-                { id: 8, title: "گرم کردن", done_date: null },
-                { id: 9, title: "تمرینات بالاتنه", done_date: null },
-                { id: 10, title: "سرد کردن", done_date: null },
-            ],
-            isDone: false,
-        },
-        {
-            id: 5,
-            title: "مطالعه کتاب مدیریت زمان",
-            description: "خواندن فصل‌های ۵ تا ۷ برای امتحان هفته آینده",
-            deadline_date: "۱۴۰۴/۰۷/۰۸",
-            flag_tuNobat: false,
-            hour: "20:00",
+            subtasks: [],
+            tags: [{ name: "سلامتی", color: "#DA348D" }],
+            deadline_date: "1404/06/28",
+            hour: "14:00",
             selectedDays: [],
-            tags: [{ name: "تحصیل", color: "#4690E4", selected: true }],
-            subtasks: [
-                { id: 11, title: "خواندن فصل ۵", done_date: "۱۴۰۴/۰۶/۲۸" },
-                { id: 12, title: "یادداشت‌برداری فصل ۶", done_date: null },
-            ],
-            isDone: false,
-        },
+            originalIndex: 2
+        }
     ]);
+    const [timers, setTimers] = useState({});
+
+    const startTimer = (taskId) => {
+        setTimers((prev) => {
+            const timer = prev[taskId] || { remaining: initialDuration, isRunning: false };
+            if (!timer.isRunning) {
+                return { ...prev, [taskId]: { ...timer, isRunning: true } };
+            }
+            return prev;
+        });
+    };
+
+    const stopTimer = (taskId) => {
+        setTimers((prev) => {
+            const timer = prev[taskId];
+            if (timer && timer.isRunning) {
+                return { ...prev, [taskId]: { ...timer, isRunning: false } };
+            }
+            return prev;
+        });
+    };
+
+    const resetTimerForTask = (taskId) => {
+        setTimers((prev) => ({
+            ...prev,
+            [taskId]: { remaining: initialDuration, isRunning: false },
+        }));
+    };
+
+    const addTask = (newTask) => {
+        setTasks((prev) => [
+            ...prev,
+            {
+                id: `${Date.now()}`,
+                title: newTask.title,
+                description: newTask.description || '',
+                deadline_date: newTask.deadline_date,
+                flag_tuNobat: newTask.flag_tuNobat || false,
+                hour: newTask.hour || '',
+                selectedDays: newTask.selectedDays || [],
+                subtasks: newTask.subtasks || [],
+                tags: newTask.tags || [],
+                isDone: false,
+                originalIndex: prev.length
+            }
+        ]);
+    };
+
+    const updateTask = (updatedTask) => {
+        setTasks((prev) => {
+            const otherTasks = prev.filter((task) => task.id !== updatedTask.id);
+            if (updatedTask.isDone) {
+                return [...otherTasks, updatedTask];
+            } else {
+                const insertIndex = Math.min(updatedTask.originalIndex || 0, otherTasks.length);
+                return [
+                    ...otherTasks.slice(0, insertIndex),
+                    updatedTask,
+                    ...otherTasks.slice(insertIndex)
+                ];
+            }
+        });
+    };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimers((prev) => {
+                const updatedTimers = { ...prev };
+                Object.keys(updatedTimers).forEach((id) => {
+                    const timer = updatedTimers[id];
+                    if (timer.isRunning && timer.remaining > 0) {
+                        timer.remaining -= 1;
+                        if (timer.remaining <= 0) {
+                            timer.isRunning = false;
+                        }
+                    }
+                });
+                return updatedTimers;
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
-        <TaskContext.Provider value={{ tasks, setTasks }}>
+        <TaskContext.Provider
+            value={{
+                tasks,
+                setTasks,
+                timers,
+                initialDuration,
+                startTimer,
+                stopTimer,
+                resetTimerForTask,
+                addTask,
+                updateTask
+            }}
+        >
             {children}
         </TaskContext.Provider>
     );
 };
+
+export default TaskProvider;

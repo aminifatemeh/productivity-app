@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .TaskCard {
   height: 178px;
   background-color: #F6F6F1;
@@ -11,6 +12,14 @@
   background-color: #e0e0e0;
   opacity: 0.7;
   pointer-events: auto;
+}
+.TaskCard.done .TaskCard__description-titles,
+.TaskCard.done .TaskCard__description-labels .task-label,
+.TaskCard.done .TaskCard__progressBar {
+  opacity: 0.7;
+}
+.TaskCard.done .task-icons img:not([alt=تکمیل]) {
+  opacity: 0.5;
 }
 .TaskCard__description {
   padding: 15px;

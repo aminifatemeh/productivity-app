@@ -18,6 +18,7 @@ function UtilitySidebar({ selectedTask, selectedDate }) {
                 .locale("fa")
                 .format("jYYYY/jMM/jDD"),
             isDone: false,
+            subtasks: newTask.subtasks || [],
         };
         setTasks((prevTasks) => [...prevTasks, formattedTask]);
         setShowModal(false);
