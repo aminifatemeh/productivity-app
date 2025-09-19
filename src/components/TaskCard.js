@@ -4,7 +4,7 @@ import SubtaskBar from "./SubtaskBar";
 import ProgressBar from "./ProgressBar";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
-function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
+function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, originalIndex }) {
   const [expanded, setExpanded] = useState(false);
   const [subtasks, setSubtasks] = useState(
       task.subtasks
@@ -41,7 +41,9 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
     const updated = [...subtasks];
     updated[index].isDone = !updated[index].isDone;
     setSubtasks(updated);
-    onUpdateTask({ ...task, subtasks: updated });
+    const newDoneCount = updated.filter((t) => t.isDone).length;
+    const isTaskDone = newDoneCount === updated.length;
+    onUpdateTask({ ...task, subtasks: updated, isDone: isTaskDone });
   };
 
   const handleDeleteSubtask = (index) => {
@@ -71,10 +73,11 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
 
   const handleToggleDone = () => {
     const isBecomingDone = !task.isDone;
-    const updatedTask = { ...task, isDone: isBecomingDone };
+    const updatedTask = { ...task, isDone: isBecomingDone, originalIndex: task.isDone ? originalIndex : task.originalIndex || 0 };
     const updatedSubtasks = task.subtasks.map((subtask) => ({
       ...subtask,
       done_date: isBecomingDone ? new Date().toISOString().split('T')[0] : null,
+      isDone: isBecomingDone,
     }));
     const updatedTaskWithSubs = { ...updatedTask, subtasks: updatedSubtasks };
     const updatedLocalSubtasks = subtasks.map((subtask) => ({
@@ -86,7 +89,7 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask }) {
   };
 
   const doneCount = subtasks.filter((t) => t.isDone).length;
-  const progressPercent = subtasks.length === 0 ? 0 : Math.round((doneCount / subtasks.length) * 100);
+  const progressPercent = task.isDone ? 100 : subtasks.length === 0 ? 0 : Math.round((doneCount / subtasks.length) * 100);
 
   return (
       <>

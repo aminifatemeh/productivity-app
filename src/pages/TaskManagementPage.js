@@ -14,17 +14,15 @@ function TaskManagementPage() {
     const [selectedDate, setSelectedDate] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const tabsWrapperRef = useRef(null); // رفرنس به tabs-wrapper
-    const tabRefs = useRef({}); // رفرنس به هر تب
+    const tabsWrapperRef = useRef(null);
+    const tabRefs = useRef({});
 
-    // خواندن تاریخ از query parameter
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const date = params.get('date');
         setSelectedDate(date || null);
     }, [location.search]);
 
-    // مدیریت موقعیت و عرض مستطیل متحرک
     useEffect(() => {
         const activeTab = tabRefs.current[selectedCategory];
         if (activeTab && tabsWrapperRef.current) {
@@ -93,7 +91,7 @@ function TaskManagementPage() {
                                     type="button"
                                     onClick={() => setSelectedCategory(category.id)}
                                     className={`tab-button ${selectedCategory === category.id ? 'active' : ''}`}
-                                    ref={(el) => (tabRefs.current[category.id] = el)} // رفرنس به تب
+                                    ref={(el) => (tabRefs.current[category.id] = el)}
                                 >
                                     <img
                                         src={category.icon}
@@ -137,6 +135,7 @@ function TaskManagementPage() {
                                         onUpdateTask={handleUpdateTask}
                                         onDeleteTask={handleDeleteTask}
                                         onEditTask={handleEditTask}
+                                        originalIndex={tasks.findIndex(t => t.id === task.id)}
                                     />
                                 </div>
                             ))}
