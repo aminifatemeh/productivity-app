@@ -90,7 +90,7 @@ export const TaskProvider = ({ children }) => {
             if (err.response?.status === 401) {
                 const refreshed = await refreshToken();
                 if (refreshed) {
-                    return await editTask(task); // Retry after token refresh
+                    return await editTask(task);
                 } else {
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('refreshToken');
@@ -100,6 +100,41 @@ export const TaskProvider = ({ children }) => {
                 }
             } else {
                 return { success: false, error: err.response?.data?.detail || 'خطایی در ویرایش تسک رخ داد' };
+            }
+        }
+    };
+
+    const deleteTask = async (taskId) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return { success: false, error: 'لطفاً ابتدا وارد سیستم شوید' };
+        }
+
+        try {
+            await axios.delete(`${API_BASE}/tasks/${taskId}/delete_task/`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+            setTimers((prevTimers) => {
+                const updatedTimers = { ...prevTimers };
+                delete updatedTimers[taskId];
+                return updatedTimers;
+            });
+            return { success: true };
+        } catch (err) {
+            if (err.response?.status === 401) {
+                const refreshed = await refreshToken();
+                if (refreshed) {
+                    return await deleteTask(taskId); // Retry after token refresh
+                } else {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('userId');
+                    return { success: false, error: 'لطفاً دوباره وارد سیستم شوید' };
+                }
+            } else {
+                return { success: false, error: err.response?.data?.error || 'خطایی در حذف تسک رخ داد' };
             }
         }
     };
@@ -178,7 +213,8 @@ export const TaskProvider = ({ children }) => {
                 initialDuration,
                 startTimer,
                 stopTimer,
-                editTask, // Add editTask to context
+                editTask,
+                deleteTask, // Add deleteTask to context
             }}
         >
             {children}

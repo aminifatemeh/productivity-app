@@ -12,12 +12,12 @@ import axios from 'axios';
 const API_BASE = 'http://171.22.24.204:8000';
 
 function TaskManagementPage({ useApi }) {
-    const { tasks, setTasks, editTask } = useContext(TaskContext); // Added editTask from context
-    const isJalali = true; // Fixed for Persian (Jalali)
+    const { tasks, setTasks, editTask, deleteTask } = useContext(TaskContext); // Added deleteTask
+    const isJalali = true;
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
     const [selectedDate, setSelectedDate] = useState(null);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
-    const [editingTask, setEditingTask] = useState(null); // State to track task being edited
+    const [editingTask, setEditingTask] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
     const tabsWrapperRef = useRef(null);
@@ -120,12 +120,12 @@ function TaskManagementPage({ useApi }) {
     };
 
     const handleEditTask = (task) => {
-        setEditingTask(task); // Set the task to be edited
-        setIsAddTaskModalOpen(true); // Open the modal
+        setEditingTask(task);
+        setIsAddTaskModalOpen(true);
     };
 
     const handleTaskUpdated = async (updatedTask) => {
-        const result = await editTask(updatedTask); // Use editTask from context
+        const result = await editTask(updatedTask);
         if (result.success) {
             setIsAddTaskModalOpen(false);
             setEditingTask(null);
@@ -228,7 +228,9 @@ function TaskManagementPage({ useApi }) {
                                             })) || [],
                                         }}
                                         originalIndex={task.originalIndex}
-                                        onEditTask={handleEditTask} // Pass handleEditTask to TaskCard
+                                        onEditTask={handleEditTask}
+                                        onDeleteTask={deleteTask} // Pass deleteTask to TaskCard
+                                        onUpdateTask={(updatedTask) => editTask(updatedTask)} // Pass editTask for updates
                                     />
                                 </div>
                             ))}
@@ -239,7 +241,7 @@ function TaskManagementPage({ useApi }) {
                     <button
                         type="button"
                         onClick={() => {
-                            setEditingTask(null); // Ensure no task is being edited when adding new
+                            setEditingTask(null);
                             setIsAddTaskModalOpen(true);
                         }}
                         className="add-task-button"
@@ -257,7 +259,7 @@ function TaskManagementPage({ useApi }) {
                             setIsAddTaskModalOpen(false);
                             setEditingTask(null);
                         }}
-                        onTaskAdded={editingTask ? handleTaskUpdated : handleAddTask} // Use edit or add based on editingTask
+                        onTaskAdded={editingTask ? handleTaskUpdated : handleAddTask}
                         initialTask={editingTask}
                         selectedDate={selectedDate}
                     />
