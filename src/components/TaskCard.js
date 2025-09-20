@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./TaskCard.scss";
 import SubtaskBar from "./SubtaskBar";
 import ProgressBar from "./ProgressBar";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
-function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, originalIndex }) {
+function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, originalIndex }) {
   const [expanded, setExpanded] = useState(false);
   const [subtasks, setSubtasks] = useState(
       task.subtasks
@@ -17,6 +17,19 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, originalIndex 
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
+
+  // Sync subtasks with task.isDone from props (for consistency after API updates)
+  useEffect(() => {
+    if (task.isDone !== undefined) {
+      const isAllDone = task.isDone;
+      setSubtasks((prevSubtasks) =>
+          prevSubtasks.map((subtask) => ({
+            ...subtask,
+            isDone: isAllDone,
+          }))
+      );
+    }
+  }, [task.isDone]);
 
   const handleDragStart = (index) => {
     setDraggedIndex(index);
@@ -71,21 +84,27 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, originalIndex 
     setIsDeleteModalOpen(false);
   };
 
-  const handleToggleDone = () => {
+  const handleToggleDone = async () => {
     const isBecomingDone = !task.isDone;
-    const updatedTask = { ...task, isDone: isBecomingDone, originalIndex: task.isDone ? originalIndex : task.originalIndex || 0 };
-    const updatedSubtasks = task.subtasks.map((subtask) => ({
-      ...subtask,
-      done_date: isBecomingDone ? new Date().toISOString().split('T')[0] : null,
-      isDone: isBecomingDone,
-    }));
-    const updatedTaskWithSubs = { ...updatedTask, subtasks: updatedSubtasks };
+    // Update local subtasks to match the new done state
     const updatedLocalSubtasks = subtasks.map((subtask) => ({
       ...subtask,
       isDone: isBecomingDone,
     }));
     setSubtasks(updatedLocalSubtasks);
-    onUpdateTask(updatedTaskWithSubs);
+
+    // Call API to toggle main task
+    const result = await onToggleTask(task.id);
+    if (!result.success) {
+      console.error('Error toggling task:', result.error);
+      // Revert local subtasks on error
+      setSubtasks((prev) => prev.map((subtask, index) => ({
+        ...subtask,
+        isDone: !isBecomingDone, // Revert
+      })));
+    }
+    // Note: onUpdateTask not called here since toggleTask handles isDone update in context
+    // Subtasks are local; if backend needs update, consider calling editTask for subtasks
   };
 
   const doneCount = subtasks.filter((t) => t.isDone).length;

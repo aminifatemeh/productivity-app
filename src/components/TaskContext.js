@@ -139,6 +139,51 @@ export const TaskProvider = ({ children }) => {
         }
     };
 
+    const toggleTask = async (taskId) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return { success: false, error: 'لطفاً ابتدا وارد سیستم شوید' };
+        }
+
+        const currentTask = tasks.find((t) => t.id === taskId);
+        if (!currentTask) {
+            return { success: false, error: 'تسک یافت نشد' };
+        }
+
+        const done = !currentTask.isDone;
+
+        try {
+            const response = await axios.post(
+                `${API_BASE}/tasks/${taskId}/toggle/`,
+                { done },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            const isDone = response.data.done;
+            setTasks((prevTasks) =>
+                prevTasks.map((t) => (t.id === taskId ? { ...t, isDone } : t))
+            );
+            return { success: true };
+        } catch (err) {
+            if (err.response?.status === 401) {
+                const refreshed = await refreshToken();
+                if (refreshed) {
+                    return await toggleTask(taskId); // Retry after token refresh
+                } else {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('userId');
+                    return { success: false, error: 'لطفاً دوباره وارد سیستم شوید' };
+                }
+            } else {
+                return { success: false, error: err.response?.data?.error || 'خطایی در تغییر وضعیت تسک رخ داد' };
+            }
+        }
+    };
+
     useEffect(() => {
         fetchTasks();
     }, []);
@@ -214,7 +259,8 @@ export const TaskProvider = ({ children }) => {
                 startTimer,
                 stopTimer,
                 editTask,
-                deleteTask, // Add deleteTask to context
+                deleteTask,
+                toggleTask, // Added toggleTask to context
             }}
         >
             {children}
