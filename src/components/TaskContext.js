@@ -5,44 +5,34 @@ export const TaskContext = createContext();
 const API_BASE = 'http://171.22.24.204:8000';
 
 export const TaskProvider = ({ children }) => {
-    // خواندن مقدار تایمر از localStorage با مقدار پیش‌فرض 5 دقیقه
-    const [initialDuration, setInitialDuration] = useState((parseInt(localStorage.getItem("timerDuration")) || 5) * 60); // تبدیل دقیقه به ثانیه
     const [tasks, setTasks] = useState([]);
     const [timers, setTimers] = useState({});
+    const [initialDuration, setInitialDuration] = useState((parseInt(localStorage.getItem("timerDuration")) || 5) * 60);
     const isTicking = useRef(false);
 
-    // به‌روزرسانی initialDuration هنگام تغییر timerDuration در localStorage
-    useEffect(() => {
-        const handleStorageChange = () => {
-            const newDuration = (parseInt(localStorage.getItem("timerDuration")) || 5) * 60;
-            setInitialDuration(newDuration);
-            // ریست تمام تایمرها به مقدار جدید
-            setTimers((prev) => {
-                const updatedTimers = {};
-                Object.keys(prev).forEach((taskId) => {
-                    updatedTimers[taskId] = { remaining: newDuration, isRunning: false };
-                });
-                return updatedTimers;
-            });
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, []);
+    const refreshToken = async () => {
+        const refresh = localStorage.getItem('refreshToken');
+        if (!refresh) return false;
+        try {
+            const response = await axios.post(`${API_BASE}/api/token/refresh/`, { refresh });
+            localStorage.setItem('accessToken', response.data.access);
+            return true;
+        } catch (err) {
+            console.error('Token refresh failed:', err.response?.data || err.message);
+            return false;
+        }
+    };
 
     const fetchTasks = async () => {
         const token = localStorage.getItem('accessToken');
-        if (!token) {
-            return;
-        }
-
+        if (!token) return;
         try {
             const response = await axios.get(`${API_BASE}/tasks/all_tasks/`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setTasks(response.data.map((task, index) => ({
+            const fetchedTasks = response.data.map((task, index) => ({
                 id: task.id.toString(),
-                title: task.title,
+                title: task.title || 'Untitled',
                 description: task.description || '',
                 flag_tuNobat: task.flag_tuNobat || false,
                 isDone: task.isDone || false,
@@ -52,7 +42,17 @@ export const TaskProvider = ({ children }) => {
                 hour: task.hour || '',
                 selectedDays: task.selectedDays || [],
                 originalIndex: index,
-            })));
+            }));
+            setTasks(fetchedTasks);
+            setTimers((prev) => {
+                const updatedTimers = { ...prev };
+                fetchedTasks.forEach((task) => {
+                    if (!updatedTimers[task.id]) {
+                        updatedTimers[task.id] = { remaining: initialDuration, isRunning: false };
+                    }
+                });
+                return updatedTimers;
+            });
         } catch (err) {
             if (err.response?.status === 401) {
                 const refreshed = await refreshToken();
@@ -61,21 +61,67 @@ export const TaskProvider = ({ children }) => {
         }
     };
 
-    const refreshToken = async () => {
-        const refresh = localStorage.getItem('refreshToken');
-        if (!refresh) return false;
+    const editTask = async (task) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) return { success: false, error: 'لطفاً ابتدا وارد سیستم شوید' };
 
         try {
-            const response = await axios.post(`${API_BASE}/api/token/refresh/`, { refresh });
-            localStorage.setItem('accessToken', response.data.access);
-            return true;
+            const response = await axios.put(`${API_BASE}/tasks/${task.id}/edit_task/`, task, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const updatedTask = {
+                id: response.data.id.toString(),
+                title: response.data.title || 'Untitled',
+                description: response.data.description || '',
+                flag_tuNobat: response.data.flag_tuNobat || false,
+                isDone: response.data.isDone || false,
+                subtasks: response.data.subtasks || [],
+                tags: response.data.tags || [],
+                deadline_date: response.data.deadline_date || '',
+                hour: response.data.hour || '',
+                selectedDays: response.data.selectedDays || [],
+                originalIndex: task.originalIndex,
+            };
+            setTasks((prevTasks) =>
+                prevTasks.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+            );
+            return { success: true, task: updatedTask };
         } catch (err) {
-            return false;
+            if (err.response?.status === 401) {
+                const refreshed = await refreshToken();
+                if (refreshed) {
+                    return await editTask(task); // Retry after token refresh
+                } else {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('userId');
+                    return { success: false, error: 'لطفاً دوباره وارد سیستم شوید' };
+                }
+            } else {
+                return { success: false, error: err.response?.data?.detail || 'خطایی در ویرایش تسک رخ داد' };
+            }
         }
     };
 
     useEffect(() => {
         fetchTasks();
+    }, []);
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const newDuration = (parseInt(localStorage.getItem("timerDuration")) || 5) * 60;
+            setInitialDuration(newDuration);
+            setTimers((prev) => {
+                const updatedTimers = {};
+                Object.keys(prev).forEach((taskId) => {
+                    updatedTimers[taskId] = { remaining: newDuration, isRunning: false };
+                });
+                return updatedTimers;
+            });
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     const startTimer = (taskId) => {
@@ -98,77 +144,9 @@ export const TaskProvider = ({ children }) => {
         });
     };
 
-    const resetTimerForTask = (taskId) => {
-        setTimers((prev) => {
-            return {
-                ...prev,
-                [taskId]: { remaining: initialDuration, isRunning: false },
-            };
-        });
-    };
-
-    const addTask = async (newTask) => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            return;
-        }
-
-        try {
-            const response = await axios.post(`${API_BASE}/tasks/add_task/`, newTask, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setTasks((prev) => [
-                ...prev,
-                {
-                    id: response.data.id.toString(),
-                    title: newTask.title,
-                    description: newTask.description || '',
-                    deadline_date: newTask.deadline_date,
-                    flag_tuNobat: newTask.flag_tuNobat || false,
-                    hour: newTask.hour || '',
-                    selectedDays: newTask.selectedDays || [],
-                    subtasks: newTask.subtasks || [],
-                    tags: newTask.tags || [],
-                    isDone: false,
-                    originalIndex: prev.length,
-                },
-            ]);
-        } catch (err) {
-        }
-    };
-
-    const updateTask = async (updatedTask) => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            return;
-        }
-
-        try {
-            await axios.put(`${API_BASE}/tasks/${updatedTask.id}/edit_task/`, updatedTask, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setTasks((prev) => {
-                const otherTasks = prev.filter((task) => task.id !== updatedTask.id);
-                if (updatedTask.isDone) {
-                    return [...otherTasks, updatedTask];
-                } else {
-                    const insertIndex = Math.min(updatedTask.originalIndex || 0, otherTasks.length);
-                    return [
-                        ...otherTasks.slice(0, insertIndex),
-                        updatedTask,
-                        ...otherTasks.slice(insertIndex),
-                    ];
-                }
-            });
-        } catch (err) {
-        }
-    };
-
     useEffect(() => {
         const interval = setInterval(() => {
-            if (isTicking.current) {
-                return;
-            }
+            if (isTicking.current) return;
             isTicking.current = true;
             setTimers((prev) => {
                 const updatedTimers = { ...prev };
@@ -188,10 +166,7 @@ export const TaskProvider = ({ children }) => {
                 return hasChanges ? updatedTimers : prev;
             });
         }, 1000);
-
-        return () => {
-            clearInterval(interval);
-        };
+        return () => clearInterval(interval);
     }, []);
 
     return (
@@ -203,9 +178,7 @@ export const TaskProvider = ({ children }) => {
                 initialDuration,
                 startTimer,
                 stopTimer,
-                resetTimerForTask,
-                addTask,
-                updateTask,
+                editTask, // Add editTask to context
             }}
         >
             {children}

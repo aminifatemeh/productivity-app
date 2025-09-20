@@ -11,8 +11,8 @@
 .AddTaskModal-border {
   position: absolute;
   top: 15px;
-  left: 15px;
-  right: 15px;
+  inset-inline-start: 15px; /* جایگزین left */
+  inset-inline-end: 15px; /* جایگزین right */
   border: 1px solid #000;
   border-radius: 17px;
   pointer-events: none;
@@ -132,7 +132,7 @@
 .toggle-advanced {
   font-weight: bold;
   font-size: 15px;
-  text-align: right;
+  text-align: start; /* جایگزین text-align: right */
   cursor: pointer;
   display: flex;
   justify-content: flex-start;
@@ -185,7 +185,7 @@
     .required-star {
       color: #D32F2F;
       font-size: 12px;
-      margin-left: 5px;
+      margin-inline-start: 5px; /* جایگزین margin-left */
     }
   }
 
@@ -303,19 +303,18 @@
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 14px; /* اندازه فونت را می‌توانید کوچکتر کنید، مثلاً 12px */
+  font-size: 12px;
   transition: background-color 0.3s;
 
   &.btn-secondary {
     background-color: #6c757d;
     color: white;
-    width: 60px; /* عرض را کاهش دادم */
-    height: 30px; /* ارتفاع اضافه شد برای تنظیم اندازه */
+    width: 60px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px; /* فونت کوچکتر */
-    padding: 4px 8px; /* پدینگ کمتر برای دکمه کوچکتر */
+    padding: 4px 8px;
 
     &:hover {
       background-color: #5a6268;
@@ -325,13 +324,12 @@
   &.btn-primary {
     background-color: #C8E6C9;
     color: #01575C;
-    width: 90px; /* عرض را کاهش دادم */
-    height: 30px; /* ارتفاع اضافه شد برای تنظیم اندازه */
+    width: 90px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px; /* فونت کوچکتر */
-    padding: 4px 8px; /* پدینگ کمتر برای دکمه کوچکتر */
+    padding: 4px 8px;
 
     &:hover {
       background-color: #A5D6A7;
@@ -344,4 +342,3 @@
     }
   }
 }
-

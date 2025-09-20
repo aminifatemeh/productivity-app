@@ -34,9 +34,6 @@ function SettingsPage() {
     const handleAppSettingsChange = (e) => {
         const { name, value } = e.target;
         setAppSettings((prev) => ({ ...prev, [name]: value }));
-        if (name === "language") {
-            setLanguage(value);
-        }
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
@@ -57,6 +54,7 @@ function SettingsPage() {
             if (userInfo.username) localStorage.setItem("username", userInfo.username);
             if (appSettings.timerDuration) localStorage.setItem("timerDuration", appSettings.timerDuration);
             localStorage.setItem("language", appSettings.language);
+            setLanguage(appSettings.language); // اعمال زبان پس از ذخیره
 
             Swal.fire({
                 title: t("settings.successTitle"),

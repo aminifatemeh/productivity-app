@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import './AddTaskModal.scss';
 import moment from 'jalali-moment';
+import { TaskContext } from './TaskContext';
 
 const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate }) => {
+    const { editTask } = useContext(TaskContext);
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [subtaskCount, setSubtaskCount] = useState(0);
     const [subtasks, setSubtasks] = useState([]);
@@ -22,7 +24,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
     const [hour, setHour] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [description, setDescription] = useState('');
-    const [errors, setErrors] = useState({ name: '', hour: '', dueDate: '' });
+    const [errors, setErrors] = useState({ name: '', hour: '', dueDate: '', form: '' });
 
     useEffect(() => {
         if (initialTask) {
@@ -31,9 +33,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             setHour(initialTask.hour || '');
             setDueDate(
                 initialTask.deadline_date
-                    ? moment(initialTask.deadline_date, 'jYYYY/jMM/jDD')
-                        .locale('fa')
-                        .format('YYYY-MM-DD')
+                    ? moment(initialTask.deadline_date, 'jYYYY/jMM/jDD').format('YYYY-MM-DD')
                     : ''
             );
             setIsRoutine(initialTask.flag_tuNobat || false);
@@ -118,35 +118,64 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         return color;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const newErrors = { name: '', hour: '', dueDate: '' };
+        const newErrors = { name: '', hour: '', dueDate: '', form: '' };
         if (!name.trim()) newErrors.name = 'این فیلد الزامی است';
         if (!hour.trim()) newErrors.hour = 'این فیلد الزامی است';
         if (!dueDate.trim()) newErrors.dueDate = 'این فیلد الزامی است';
         if (Object.values(newErrors).some((error) => error)) {
             setErrors(newErrors);
+            return;
+        }
+
+        const selectedTags = tags
+            .filter((tag) => tag.selected)
+            .map((tag) => ({ name: tag.name, color: tag.color }));
+        const formattedDueDate = moment(dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD'); // Send Gregorian date
+        const taskData = {
+            id: initialTask?.id,
+            title: name,
+            description: description,
+            deadline_date: formattedDueDate,
+            flag_tuNobat: isInNobat,
+            hour: hour,
+            selectedDays: selectedDays,
+            subtasks: subtasks.map((subtask, index) => ({
+                id: subtask.id || null, // Avoid sending temporary IDs for new subtasks
+                title: subtask.title,
+                done_date: subtask.done_date || null,
+            })),
+            tags: selectedTags,
+            isDone: initialTask?.isDone || false,
+            originalIndex: initialTask?.originalIndex || 0,
+        };
+
+        console.log('Sending task data:', taskData); // Debug: Log the payload
+
+        if (initialTask) {
+            // Editing an existing task
+            const result = await editTask(taskData);
+            if (result.success) {
+                onTaskAdded(result.task); // Update TaskCard with the returned task
+                onClose();
+                resetForm();
+            } else {
+                // Display detailed serializer errors
+                const errorDetail = result.error.detail || result.error;
+                if (typeof errorDetail === 'object') {
+                    const errorMessages = Object.entries(errorDetail)
+                        .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
+                        .join('; ');
+                    setErrors({ ...newErrors, form: errorMessages || 'خطایی در ویرایش تسک رخ داد' });
+                } else {
+                    setErrors({ ...newErrors, form: errorDetail || 'خطایی در ویرایش تسک رخ داد' });
+                }
+                console.error('Edit task error:', errorDetail); // Debug: Log the error
+            }
         } else {
-            const selectedTags = tags
-                .filter((tag) => tag.selected)
-                .map((tag) => ({ name: tag.name, color: tag.color }));
-            const newTask = {
-                id: initialTask?.id || Date.now(),
-                title: name,
-                description: description,
-                deadline_date: dueDate,
-                flag_tuNobat: isInNobat,
-                hour: hour,
-                selectedDays: selectedDays,
-                subtasks: subtasks.map((subtask, index) => ({
-                    id: subtask.id || index + 1,
-                    title: subtask.title,
-                    done_date: subtask.done_date || null,
-                })),
-                tags: selectedTags,
-                isDone: false,
-            };
-            onTaskAdded(newTask);
+            // Adding a new task
+            onTaskAdded(taskData);
             onClose();
             resetForm();
         }
@@ -163,7 +192,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         setIsInNobat(false);
         setSelectedDays([]);
         setTags(tags.map((tag) => ({ ...tag, selected: false })));
-        setErrors({ name: '', hour: '', dueDate: '' });
+        setErrors({ name: '', hour: '', dueDate: '', form: '' });
     };
 
     useEffect(() => {
@@ -182,12 +211,16 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         return () => window.removeEventListener('resize', updateBorderHeight);
     }, [subtaskCount, showAdvanced, subtasks, isRoutine, isInNobat, selectedDays, tags]);
 
+    const routineDays = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+
     if (!isOpen) return <></>;
 
     return (
         <div className="AddTaskModal" ref={modalRef}>
             <div className="AddTaskModal-border"></div>
-            <span className="AddTaskModal-title">{initialTask ? 'ویرایش تسک' : 'افزودن تسک'}</span>
+            <span className="AddTaskModal-title">
+                {initialTask ? 'ویرایش تسک' : 'اضافه کردن تسک جدید'}
+            </span>
             <form action="" className="AddTaskModal-form" onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label>
@@ -259,7 +292,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                 {isRoutine && (
                     <div className="routine-days mt-3">
                         <div className="days-box">
-                            {['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'].map((day) => (
+                            {routineDays.map((day, index) => (
                                 <div
                                     key={day}
                                     className={`day-circle ${selectedDays.includes(day) ? 'selected' : ''}`}
@@ -272,11 +305,11 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                     </div>
                 )}
                 <div
-                    className="toggle-advanced text-right mt-3"
+                    className="toggle-advanced mt-3"
                     onClick={() => setShowAdvanced(!showAdvanced)}
                 >
                     <span className="toggle-text">گزینه‌های بیشتر</span>
-                    <span className="toggle-arrow">{showAdvanced ? '↑' : '↓'}</span>
+                    <span className="toggle-arrow">{showAdvanced ? '↓' : '↑'}</span>
                 </div>
                 {showAdvanced && (
                     <div className="mt-3">
@@ -305,7 +338,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                                     className="form-control subtask-input"
                                     value={subtask.title || ''}
                                     onChange={(e) => handleSubtaskChange(index, e.target.value)}
-                                    placeholder={`ساب‌تسک ${index + 1}`}
+                                    placeholder={`زیرتسک ${index + 1}`}
                                 />
                             </div>
                         ))}
@@ -343,7 +376,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                                     className="tag more-tag"
                                     onClick={() => setShowNewTagInput(true)}
                                 >
-                                    بیشتر
+                                    تگ جدید
                                 </div>
                                 {showNewTagInput && (
                                     <div className="tag new-tag">
@@ -361,6 +394,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                         </div>
                     </div>
                 )}
+                {errors.form && <div className="error-message">{errors.form}</div>}
                 <div className="d-flex justify-content-end mt-4 gap-2">
                     <button type="button" className="btn btn-secondary" onClick={onClose}>
                         بستن
@@ -370,7 +404,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                         className="btn btn-primary"
                         disabled={!name.trim() || !hour.trim() || !dueDate.trim()}
                     >
-                        {initialTask ? 'ذخیره تغییرات' : 'ذخیره تسک'}
+                        {initialTask ? 'ذخیره تغییرات' : 'ذخیره'}
                     </button>
                 </div>
             </form>

@@ -1,21 +1,37 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import './TaskManagementPage.scss';
 import SidebarMenu from "../components/SidebarMenu";
 import TaskCard from "../components/TaskCard";
+import TaskComponentApi from "../api/TaskComponentApi";
 import AddTaskModal from "../components/AddTaskModal";
 import { TaskContext } from "../components/TaskContext";
+import moment from 'jalali-moment';
+import axios from 'axios';
 
-function TaskManagementPage() {
-    const { tasks, setTasks } = useContext(TaskContext);
-    const [showModal, setShowModal] = useState(false);
+const API_BASE = 'http://171.22.24.204:8000';
+
+function TaskManagementPage({ useApi }) {
+    const { tasks, setTasks, editTask } = useContext(TaskContext); // Added editTask from context
+    const isJalali = true; // Fixed for Persian (Jalali)
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
-    const [editTask, setEditTask] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState(null); // State to track task being edited
     const navigate = useNavigate();
     const location = useLocation();
     const tabsWrapperRef = useRef(null);
     const tabRefs = useRef({});
+
+    const { loading, error } = TaskComponentApi({
+        category: selectedCategory,
+        onTasksFetched: (fetchedTasks, hasError) => {
+            if (!hasError) {
+                setTasks(fetchedTasks);
+            }
+        },
+        useApi,
+    });
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -33,44 +49,105 @@ function TaskManagementPage() {
         }
     }, [selectedCategory]);
 
-    const handleTaskAdded = (newTask) => {
-        console.log('New task added:', newTask);
-        setTasks((prevTasks) => [...prevTasks, { ...newTask, isDone: false }]);
-        setShowModal(false);
-    };
-
-    const handleUpdateTask = (updatedTask) => {
-        console.log('Task updated:', updatedTask);
-        setTasks((prevTasks) => {
-            const otherTasks = prevTasks.filter((task) => task.id !== updatedTask.id);
-            return [...otherTasks, { ...updatedTask, subtasks: updatedTask.subtasks || [] }];
-        });
-        setEditTask(null);
-    };
-
-    const handleDeleteTask = (taskId) => {
-        console.log('Task deleted:', taskId);
-        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-    };
-
-    const handleEditTask = (task) => {
-        setEditTask({ ...task, subtasks: task.subtasks || [] });
-    };
-
     const clearDateFilter = () => {
         setSelectedDate(null);
         navigate('/task-management');
     };
 
+    const handleAddTask = async (newTask) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            console.error('No access token found');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                `${API_BASE}/tasks/add_task/`,
+                {
+                    title: newTask.title,
+                    description: newTask.description,
+                    deadline_date: newTask.deadline_date,
+                    flag_tuNobat: newTask.flag_tuNobat,
+                    hour: newTask.hour,
+                    selectedDays: newTask.selectedDays,
+                    subtasks: newTask.subtasks,
+                    tags: newTask.tags,
+                    isDone: newTask.isDone,
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            const addedTask = {
+                id: response.data.id.toString(),
+                title: response.data.title || 'بدون عنوان',
+                description: response.data.description || '',
+                flag_tuNobat: response.data.flag_tuNobat || false,
+                isDone: response.data.isDone || false,
+                subtasks: response.data.subtasks || [],
+                tags: response.data.tags || [],
+                deadline_date: response.data.deadline_date || '',
+                hour: response.data.hour || '',
+                selectedDays: response.data.selectedDays || [],
+                originalIndex: tasks.length,
+            };
+
+            setTasks((prevTasks) => [...prevTasks, addedTask]);
+            setIsAddTaskModalOpen(false);
+        } catch (err) {
+            console.error('Error adding task:', err.response?.data || err.message);
+            if (err.response?.status === 401) {
+                const refresh = localStorage.getItem('refreshToken');
+                if (refresh) {
+                    try {
+                        const refreshResponse = await axios.post(`${API_BASE}/api/token/refresh/`, { refresh });
+                        localStorage.setItem('accessToken', refreshResponse.data.access);
+                        handleAddTask(newTask);
+                    } catch (refreshErr) {
+                        console.error('Token refresh failed:', refreshErr.response?.data || refreshErr.message);
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                        navigate('/login');
+                    }
+                } else {
+                    navigate('/login');
+                }
+            }
+        }
+    };
+
+    const handleEditTask = (task) => {
+        setEditingTask(task); // Set the task to be edited
+        setIsAddTaskModalOpen(true); // Open the modal
+    };
+
+    const handleTaskUpdated = async (updatedTask) => {
+        const result = await editTask(updatedTask); // Use editTask from context
+        if (result.success) {
+            setIsAddTaskModalOpen(false);
+            setEditingTask(null);
+        } else {
+            console.error('Error updating task:', result.error);
+            if (result.error.includes('دوباره وارد سیستم شوید')) {
+                navigate('/login');
+            }
+        }
+    };
+
     const categories = [
-        { id: 'khak_khorde', label: 'خاک خورده', icon: "/assets/icons/khakhorde_icon.svg" },
-        { id: 'rumiz', label: 'رومیزی', icon: "/assets/icons/rumiz_icon.svg" },
+        { id: 'khak_khorde', label: 'خاک خورده', icon: "/assets/icons/khak_khorde_icon.svg" },
+        { id: 'rumiz', label: 'رومیز', icon: "/assets/icons/rumiz_icon.svg" },
         { id: 'nobatesh_mishe', label: 'نوبتش میشه', icon: "/assets/icons/nobatesh_mishe_icon.svg" },
     ];
 
     const filteredTasks = tasks.filter((task) => {
-        if (selectedDate && task.deadline_date !== selectedDate) {
-            return false;
+        if (!task || !task.id) return false;
+        if (selectedDate) {
+            const taskDate = moment(task.deadline_date, 'jYYYY/jMM/jDD').format('YYYY-MM-DD');
+            return taskDate === selectedDate;
         }
         if (selectedCategory === 'nobatesh_mishe') return task.flag_tuNobat && !task.isDone;
         if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat && !task.isDone;
@@ -78,10 +155,15 @@ function TaskManagementPage() {
         return true;
     });
 
+    const formatDate = (date) => {
+        if (!date) return '';
+        return moment(date, 'YYYY-MM-DD').locale('fa').format('jYYYY/jMM/jDD');
+    };
+
     return (
-        <div className="d-flex task-management-page">
+        <div className="d-flex task-management-page" dir="rtl">
             <SidebarMenu />
-            <div className="d-flex flex-column flex-grow-1">
+            <div className="main-content d-flex flex-column flex-grow-1">
                 <div className="header-placeholder"></div>
                 <div className="tab-container">
                     <div className="tabs-wrapper" ref={tabsWrapperRef}>
@@ -92,6 +174,7 @@ function TaskManagementPage() {
                                     onClick={() => setSelectedCategory(category.id)}
                                     className={`tab-button ${selectedCategory === category.id ? 'active' : ''}`}
                                     ref={(el) => (tabRefs.current[category.id] = el)}
+                                    aria-label={`${category.label} tab`}
                                 >
                                     <img
                                         src={category.icon}
@@ -108,7 +191,7 @@ function TaskManagementPage() {
                     </div>
                     {selectedDate && (
                         <div className="date-filter-info">
-                            <span>نمایش تسک‌های تاریخ: {selectedDate}</span>
+                            <span>فیلتر تاریخ: {formatDate(selectedDate)}</span>
                             <button
                                 type="button"
                                 className="clear-date-filter-btn"
@@ -119,58 +202,67 @@ function TaskManagementPage() {
                         </div>
                     )}
                 </div>
-                <div
-                    className={`flex-grow-1 d-flex flex-column tasks-grid ${showModal || editTask ? 'overflow-hidden' : ''}`}
-                >
-                    {filteredTasks.length === 0 ? (
+                <div className="flex-grow-1 d-flex flex-column tasks-grid">
+                    {loading ? (
+                        <div>در حال بارگذاری...</div>
+                    ) : error ? (
+                        <div>
+                            خطا: {error}
+                            <button onClick={() => window.location.reload()}>تلاش دوباره</button>
+                        </div>
+                    ) : filteredTasks.length === 0 ? (
                         <div className="empty-message">
-                            هیچ تسکی برای نمایش وجود ندارد
+                            هیچ تسکی یافت نشد
                         </div>
                     ) : (
                         <div className="row gy-4">
                             {filteredTasks.map((task) => (
                                 <div className="col-12 col-sm-6 col-md-4" key={task.id}>
                                     <TaskCard
-                                        task={task}
-                                        onUpdateTask={handleUpdateTask}
-                                        onDeleteTask={handleDeleteTask}
-                                        onEditTask={handleEditTask}
-                                        originalIndex={tasks.findIndex(t => t.id === task.id)}
+                                        task={{
+                                            ...task,
+                                            deadline_date: formatDate(task.deadline_date),
+                                            tags: task.tags?.map((tag) => ({
+                                                ...tag,
+                                                name: tag.isDefault ? tag.name : tag.name,
+                                            })) || [],
+                                        }}
+                                        originalIndex={task.originalIndex}
+                                        onEditTask={handleEditTask} // Pass handleEditTask to TaskCard
                                     />
                                 </div>
                             ))}
                         </div>
                     )}
-                    {showModal && (
-                        <div className="modal-overlay">
-                            <AddTaskModal
-                                isOpen={showModal}
-                                onClose={() => setShowModal(false)}
-                                onTaskAdded={handleTaskAdded}
-                            />
-                        </div>
-                    )}
-                    {editTask && (
-                        <div className="modal-overlay">
-                            <AddTaskModal
-                                isOpen={!!editTask}
-                                onClose={() => setEditTask(null)}
-                                onTaskAdded={handleUpdateTask}
-                                initialTask={editTask}
-                            />
-                        </div>
-                    )}
                 </div>
-                <div className="d-flex w-100 justify-content-center align-items-center">
+                <div className="footer-section d-flex w-100 justify-content-center align-items-center">
                     <button
                         type="button"
-                        onClick={() => setShowModal(true)}
+                        onClick={() => {
+                            setEditingTask(null); // Ensure no task is being edited when adding new
+                            setIsAddTaskModalOpen(true);
+                        }}
                         className="add-task-button"
+                        aria-label="اضافه کردن تسک"
                     >
-                        افزودن تسک
+                        اضافه کردن تسک
                     </button>
                 </div>
             </div>
+            {isAddTaskModalOpen && (
+                <div className="modal-overlay">
+                    <AddTaskModal
+                        isOpen={isAddTaskModalOpen}
+                        onClose={() => {
+                            setIsAddTaskModalOpen(false);
+                            setEditingTask(null);
+                        }}
+                        onTaskAdded={editingTask ? handleTaskUpdated : handleAddTask} // Use edit or add based on editingTask
+                        initialTask={editingTask}
+                        selectedDate={selectedDate}
+                    />
+                </div>
+            )}
         </div>
     );
 }

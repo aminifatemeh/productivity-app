@@ -1,5 +1,19 @@
 .task-management-page {
   min-height: 100vh;
+  display: flex;
+
+  /* جهت توسط ویژگی dir در JSX تنظیم می‌شود، بنابراین اینجا نیازی به direction نیست */
+
+  .main-content {
+    flex-grow: 1;
+    max-width: calc(100% - 220px); /* عرض محتوا با جبران عرض SidebarMenu (200px + 20px فاصله) */
+    margin-inline-start: 220px; /* فاصله از SidebarMenu */
+    margin-inline-end: 20px; /* فاصله از لبه دیگر */
+    padding-inline: 20px; /* فاصله داخلی برای محتوا */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* مرکز کردن محتوای داخلی */
+  }
 
   .header-placeholder {
     height: 60px; /* برای هدر */
@@ -12,11 +26,11 @@
     align-items: center; /* وسط‌چین افقی */
     padding: 1rem;
     background-color: #EAFFEB;
-    margin: 20px; /* وسط‌چین کردن با فاصله از چپ و راست */
-    max-width: 1200px; /* عرض محدود */
     border-radius: 23px; /* بردردیوس ۲۳ پیکسل */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* باکس شدو */
-    min-height: 80px; /* ارتفاع حداقل برای اطمینان از فضای کافی */
+    min-height: 80px; /* ارتفاع حداقل */
+    width: 100%; /* پر کردن عرض main-content */
+    max-width: 1000px; /* محدود کردن عرض تب‌ها */
   }
 
   .tabs-wrapper {
@@ -26,6 +40,8 @@
     gap: 10px;
     margin-bottom: 10px;
     position: relative; /* برای موقعیت‌دهی شبه‌المنت */
+    width: 100%; /* پر کردن عرض tab-container */
+    max-width: 600px; /* محدود کردن عرض تب‌ها */
   }
 
   .tab-button {
@@ -39,8 +55,8 @@
     cursor: pointer;
     transition: color 0.3s ease;
     position: relative;
-    z-index: 1; /* برای اطمینان از اینکه تب‌ها بالای مستطیل متحرک هستند */
-    height: 100%; /* اطمینان از اینکه تب‌ها ارتفاع کامل tabs-wrapper را بگیرند */
+    z-index: 1; /* تب‌ها بالای مستطیل متحرک */
+    height: 100%; /* پر کردن ارتفاع tabs-wrapper */
 
     &.active {
       color: #01575c;
@@ -49,16 +65,15 @@
     .tab-icon {
       width: 24px;
       height: 24px;
-      margin: 0 8px;
+      margin-inline-end: 8px; /* فاصله آیکون از متن، سازگار با RTL/LTR */
     }
   }
 
-  /* مستطیل متحرک */
   .tabs-wrapper::before {
     content: '';
     position: absolute;
     bottom: 0;
-    left: var(--slider-left, 0); /* موقعیت افقی مستطیل */
+    inset-inline-end: var(--slider-left, 0); /* سازگار با RTL/LTR */
     width: var(--slider-width, 0); /* عرض مستطیل */
     height: 100%; /* ارتفاع کامل تب */
     background-color: #e1f396;
@@ -83,28 +98,37 @@
     font-size: 14px;
     color: #333;
     margin-top: 10px;
+  }
 
-    .clear-date-filter-btn {
-      padding: 5px 10px;
-      background-color: #ff6b6b;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+  .clear-date-filter-btn {
+    padding: 5px 10px;
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 
-      &:hover {
-        background-color: #e55a5a;
-      }
+    &:hover {
+      background-color: #e55a5a;
     }
   }
 
   .tasks-grid {
     padding: 2rem;
     flex-grow: 1;
+    width: 100%; /* پر کردن عرض main-content */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* مرکز کردن محتوای داخلی */
 
     &.overflow-hidden {
       overflow: hidden;
+    }
+
+    .row {
+      width: 100%;
+      max-width: 1000px; /* محدود کردن عرض کارت‌ها */
     }
 
     .empty-message {
@@ -135,7 +159,7 @@
   .modal-overlay {
     position: fixed;
     top: 0;
-    left: 0;
+    inset-inline-start: 0; /* سازگار با RTL/LTR */
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
@@ -145,5 +169,31 @@
     z-index: 2000;
     padding: 40px;
     overflow: auto;
+  }
+
+  /* تنظیمات برای RTL */
+  &[dir="rtl"] {
+    .tab-icon {
+      margin-inline-start: 8px; /* در RTL، آیکون بعد از متن */
+      margin-inline-end: 0;
+    }
+  }
+
+  /* تنظیمات برای صفحه‌نمایش‌های کوچک‌تر */
+  @media (max-width: 768px) {
+    .main-content {
+      max-width: 100%; /* در موبایل، عرض کامل */
+      margin-inline-start: 0; /* حذف حاشیه برای جلوگیری از تداخل */
+      padding-inline: 10px;
+    }
+
+    .tab-container {
+      max-width: 100%; /* عرض کامل در موبایل */
+      margin: 10px;
+    }
+
+    .tasks-grid .row {
+      max-width: 100%;
+    }
   }
 }

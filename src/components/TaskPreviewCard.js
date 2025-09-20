@@ -21,12 +21,13 @@ const cardConfigs = {
   },
 };
 
-function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
+function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
   const { timers, initialDuration, startTimer, stopTimer } = useContext(TaskContext);
   const { t } = useContext(LanguageContext);
-  const config = cardConfigs[cardName];
+  const config = cardConfigs[cardName] || cardConfigs.active; // Fallback to active if cardName invalid
 
-  const filteredTasks = tasks.filter((task) => {
+  const filteredTasks = (tasks || []).filter((task) => {
+    if (!task || !task.id) return false; // Skip invalid tasks
     if (cardName === "active") return task.flag_tuNobat && !task.isDone;
     if (cardName === "upNext") return !task.flag_tuNobat && !task.isDone;
     if (cardName === "archived") return task.isDone;
@@ -40,13 +41,14 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
   };
 
   const handleTaskClick = (task) => {
-    const timer = timers[task.id] || { remaining: initialDuration, isRunning: false };
+    if (!task || !task.id) return;
+    const timer = timers[task.id] || { remaining: initialDuration || 300, isRunning: false };
     if (timer.isRunning) {
       stopTimer(task.id);
     } else {
       startTimer(task.id);
     }
-    setSelectedTask(task);
+    if (setSelectedTask) setSelectedTask(task);
   };
 
   return (
@@ -60,7 +62,8 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
               <span>{t("taskPreviewCard.noTasks")}</span>
           ) : (
               filteredTasks.map((task) => {
-                const timer = timers[task.id] || { remaining: initialDuration, isRunning: false };
+                if (!task || !task.id) return null; // Skip invalid tasks
+                const timer = timers[task.id] || { remaining: initialDuration || 300, isRunning: false };
                 const progress = initialDuration > 0
                     ? Math.min(((initialDuration - timer.remaining) / initialDuration) * 100, 100)
                     : 0;
@@ -71,7 +74,7 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
                         style={{ "--progress": `${progress}%` }}
                     >
                       <div className="circle"></div>
-                      <span>{task.title}</span>
+                      <span>{task.title || "Untitled"}</span>
                       <img
                           src={timer.isRunning ? "/assets/icons/pause.svg" : "/assets/icons/Polygon.svg"}
                           alt={timer.isRunning ? "Pause" : "Play"}
@@ -83,7 +86,7 @@ function TaskPreviewCard({ cardName, tasks, setSelectedTask }) {
                       />
                     </div>
                 );
-              })
+              }).filter(Boolean) // Remove null entries
           )}
         </div>
       </div>

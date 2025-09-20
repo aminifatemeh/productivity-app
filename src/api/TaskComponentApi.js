@@ -3,10 +3,10 @@ import axios from 'axios';
 
 const API_BASE = 'http://171.22.24.204:8000';
 
-function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
+function TaskComponentApi({ category, onTasksFetched, useApi }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const isFetching = useRef(false); // Prevent concurrent requests
+    const isFetching = useRef(false);
 
     const refreshToken = async () => {
         const refresh = localStorage.getItem('refreshToken');
@@ -14,11 +14,8 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
             console.log('No refresh token available');
             return false;
         }
-
         try {
-            const response = await axios.post(`${API_BASE}/api/token/refresh/`, {
-                refresh,
-            });
+            const response = await axios.post(`${API_BASE}/api/token/refresh/`, { refresh });
             localStorage.setItem('accessToken', response.data.access);
             console.log('Token refreshed successfully');
             return true;
@@ -32,7 +29,7 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
         if (!useApi) {
             setLoading(false);
             setError(null);
-            onTasksFetched(defaultTasks || [], false);
+            onTasksFetched([], false);
             return;
         }
 
@@ -71,12 +68,21 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
 
         try {
             const response = await axios.get(endpoint, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
             });
-            console.log(`Response for ${category}:`, response.data);
-            const fetchedTasks = Array.isArray(response.data) ? response.data : [];
+            const fetchedTasks = Array.isArray(response.data) ? response.data.map((task, index) => ({
+                id: task.id.toString(),
+                title: task.title || 'Untitled',
+                description: task.description || '',
+                flag_tuNobat: task.flag_tuNobat || false,
+                isDone: task.isDone || false,
+                subtasks: task.subtasks || [],
+                tags: task.tags || [],
+                deadline_date: task.deadline_date || '',
+                hour: task.hour || '',
+                selectedDays: task.selectedDays || [],
+                originalIndex: index,
+            })) : [];
             setLoading(false);
             onTasksFetched(fetchedTasks, false);
         } catch (err) {
@@ -84,7 +90,7 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
             if (err.response?.status === 401) {
                 const refreshed = await refreshToken();
                 if (refreshed) {
-                    fetchTasks(); // Retry with new token
+                    fetchTasks();
                 } else {
                     setError('لطفاً دوباره وارد سیستم شوید');
                     localStorage.removeItem('accessToken');
@@ -112,18 +118,7 @@ function TaskComponentApi({ category, onTasksFetched, useApi, defaultTasks }) {
         fetchTasks();
     }, [category, useApi]);
 
-    if (!useApi) return null;
-    if (loading) return <div>در حال بارگذاری...</div>;
-    if (error) return (
-        <div>
-            خطا: {error}
-            <button onClick={() => { setError(null); setLoading(true); fetchTasks(); }}>
-                تلاش دوباره
-            </button>
-        </div>
-    );
-
-    return null;
+    return { loading, error };
 }
 
 export default TaskComponentApi;

@@ -8,7 +8,7 @@ import { LanguageContext } from "../context/LanguageContext";
 import moment from "jalali-moment";
 
 function UtilitySidebar({ selectedTask, selectedDate }) {
-    const { t } = useContext(LanguageContext);
+    const { t, language } = useContext(LanguageContext);
     const [showModal, setShowModal] = useState(false);
     const { setTasks } = useContext(TaskContext);
     const navigate = useNavigate();
@@ -16,9 +16,9 @@ function UtilitySidebar({ selectedTask, selectedDate }) {
     const handleTaskAdded = (newTask) => {
         const formattedTask = {
             ...newTask,
-            deadline_date: moment(newTask.deadline_date, "YYYY-MM-DD")
-                .locale("fa")
-                .format("jYYYY/jMM/jDD"),
+            deadline_date: language === "fa"
+                ? moment(newTask.deadline_date, "YYYY-MM-DD").locale("fa").format("jYYYY/jMM/jDD")
+                : moment(newTask.deadline_date, "YYYY-MM-DD").format("YYYY/MM/DD"),
             isDone: false,
             subtasks: newTask.subtasks || [],
         };

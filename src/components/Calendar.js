@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'jalali-moment';
+import { LanguageContext } from '../context/LanguageContext';
 import './Calendar.css';
 
-const JalaliCalendar = ({ onDateSelect }) => {
-    const [currentDate, setCurrentDate] = useState(moment().locale('fa'));
+const Calendar = ({ onDateSelect }) => {
+    const { language, t } = useContext(LanguageContext);
+    const [currentDate, setCurrentDate] = useState(
+        language === 'fa' ? moment().locale('fa') : moment()
+    );
     const [selectedDate, setSelectedDate] = useState(null);
     const navigate = useNavigate();
 
-    const year = currentDate.jYear();
-    const month = currentDate.jMonth();
-    const daysInMonth = currentDate.jDaysInMonth();
-    const firstDayOfMonthMoment = currentDate.clone().startOf('jMonth').locale('fa');
-    let firstDayOfMonth = firstDayOfMonthMoment.day();
-    const offset = 1;
+    const isJalali = language === 'fa';
+    const year = isJalali ? currentDate.jYear() : currentDate.year();
+    const month = isJalali ? currentDate.jMonth() : currentDate.month();
+    const daysInMonth = isJalali ? currentDate.jDaysInMonth() : currentDate.daysInMonth();
+    const firstDayOfMonthMoment = currentDate.clone().startOf(isJalali ? 'jMonth' : 'month');
+    let firstDayOfMonth = isJalali ? firstDayOfMonthMoment.day() : firstDayOfMonthMoment.day();
+    const offset = isJalali ? 1 : 0; // برای جلالی، یک روز جابه‌جایی
     firstDayOfMonth = (firstDayOfMonth + offset) % 7;
 
     const daysArray = [];
@@ -27,25 +32,30 @@ const JalaliCalendar = ({ onDateSelect }) => {
     const changeMonth = (direction) => {
         setCurrentDate(
             direction === 'next'
-                ? currentDate.clone().add(1, 'jMonth')
-                : currentDate.clone().subtract(1, 'jMonth')
+                ? currentDate.clone().add(1, isJalali ? 'jMonth' : 'month')
+                : currentDate.clone().subtract(1, isJalali ? 'jMonth' : 'month')
         );
     };
 
     const selectDate = (day) => {
         if (day) {
-            const newSelectedDate = moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('fa');
+            const newSelectedDate = isJalali
+                ? moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('fa')
+                : moment(`${year}/${month + 1}/${day}`, 'YYYY/MM/DD');
             setSelectedDate(newSelectedDate);
-            const formattedDate = newSelectedDate.format('jYYYY/jMM/jDD');
+            const formattedDate = isJalali
+                ? newSelectedDate.format('jYYYY/jMM/jDD')
+                : newSelectedDate.format('YYYY/MM/DD');
             if (onDateSelect) {
                 onDateSelect(formattedDate);
             }
-            // هدایت به TaskManagementPage با تاریخ به‌عنوان query parameter
             navigate(`/task-management?date=${formattedDate}`);
         }
     };
 
-    const monthName = currentDate.format('jMMMM');
+    const monthName = isJalali
+        ? currentDate.format('jMMMM')
+        : currentDate.format('MMMM');
 
     return (
         <div className="calendar-container">
@@ -53,31 +63,28 @@ const JalaliCalendar = ({ onDateSelect }) => {
                 <div className="calendar-title">{`${monthName} ${year}`}</div>
                 <div className="calendar-nav">
                     <button className="nav-button prev" onClick={() => changeMonth('prev')}>
-                        قبلی
+                        {t('calendar.prev')}
                     </button>
                     <button className="nav-button next" onClick={() => changeMonth('next')}>
-                        بعدی
+                        {t('calendar.next')}
                     </button>
                 </div>
             </div>
             <div className="calendar-grid">
-                <div className="calendar-day">ش</div>
-                <div className="calendar-day">ی</div>
-                <div className="calendar-day">د</div>
-                <div className="calendar-day">س</div>
-                <div className="calendar-day">چ</div>
-                <div className="calendar-day">پ</div>
-                <div className="calendar-day">ج</div>
-
+                {t('calendar.days').map((day, index) => (
+                    <div key={index} className="calendar-day">
+                        {day}
+                    </div>
+                ))}
                 {daysArray.map((day, index) => (
                     <div
                         key={index}
                         className={`calendar-date ${
                             day &&
                             selectedDate &&
-                            selectedDate.jDate() === day &&
-                            selectedDate.jMonth() === month &&
-                            selectedDate.jYear() === year
+                            (isJalali ? selectedDate.jDate() : selectedDate.date()) === day &&
+                            (isJalali ? selectedDate.jMonth() : selectedDate.month()) === month &&
+                            (isJalali ? selectedDate.jYear() : selectedDate.year()) === year
                                 ? 'selected'
                                 : ''
                         } ${!day ? 'empty' : ''}`}
@@ -89,11 +96,11 @@ const JalaliCalendar = ({ onDateSelect }) => {
             </div>
             {selectedDate && (
                 <p className="selected-date">
-                    تاریخ انتخاب‌شده: {selectedDate.format('jYYYY/jMM/jDD')}
+                    {t('calendar.selectedDate')}: {selectedDate.format(isJalali ? 'jYYYY/jMM/jDD' : 'YYYY/MM/DD')}
                 </p>
             )}
         </div>
     );
 };
 
-export default JalaliCalendar;
+export default Calendar;
