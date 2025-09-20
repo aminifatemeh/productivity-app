@@ -12,7 +12,7 @@ import axios from 'axios';
 const API_BASE = 'http://171.22.24.204:8000';
 
 function TaskManagementPage({ useApi }) {
-    const { tasks, setTasks, editTask, deleteTask } = useContext(TaskContext); // Added deleteTask
+    const { tasks, setTasks, editTask, deleteTask } = useContext(TaskContext);
     const isJalali = true;
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
     const [selectedDate, setSelectedDate] = useState(null);
@@ -24,10 +24,13 @@ function TaskManagementPage({ useApi }) {
     const tabRefs = useRef({});
 
     const { loading, error } = TaskComponentApi({
-        category: selectedCategory,
         onTasksFetched: (fetchedTasks, hasError) => {
             if (!hasError) {
-                setTasks(fetchedTasks);
+                setTasks((prevTasks) => {
+                    const existingTaskIds = new Set(prevTasks.map((task) => task.id));
+                    const newTasks = fetchedTasks.filter((task) => !existingTaskIds.has(task.id));
+                    return [...prevTasks, ...newTasks];
+                });
             }
         },
         useApi,
@@ -62,6 +65,8 @@ function TaskManagementPage({ useApi }) {
             return;
         }
 
+        console.log('New Task being sent:', newTask);
+
         try {
             const response = await axios.post(
                 `${API_BASE}/tasks/add_task/`,
@@ -80,6 +85,8 @@ function TaskManagementPage({ useApi }) {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
+
+            console.log('API Response:', response.data);
 
             const addedTask = {
                 id: response.data.id.toString(),
@@ -145,13 +152,25 @@ function TaskManagementPage({ useApi }) {
 
     const filteredTasks = tasks.filter((task) => {
         if (!task || !task.id) return false;
+
+        const today = moment().startOf('day');
+        const taskDate = task.deadline_date ? moment(task.deadline_date, 'YYYY-MM-DD') : null;
+
         if (selectedDate) {
-            const taskDate = moment(task.deadline_date, 'jYYYY/jMM/jDD').format('YYYY-MM-DD');
-            return taskDate === selectedDate;
+            const formattedTaskDate = taskDate ? taskDate.format('YYYY-MM-DD') : '';
+            console.log(`Task ID: ${task.id}, Task Date: ${formattedTaskDate}, Selected Date: ${selectedDate}`);
+            return formattedTaskDate === selectedDate;
         }
-        if (selectedCategory === 'nobatesh_mishe') return task.flag_tuNobat && !task.isDone;
-        if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat && !task.isDone;
-        if (selectedCategory === 'rumiz') return task.isDone;
+
+        if (selectedCategory === 'nobatesh_mishe') {
+            return (task.flag_tuNobat || (taskDate && taskDate.isSameOrAfter(today))) && !task.isDone;
+        }
+        if (selectedCategory === 'khak_khorde') {
+            return !task.flag_tuNobat && taskDate && taskDate.isBefore(today) && !task.isDone;
+        }
+        if (selectedCategory === 'rumiz') {
+            return task.isDone;
+        }
         return true;
     });
 
@@ -229,8 +248,8 @@ function TaskManagementPage({ useApi }) {
                                         }}
                                         originalIndex={task.originalIndex}
                                         onEditTask={handleEditTask}
-                                        onDeleteTask={deleteTask} // Pass deleteTask to TaskCard
-                                        onUpdateTask={(updatedTask) => editTask(updatedTask)} // Pass editTask for updates
+                                        onDeleteTask={deleteTask}
+                                        onUpdateTask={(updatedTask) => editTask(updatedTask)}
                                     />
                                 </div>
                             ))}
