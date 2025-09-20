@@ -15,7 +15,7 @@ function TaskComponentApi({ category, onTasksFetched, useApi }) {
             return false;
         }
         try {
-            const response = await axios.post(`${API_BASE}/api/token/refresh/`, { refresh });
+            const response = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
             localStorage.setItem('accessToken', response.data.access);
             console.log('Token refreshed successfully');
             return true;

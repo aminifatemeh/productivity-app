@@ -14,7 +14,7 @@ export const TaskProvider = ({ children }) => {
         const refresh = localStorage.getItem('refreshToken');
         if (!refresh) return false;
         try {
-            const response = await axios.post(`${API_BASE}/api/token/refresh/`, { refresh });
+            const response = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
             localStorage.setItem('accessToken', response.data.access);
             return true;
         } catch (err) {

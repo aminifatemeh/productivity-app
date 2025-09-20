@@ -103,7 +103,7 @@ function TaskManagementPage({ useApi }) {
                 const refresh = localStorage.getItem('refreshToken');
                 if (refresh) {
                     try {
-                        const refreshResponse = await axios.post(`${API_BASE}/api/token/refresh/`, { refresh });
+                        const refreshResponse = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
                         localStorage.setItem('accessToken', refreshResponse.data.access);
                         handleAddTask(newTask);
                     } catch (refreshErr) {
