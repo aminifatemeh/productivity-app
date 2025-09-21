@@ -17,9 +17,7 @@ const Calendar = ({ onDateSelect }) => {
     const month = isJalali ? currentDate.jMonth() : currentDate.month();
     const daysInMonth = isJalali ? currentDate.jDaysInMonth() : currentDate.daysInMonth();
     const firstDayOfMonthMoment = currentDate.clone().startOf(isJalali ? 'jMonth' : 'month');
-    let firstDayOfMonth = isJalali ? firstDayOfMonthMoment.day() : firstDayOfMonthMoment.day();
-    const offset = isJalali ? 1 : 0; // برای جلالی، یک روز جابه‌جایی
-    firstDayOfMonth = (firstDayOfMonth + offset) % 7;
+    const firstDayOfMonth = isJalali ? (firstDayOfMonthMoment.day() + 1) % 7 : firstDayOfMonthMoment.day(); // حذف آفست اضافی و اصلاح محاسبه روز اول
 
     const daysArray = [];
     for (let i = 0; i < firstDayOfMonth; i++) {
@@ -43,9 +41,11 @@ const Calendar = ({ onDateSelect }) => {
                 ? moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('fa')
                 : moment(`${year}/${month + 1}/${day}`, 'YYYY/MM/DD');
             setSelectedDate(newSelectedDate);
+            // تبدیل تاریخ جلالی به میلادی با فرمت YYYY-MM-DD
             const formattedDate = isJalali
-                ? newSelectedDate.format('jYYYY/jMM/jDD')
-                : newSelectedDate.format('YYYY/MM/DD');
+                ? moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('en').format('YYYY-MM-DD')
+                : newSelectedDate.format('YYYY-MM-DD');
+            console.log('Selected Date:', formattedDate); // برای دیباگ
             if (onDateSelect) {
                 onDateSelect(formattedDate);
             }

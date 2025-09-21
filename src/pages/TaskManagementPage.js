@@ -12,7 +12,7 @@ import axios from 'axios';
 const API_BASE = 'http://171.22.24.204:8000';
 
 function TaskManagementPage({ useApi }) {
-    const { tasks, setTasks, editTask, deleteTask, toggleTask } = useContext(TaskContext); // Added toggleTask
+    const { tasks, setTasks, editTask, deleteTask, toggleTask } = useContext(TaskContext);
     const isJalali = true;
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
     const [selectedDate, setSelectedDate] = useState(null);
@@ -250,7 +250,7 @@ function TaskManagementPage({ useApi }) {
                                         onEditTask={handleEditTask}
                                         onDeleteTask={deleteTask}
                                         onUpdateTask={(updatedTask) => editTask(updatedTask)}
-                                        onToggleTask={toggleTask} // Added onToggleTask
+                                        onToggleTask={toggleTask}
                                     />
                                 </div>
                             ))}

@@ -342,3 +342,22 @@
     }
   }
 }
+.calendar-wrapper {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background-color: #F6F6F1;
+  border-radius: 17px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  margin-top: 10px;
+}
+
+.calendar-wrapper .btn-secondary {
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+}

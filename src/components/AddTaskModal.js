@@ -122,7 +122,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         e.preventDefault();
         const newErrors = { name: '', hour: '', dueDate: '', form: '' };
         if (!name.trim()) newErrors.name = 'این فیلد الزامی است';
-        if (!hour.trim()) newErrors.hour = 'این فیلد الزامی است';
         if (!dueDate.trim()) newErrors.dueDate = 'این فیلد الزامی است';
         if (Object.values(newErrors).some((error) => error)) {
             setErrors(newErrors);
@@ -132,7 +131,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         const selectedTags = tags
             .filter((tag) => tag.selected)
             .map((tag) => ({ name: tag.name, color: tag.color }));
-        const formattedDueDate = moment(dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD'); // Send Gregorian date
+        const formattedDueDate = moment(dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD');
         const taskData = {
             id: initialTask?.id,
             title: name,
@@ -142,7 +141,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             hour: hour,
             selectedDays: selectedDays,
             subtasks: subtasks.map((subtask, index) => ({
-                id: subtask.id || null, // Avoid sending temporary IDs for new subtasks
+                id: subtask.id || null,
                 title: subtask.title,
                 done_date: subtask.done_date || null,
             })),
@@ -151,17 +150,15 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             originalIndex: initialTask?.originalIndex || 0,
         };
 
-        console.log('Sending task data:', taskData); // Debug: Log the payload
+        console.log('Sending task data:', taskData);
 
         if (initialTask) {
-            // Editing an existing task
             const result = await editTask(taskData);
             if (result.success) {
-                onTaskAdded(result.task); // Update TaskCard with the returned task
+                onTaskAdded(result.task);
                 onClose();
                 resetForm();
             } else {
-                // Display detailed serializer errors
                 const errorDetail = result.error.detail || result.error;
                 if (typeof errorDetail === 'object') {
                     const errorMessages = Object.entries(errorDetail)
@@ -171,10 +168,9 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                 } else {
                     setErrors({ ...newErrors, form: errorDetail || 'خطایی در ویرایش تسک رخ داد' });
                 }
-                console.error('Edit task error:', errorDetail); // Debug: Log the error
+                console.error('Edit task error:', errorDetail);
             }
         } else {
-            // Adding a new task
             onTaskAdded(taskData);
             onClose();
             resetForm();
@@ -245,9 +241,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                 </div>
                 <div className="d-flex justify-content-between gap-3">
                     <div className="form-group flex-grow-1">
-                        <label>
-                            ساعت <span className="required-star">★</span>
-                        </label>
+                        <label>ساعت</label>
                         <input
                             type="time"
                             className="form-control"
@@ -402,7 +396,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        disabled={!name.trim() || !hour.trim() || !dueDate.trim()}
+                        disabled={!name.trim() || !dueDate.trim()}
                     >
                         {initialTask ? 'ذخیره تغییرات' : 'ذخیره'}
                     </button>
