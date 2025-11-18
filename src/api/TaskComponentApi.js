@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://171.22.24.204:8000';
+const API_BASE = 'http://5.202.57.77:8000';
 
 function TaskComponentApi({ onTasksFetched, useApi }) {
     const [loading, setLoading] = useState(true);

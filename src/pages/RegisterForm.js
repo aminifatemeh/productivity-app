@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './RegisterPage.scss';
 
-const API_BASE = 'http://171.22.24.204:8000';
+const API_BASE = 'http://5.202.57.77/:8000';
 
 function RegisterForm() {
     const [username, setUsername] = useState('');

@@ -1,187 +1,192 @@
-import React, { createContext, useState, useEffect, useRef } from "react";
-import axios from 'axios';
+import React, { createContext, useState, useEffect } from "react";
 
 export const TaskContext = createContext();
-const API_BASE = 'http://171.22.24.204:8000';
 
 export const TaskProvider = ({ children }) => {
     const [tasks, setTasks] = useState([]);
     const [timers, setTimers] = useState({});
     const [initialDuration, setInitialDuration] = useState((parseInt(localStorage.getItem("timerDuration")) || 5) * 60);
-    const isTicking = useRef(false);
 
-    const refreshToken = async () => {
-        const refresh = localStorage.getItem('refreshToken');
-        if (!refresh) return false;
-        try {
-            const response = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
-            localStorage.setItem('accessToken', response.data.access);
-            return true;
-        } catch (err) {
-            console.error('Token refresh failed:', err.response?.data || err.message);
-            return false;
+    const getCurrentUserId = () => localStorage.getItem('userId') || 'offline_user';
+
+    const fetchTasks = () => {
+        const userId = getCurrentUserId();
+        let storedTasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
+
+        if (storedTasks.length === 0) {
+            storedTasks = [
+                {
+                    id: Date.now().toString() + '1',
+                    title: 'آماده‌سازی اسلایدهای ارائه',
+                    description: 'اسلایدهای پاورپوینت برای ارائه درس هوش مصنوعی (حداقل 10 اسلاید شامل مقدمه، روش‌ها، و نتیجه‌گیری)',
+                    flag_tuNobat: false,
+                    isDone: false,
+                    subtasks: [
+                        { id: '1', title: 'جمع‌آوری منابع تحقیقاتی', isDone: false },
+                        { id: '2', title: 'طراحی نمودارها و جداول', isDone: false },
+                        { id: '3', title: 'نوشتن متن اسلایدها', isDone: false },
+                        { id: '4', title: 'تمرین ارائه', isDone: false },
+                    ],
+                    tags: [
+                        { name: 'دانشگاه', color: '#FF5733', isDefault: true },
+                        { name: 'پروژه', color: '#33C4FF', isDefault: true },
+                        { name: 'فوری', color: '#FF33A1', isDefault: true },
+                    ],
+                    deadline_date: '2025-09-01',
+                    hour: '14:00',
+                    selectedDays: [],
+                    originalIndex: 0,
+                },
+                {
+                    id: Date.now().toString() + '2',
+                    title: 'خرید مواد غذایی',
+                    description: 'خرید اقلام ضروری برای هفته (شامل لبنیات، میوه، سبزیجات، و مواد پروتئینی)',
+                    flag_tuNobat: false,
+                    isDone: false,
+                    subtasks: [
+                        { id: '1', title: 'تهیه لیست خرید', isDone: false },
+                        { id: '2', title: 'بازدید از سوپرمارکت', isDone: false },
+                        { id: '3', title: 'بررسی تاریخ انقضای محصولات', isDone: false },
+                    ],
+                    tags: [
+                        { name: 'خرید', color: '#28A745', isDefault: true },
+                        { name: 'خانه', color: '#FFC107', isDefault: true },
+                        { name: 'ضروری', color: '#DC3545', isDefault: true },
+                    ],
+                    deadline_date: '2025-09-01',
+                    hour: '18:00',
+                    selectedDays: ['Saturday'],
+                    originalIndex: 1,
+                },
+                {
+                    id: Date.now().toString() + '3',
+                    title: 'هماهنگی جلسه تیمی',
+                    description: 'تنظیم جلسه با تیم پروژه برای بررسی پیشرفت پروژه اپلیکیشن',
+                    flag_tuNobat: false,
+                    isDone: false,
+                    subtasks: [
+                        { id: '1', title: 'رزرو اتاق جلسه', isDone: false },
+                        { id: '2', title: 'ارسال دعوت‌نامه به اعضا', isDone: false },
+                        { id: '3', title: 'آماده‌سازی دستور جلسه', isDone: false },
+                    ],
+                    tags: [
+                        { name: 'کار', color: '#007BFF', isDefault: true },
+                        { name: 'جلسه', color: '#6F42C1', isDefault: true },
+                        { name: 'هماهنگی', color: '#FD7E14', isDefault: true },
+                    ],
+                    deadline_date: '2025-09-01',
+                    hour: '10:00',
+                    selectedDays: [],
+                    originalIndex: 2,
+                },
+                {
+                    id: Date.now().toString() + '4',
+                    title: 'تمرین ورزشی',
+                    description: '30 دقیقه ورزش شامل دویدن و تمرینات کششی',
+                    flag_tuNobat: false,
+                    isDone: false,
+                    subtasks: [
+                        { id: '1', title: 'گرم کردن (5 دقیقه)', isDone: false },
+                        { id: '2', title: 'دویدن (20 دقیقه)', isDone: false },
+                        { id: '3', title: 'تمرینات کششی (5 دقیقه)', isDone: false },
+                    ],
+                    tags: [
+                        { name: 'ورزش', color: '#20C997', isDefault: true },
+                        { name: 'سلامت', color: '#17A2B8', isDefault: true },
+                        { name: 'روتین', color: '#E83E8C', isDefault: true },
+                    ],
+                    deadline_date: '2025-09-01',
+                    hour: '07:00',
+                    selectedDays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                    originalIndex: 3,
+                },
+            ];
+            localStorage.setItem(`tasks_${userId}`, JSON.stringify(storedTasks));
         }
-    };
 
-    const fetchTasks = async () => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) return;
-        try {
-            const response = await axios.get(`${API_BASE}/tasks/all_tasks/`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const fetchedTasks = response.data.map((task, index) => ({
-                id: task.id.toString(),
-                title: task.title || 'Untitled',
-                description: task.description || '',
-                flag_tuNobat: task.flag_tuNobat || false,
-                isDone: task.isDone || false,
-                subtasks: task.subtasks || [],
-                tags: task.tags || [],
-                deadline_date: task.deadline_date || '',
-                hour: task.hour || '',
-                selectedDays: task.selectedDays || [],
-                originalIndex: index,
-            }));
-            setTasks(fetchedTasks);
-            setTimers((prev) => {
-                const updatedTimers = { ...prev };
-                fetchedTasks.forEach((task) => {
-                    if (!updatedTimers[task.id]) {
-                        updatedTimers[task.id] = { remaining: initialDuration, isRunning: false };
-                    }
-                });
-                return updatedTimers;
-            });
-        } catch (err) {
-            if (err.response?.status === 401) {
-                const refreshed = await refreshToken();
-                if (refreshed) fetchTasks();
-            }
-        }
-    };
-
-    const editTask = async (task) => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) return { success: false, error: 'لطفاً ابتدا وارد سیستم شوید' };
-
-        try {
-            const response = await axios.put(`${API_BASE}/tasks/${task.id}/edit_task/`, task, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const updatedTask = {
-                id: response.data.id.toString(),
-                title: response.data.title || 'Untitled',
-                description: response.data.description || '',
-                flag_tuNobat: response.data.flag_tuNobat || false,
-                isDone: response.data.isDone || false,
-                subtasks: response.data.subtasks || [],
-                tags: response.data.tags || [],
-                deadline_date: response.data.deadline_date || '',
-                hour: response.data.hour || '',
-                selectedDays: response.data.selectedDays || [],
-                originalIndex: task.originalIndex,
-            };
-            setTasks((prevTasks) =>
-                prevTasks.map((t) => (t.id === updatedTask.id ? updatedTask : t))
-            );
-            return { success: true, task: updatedTask };
-        } catch (err) {
-            if (err.response?.status === 401) {
-                const refreshed = await refreshToken();
-                if (refreshed) {
-                    return await editTask(task);
-                } else {
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('userId');
-                    return { success: false, error: 'لطفاً دوباره وارد سیستم شوید' };
+        const fetchedTasks = storedTasks.map((task, index) => ({
+            id: task.id.toString(),
+            title: task.title || 'Untitled',
+            description: task.description || '',
+            flag_tuNobat: task.flag_tuNobat || false,
+            isDone: task.isDone || false,
+            subtasks: task.subtasks || [],
+            tags: task.tags || [],
+            deadline_date: task.deadline_date || '',
+            hour: task.hour || '',
+            selectedDays: task.selectedDays || [],
+            originalIndex: index,
+        }));
+        setTasks(fetchedTasks);
+        setTimers((prev) => {
+            const updatedTimers = { ...prev };
+            fetchedTasks.forEach((task) => {
+                if (!updatedTimers[task.id]) {
+                    updatedTimers[task.id] = { remaining: initialDuration, isRunning: false };
                 }
-            } else {
-                return { success: false, error: err.response?.data?.detail || 'خطایی در ویرایش تسک رخ داد' };
-            }
-        }
+            });
+            return updatedTimers;
+        });
     };
 
-    const deleteTask = async (taskId) => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            return { success: false, error: 'لطفاً ابتدا وارد سیستم شوید' };
-        }
-
-        try {
-            await axios.delete(`${API_BASE}/tasks/${taskId}/delete_task/`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-            setTimers((prevTimers) => {
-                const updatedTimers = { ...prevTimers };
-                delete updatedTimers[taskId];
-                return updatedTimers;
-            });
-            return { success: true };
-        } catch (err) {
-            if (err.response?.status === 401) {
-                const refreshed = await refreshToken();
-                if (refreshed) {
-                    return await deleteTask(taskId); // Retry after token refresh
-                } else {
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('userId');
-                    return { success: false, error: 'لطفاً دوباره وارد سیستم شوید' };
-                }
-            } else {
-                return { success: false, error: err.response?.data?.error || 'خطایی در حذف تسک رخ داد' };
-            }
-        }
+    const editTask = (task) => {
+        const userId = getCurrentUserId();
+        const storedTasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
+        const updatedTasks = storedTasks.map((t) => (t.id === task.id ? task : t));
+        localStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
+        setTasks(updatedTasks);
+        return { success: true, task };
     };
 
-    const toggleTask = async (taskId) => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            return { success: false, error: 'لطفاً ابتدا وارد سیستم شوید' };
-        }
+    const deleteTask = (taskId) => {
+        const userId = getCurrentUserId();
+        const storedTasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
+        const updatedTasks = storedTasks.filter((task) => task.id !== taskId);
+        localStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
+        setTasks(updatedTasks);
+        setTimers((prevTimers) => {
+            const updatedTimers = { ...prevTimers };
+            delete updatedTimers[taskId];
+            return updatedTimers;
+        });
+        return { success: true };
+    };
 
+    const toggleTask = (taskId) => {
         const currentTask = tasks.find((t) => t.id === taskId);
         if (!currentTask) {
             return { success: false, error: 'تسک یافت نشد' };
         }
-
         const done = !currentTask.isDone;
+        const updatedTask = { ...currentTask, isDone: done };
+        return editTask(updatedTask);
+    };
 
-        try {
-            const response = await axios.post(
-                `${API_BASE}/tasks/${taskId}/toggle/`,
-                { done },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
-            const isDone = response.data.done;
-            setTasks((prevTasks) =>
-                prevTasks.map((t) => (t.id === taskId ? { ...t, isDone } : t))
-            );
-            return { success: true };
-        } catch (err) {
-            if (err.response?.status === 401) {
-                const refreshed = await refreshToken();
-                if (refreshed) {
-                    return await toggleTask(taskId); // Retry after token refresh
-                } else {
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('userId');
-                    return { success: false, error: 'لطفاً دوباره وارد سیستم شوید' };
-                }
-            } else {
-                return { success: false, error: err.response?.data?.error || 'خطایی در تغییر وضعیت تسک رخ داد' };
+    const startTimer = (taskId) => {
+        setTimers((prev) => {
+            const timer = prev[taskId] || { remaining: initialDuration, isRunning: false };
+            if (!timer.isRunning) {
+                return { ...prev, [taskId]: { ...timer, isRunning: true } };
             }
-        }
+            return prev;
+        });
+    };
+
+    const stopTimer = (taskId) => {
+        setTimers((prev) => {
+            const timer = prev[taskId];
+            if (timer && timer.isRunning) {
+                return { ...prev, [taskId]: { ...timer, isRunning: false } };
+            }
+            return prev;
+        });
+    };
+
+    const resetTimerForTask = (taskId) => {
+        setTimers((prev) => {
+            const timer = prev[taskId] || { remaining: initialDuration, isRunning: false };
+            return { ...prev, [taskId]: { ...timer, remaining: initialDuration, isRunning: false } };
+        });
     };
 
     useEffect(() => {
@@ -204,50 +209,36 @@ export const TaskProvider = ({ children }) => {
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
-    const startTimer = (taskId) => {
-        setTimers((prev) => {
-            const timer = prev[taskId] || { remaining: initialDuration, isRunning: false };
-            if (!timer.isRunning) {
-                return { ...prev, [taskId]: { ...timer, isRunning: true } };
-            }
-            return prev;
-        });
-    };
-
-    const stopTimer = (taskId) => {
-        setTimers((prev) => {
-            const timer = prev[taskId];
-            if (timer && timer.isRunning) {
-                return { ...prev, [taskId]: { ...timer, isRunning: false } };
-            }
-            return prev;
-        });
-    };
-
+    // ✅ FIX: تایمر اصلاح‌شده
     useEffect(() => {
         const interval = setInterval(() => {
-            if (isTicking.current) return;
-            isTicking.current = true;
             setTimers((prev) => {
                 const updatedTimers = { ...prev };
                 let hasChanges = false;
+
                 Object.keys(updatedTimers).forEach((id) => {
                     const timer = updatedTimers[id];
                     if (timer.isRunning && timer.remaining > 0) {
-                        timer.remaining = Math.max(0, timer.remaining - 1);
+                        updatedTimers[id] = {
+                            ...timer,
+                            remaining: timer.remaining - 1
+                        };
                         hasChanges = true;
-                    }
-                    if (timer.remaining <= 0 && timer.isRunning) {
-                        timer.isRunning = false;
+                    } else if (timer.remaining <= 0 && timer.isRunning) {
+                        updatedTimers[id] = {
+                            ...timer,
+                            isRunning: false
+                        };
                         hasChanges = true;
                     }
                 });
-                isTicking.current = false;
+
                 return hasChanges ? updatedTimers : prev;
             });
         }, 1000);
+
         return () => clearInterval(interval);
-    }, []);
+    }, []); // ✅ dependency array خالی
 
     return (
         <TaskContext.Provider
@@ -258,9 +249,10 @@ export const TaskProvider = ({ children }) => {
                 initialDuration,
                 startTimer,
                 stopTimer,
+                resetTimerForTask,
                 editTask,
                 deleteTask,
-                toggleTask, // Added toggleTask to context
+                toggleTask,
             }}
         >
             {children}
