@@ -1,0 +1,100 @@
+.vision-task-card {
+  width: 300px;
+  min-height: 140px;
+  height: auto;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+  border-radius: 23px;
+  box-shadow: 0px 4px 8px rgba(76, 175, 80, 0.2);
+  position: relative;
+  overflow: visible;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 15px;
+
+
+  &:hover {
+    box-shadow: 0px 6px 12px rgba(76, 175, 80, 0.3);
+    transform: scale(1.03);
+  }
+
+  &__description {
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+
+    &-titles {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+
+      .task-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #2e7d32;
+        line-height: 1.3;
+      }
+
+      .task-description {
+        font-size: 13px;
+        color: #5a5a5a;
+        line-height: 1.4;
+      }
+    }
+
+    &-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      flex-shrink: 0;
+
+      .task-label {
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 110px;
+        justify-content: flex-end;
+        gap: 5px;
+      }
+    }
+  }
+
+  &__divider {
+    width: calc(100% - 30px);
+    height: 1px;
+    background-color: rgba(76, 175, 80, 0.3);
+    margin: 10px 15px;
+    transform: scaleY(0.3);
+    transform-origin: top;
+  }
+
+  &__expanded-area {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 0 15px 10px 15px;
+    box-sizing: border-box;
+  }
+
+  &.has-subtasks {
+    min-height: 200px;
+  }
+
+  .task-tag {
+    display: inline-block;
+    width: 70px;
+    height: 21px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    color: white;
+    font-size: 10px;
+    font-weight: normal;
+    text-align: center;
+    margin-inline-end: 5px;
+    line-height: 17px;
+  }
+}
