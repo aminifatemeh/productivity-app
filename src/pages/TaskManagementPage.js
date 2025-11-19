@@ -7,10 +7,9 @@ import TaskCard from "../components/TaskCard";
 import TaskComponentApi from "../api/TaskComponentApi";
 import AddTaskModal from "../components/AddTaskModal";
 import { TaskContext } from "../components/TaskContext";
-import { tasksAPI } from "../api/apiService";
 import moment from 'jalali-moment';
 
-function TaskManagementPage({ useApi }) {
+function TaskManagementPage() {
     const { tasks, setTasks, editTask, deleteTask, toggleTask } = useContext(TaskContext);
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
     const [selectedDate, setSelectedDate] = useState(null);
@@ -21,17 +20,24 @@ function TaskManagementPage({ useApi }) {
     const tabsWrapperRef = useRef(null);
     const tabRefs = useRef({});
 
+    // گرفتن تسک‌ها از سرور (در صورت موجود بودن)
     const { loading, error } = TaskComponentApi({
         onTasksFetched: (fetchedTasks, hasError) => {
-            if (!hasError) {
-                setTasks((prevTasks) => {
-                    const existingTaskIds = new Set(prevTasks.map((task) => task.id));
-                    const newTasks = fetchedTasks.filter((task) => !existingTaskIds.has(task.id));
-                    return [...prevTasks, ...newTasks];
+            if (!hasError && fetchedTasks?.length > 0) {
+                setTasks(prev => {
+                    const existingIds = new Set(prev.map(t => t.id));
+                    const newOnes = fetchedTasks
+                        .filter(t => t.id && !existingIds.has(String(t.id)))
+                        .map((t, i) => ({
+                            ...t,
+                            id: String(t.id),
+                            originalIndex: prev.length + i,
+                        }));
+                    return [...prev, ...newOnes];
                 });
             }
         },
-        useApi,
+        useApi: true,
     });
 
     useEffect(() => {
@@ -41,12 +47,22 @@ function TaskManagementPage({ useApi }) {
     }, [location.search]);
 
     useEffect(() => {
+        if (location.state?.openEditModalFor) {
+            const taskId = location.state.openEditModalFor;
+            const taskToEdit = tasks.find(t => t.id === taskId);
+            if (taskToEdit) {
+                setEditingTask(taskToEdit);
+                setIsAddTaskModalOpen(true);
+                navigate(location.pathname, { replace: true, state: {} });
+            }
+        }
+    }, [location.state, tasks, navigate, location]);
+
+    useEffect(() => {
         const activeTab = tabRefs.current[selectedCategory];
         if (activeTab && tabsWrapperRef.current) {
-            const { offsetLeft, offsetWidth } = activeTab;
-            const tabsWrapper = tabsWrapperRef.current;
-            tabsWrapper.style.setProperty('--slider-left', `${offsetLeft}px`);
-            tabsWrapper.style.setProperty('--slider-width', `${offsetWidth}px`);
+            tabsWrapperRef.current.style.setProperty('--slider-left', `${activeTab.offsetLeft}px`);
+            tabsWrapperRef.current.style.setProperty('--slider-width', `${activeTab.offsetWidth}px`);
         }
     }, [selectedCategory]);
 
@@ -55,53 +71,20 @@ function TaskManagementPage({ useApi }) {
         navigate('/task-management');
     };
 
-    const handleAddTask = async (newTask) => {
+    const handleAddTask = (newTask) => {
         const token = localStorage.getItem('accessToken');
-        if (!token) {
-            console.error('No access token found');
-            navigate('/login');
-            return;
+        if (token) {
+            // آنلاین — ارسال به سرور
+        } else {
+            // آفلاین
+            const userId = localStorage.getItem('userId') || 'offline_user';
+            const newId = Date.now().toString(36) + '_' + Math.random().toString(36).substr(2);
+            const taskToSave = { ...newTask, id: newId, isDone: false, originalIndex: tasks.length };
+            const updated = [...tasks, taskToSave];
+            localStorage.setItem(`tasks_${userId}`, JSON.stringify(updated));
+            setTasks(updated);
         }
-
-        console.log('New Task being sent:', newTask);
-
-        try {
-            const data = await tasksAPI.addTask({
-                title: newTask.title,
-                description: newTask.description,
-                deadline_date: newTask.deadline_date,
-                flag_tuNobat: newTask.flag_tuNobat,
-                hour: newTask.hour,
-                selectedDays: newTask.selectedDays,
-                subtasks: newTask.subtasks,
-                tags: newTask.tags,
-                isDone: newTask.isDone,
-            });
-
-            console.log('API Response:', data);
-
-            const addedTask = {
-                id: data.id.toString(),
-                title: data.title || 'بدون عنوان',
-                description: data.description || '',
-                flag_tuNobat: data.flag_tuNobat || false,
-                isDone: data.isDone || false,
-                subtasks: data.subtasks || [],
-                tags: data.tags || [],
-                deadline_date: data.deadline_date || '',
-                hour: data.hour || '',
-                selectedDays: data.selectedDays || [],
-                originalIndex: tasks.length,
-            };
-
-            setTasks((prevTasks) => [...prevTasks, addedTask]);
-            setIsAddTaskModalOpen(false);
-        } catch (err) {
-            console.error('Error adding task:', err.response?.data || err.message);
-            if (err.response?.status === 401) {
-                navigate('/login');
-            }
-        }
+        setIsAddTaskModalOpen(false);
     };
 
     const handleEditTask = (task) => {
@@ -109,17 +92,10 @@ function TaskManagementPage({ useApi }) {
         setIsAddTaskModalOpen(true);
     };
 
-    const handleTaskUpdated = async (updatedTask) => {
-        const result = await editTask(updatedTask);
-        if (result.success) {
-            setIsAddTaskModalOpen(false);
-            setEditingTask(null);
-        } else {
-            console.error('Error updating task:', result.error);
-            if (result.error.includes('دوباره وارد سیستم شوید')) {
-                navigate('/login');
-            }
-        }
+    const handleTaskUpdated = (updatedTask) => {
+        editTask(updatedTask);
+        setIsAddTaskModalOpen(false);
+        setEditingTask(null);
     };
 
     const categories = [
@@ -128,106 +104,82 @@ function TaskManagementPage({ useApi }) {
         { id: 'nobatesh_mishe', label: 'نوبتش میشه', icon: "/assets/icons/nobatesh_mishe_icon.svg" },
     ];
 
-    const filteredTasks = tasks.filter((task) => {
-        if (!task || !task.id) return false;
-
+    const filteredTasks = tasks.filter(task => {
+        if (!task?.id) return false;
         const today = moment().startOf('day');
         const taskDate = task.deadline_date ? moment(task.deadline_date, 'YYYY-MM-DD') : null;
 
-        if (selectedDate) {
-            const formattedTaskDate = taskDate ? taskDate.format('YYYY-MM-DD') : '';
-            console.log(`Task ID: ${task.id}, Task Date: ${formattedTaskDate}, Selected Date: ${selectedDate}`);
-            return formattedTaskDate === selectedDate;
-        }
-
-        if (selectedCategory === 'nobatesh_mishe') {
-            return (task.flag_tuNobat || (taskDate && taskDate.isSameOrAfter(today))) && !task.isDone;
-        }
-        if (selectedCategory === 'khak_khorde') {
-            return !task.flag_tuNobat && taskDate && taskDate.isBefore(today) && !task.isDone;
-        }
-        if (selectedCategory === 'rumiz') {
-            return task.isDone;
-        }
+        if (selectedDate) return taskDate?.format('YYYY-MM-DD') === selectedDate;
+        if (selectedCategory === 'nobatesh_mishe') return (task.flag_tuNobat || (taskDate && taskDate.isSameOrAfter(today))) && !task.isDone;
+        if (selectedCategory === 'khak_khorde') return !task.flag_tuNobat && taskDate && taskDate.isBefore(today) && !task.isDone;
+        if (selectedCategory === 'rumiz') return task.isDone;
         return true;
     });
 
     const formatDate = (date) => {
         if (!date) return '';
-        return moment(date, 'YYYY-MM-DD').locale('fa').format('jYYYY/jMM/jDD');
+        const m = moment(date, 'YYYY-MM-DD', true); // parse strict
+        if (!m.isValid()) return '';
+        return m.locale('fa').format('jYYYY/jMM/jDD');
     };
+
 
     return (
         <div className="d-flex task-management-page" dir="rtl">
             <SidebarMenu />
             <div className="main-content d-flex flex-column flex-grow-1">
                 <div className="header-placeholder"></div>
+
                 <div className="tab-container">
                     <div className="tabs-wrapper" ref={tabsWrapperRef}>
-                        {categories.map((category, index) => (
-                            <React.Fragment key={category.id}>
+                        {categories.map((cat, i) => (
+                            <React.Fragment key={cat.id}>
                                 <button
                                     type="button"
-                                    onClick={() => setSelectedCategory(category.id)}
-                                    className={`tab-button ${selectedCategory === category.id ? 'active' : ''}`}
-                                    ref={(el) => (tabRefs.current[category.id] = el)}
-                                    aria-label={`${category.label} tab`}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className={`tab-button ${selectedCategory === cat.id ? 'active' : ''}`}
+                                    ref={el => tabRefs.current[cat.id] = el}
                                 >
-                                    <img
-                                        src={category.icon}
-                                        alt={`${category.label} icon`}
-                                        className="tab-icon"
-                                    />
-                                    {category.label}
+                                    <img src={cat.icon} alt={cat.label} className="tab-icon" />
+                                    {cat.label}
                                 </button>
-                                {index < categories.length - 1 && (
-                                    <div className="tab-separator"></div>
-                                )}
+                                {i < categories.length - 1 && <div className="tab-separator"></div>}
                             </React.Fragment>
                         ))}
                     </div>
+
                     {selectedDate && (
                         <div className="date-filter-info">
                             <span>فیلتر تاریخ: {formatDate(selectedDate)}</span>
-                            <button
-                                type="button"
-                                className="clear-date-filter-btn"
-                                onClick={clearDateFilter}
-                            >
+                            <button className="clear-date-filter-btn" onClick={clearDateFilter}>
                                 حذف فیلتر تاریخ
                             </button>
                         </div>
                     )}
                 </div>
+
+                {/* پیام خطای سرور */}
+                {error && (
+                    <div className="text-center py-2 text-warning">
+                        اتصال به سرور قطع است — در حالت آفلاین
+                    </div>
+                )}
+
                 <div className="flex-grow-1 d-flex flex-column tasks-grid">
                     {loading ? (
-                        <div>در حال بارگذاری...</div>
-                    ) : error ? (
-                        <div>
-                            خطا: {error}
-                            <button onClick={() => window.location.reload()}>تلاش دوباره</button>
-                        </div>
+                        <div className="text-center py-5">در حال بارگذاری از سرور...</div>
                     ) : filteredTasks.length === 0 ? (
-                        <div className="empty-message">
-                            هیچ تسکی یافت نشد
-                        </div>
+                        <div className="empty-message text-center py-5">هیچ تسکی یافت نشد</div>
                     ) : (
                         <div className="row gy-4">
-                            {filteredTasks.map((task) => (
+                            {filteredTasks.map(task => (
                                 <div className="col-12 col-sm-6 col-md-4" key={task.id}>
                                     <TaskCard
-                                        task={{
-                                            ...task,
-                                            deadline_date: formatDate(task.deadline_date),
-                                            tags: task.tags?.map((tag) => ({
-                                                ...tag,
-                                                name: tag.isDefault ? tag.name : tag.name,
-                                            })) || [],
-                                        }}
+                                        task={{ ...task, deadline_date: formatDate(task.deadline_date) }}
                                         originalIndex={task.originalIndex}
                                         onEditTask={handleEditTask}
                                         onDeleteTask={deleteTask}
-                                        onUpdateTask={(updatedTask) => editTask(updatedTask)}
+                                        onUpdateTask={editTask}
                                         onToggleTask={toggleTask}
                                     />
                                 </div>
@@ -235,6 +187,7 @@ function TaskManagementPage({ useApi }) {
                         </div>
                     )}
                 </div>
+
                 <div className="footer-section d-flex w-100 justify-content-center align-items-center">
                     <button
                         type="button"
@@ -243,12 +196,12 @@ function TaskManagementPage({ useApi }) {
                             setIsAddTaskModalOpen(true);
                         }}
                         className="add-task-button"
-                        aria-label="اضافه کردن تسک"
                     >
                         اضافه کردن تسک
                     </button>
                 </div>
             </div>
+
             {isAddTaskModalOpen && (
                 <div className="modal-overlay">
                     <AddTaskModal

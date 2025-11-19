@@ -1,53 +1,50 @@
 // components/VisionTaskCard.js
 import React from 'react';
 import './VisionTaskCard.scss';
-import SubtaskBar from './SubtaskBar';
 
-function VisionTaskCard({ task }) {
-    const hasSubtasks = task.subtasks && task.subtasks.length > 0;
-
+function VisionTaskCard({ task, onEdit }) {
     return (
-        <div className={`vision-task-card ${hasSubtasks ? 'has-subtasks' : ''}`}>
-            <div className="vision-task-card__description">
-                <div className="vision-task-card__description-titles">
-                    <span className="task-title">{task.title}</span>
-                    <span className="task-description">{task.description}</span>
-                </div>
-                <div className="vision-task-card__description-labels">
-                    <div className="task-label">
-                        {task.tags && task.tags.length > 0 ? (
-                            task.tags.map((tag, index) => (
-                                <span
-                                    key={index}
-                                    className="task-tag"
-                                    style={{
-                                        backgroundColor: tag.color || '#D9D9D9',
-                                    }}
-                                >
-                                    {tag.name}
-                                </span>
-                            ))
-                        ) : null}
-                    </div>
-                </div>
+        <div className="vision-task-card">
+            <div className="vision-card-header">
+                <h3 className="vision-task-title">{task.title}</h3>
+                {onEdit && (
+                    <button
+                        type="button"
+                        onClick={onEdit}
+                        className="vision-edit-btn"
+                        title="ویرایش تسک"
+                    >
+                        Edit
+                    </button>
+                )}
             </div>
 
-            {hasSubtasks && (
-                <>
-                    <div className="vision-task-card__divider" />
-                    <div className="vision-task-card__expanded-area">
-                        {task.subtasks.map((subtask) => (
-                            <div key={subtask.id} className="w-100">
-                                <SubtaskBar
-                                    title={subtask.title}
-                                    isDone={subtask.isDone}
-                                    onToggle={null}
-                                    onDelete={null}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </>
+            {task.description && (
+                <p className="vision-task-description">{task.description}</p>
+            )}
+
+            {task.subtasks && task.subtasks.length > 0 && (
+                <ul className="vision-subtasks">
+                    {task.subtasks.map(sub => (
+                        <li key={sub.id} className={sub.isDone ? 'done' : ''}>
+                            {sub.title}
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {task.tags && task.tags.length > 0 && (
+                <div className="vision-tags">
+                    {task.tags.map((tag, i) => (
+                        <span
+                            key={i}
+                            className="vision-tag"
+                            style={{ backgroundColor: tag.color || '#888' }}
+                        >
+                            {tag.name}
+                        </span>
+                    ))}
+                </div>
             )}
         </div>
     );

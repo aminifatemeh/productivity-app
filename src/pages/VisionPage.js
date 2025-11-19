@@ -1,13 +1,19 @@
 // pages/VisionPage.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './VisionPage.scss';
 import SidebarMenu from '../components/SidebarMenu';
 import VisionTaskCard from '../components/VisionTaskCard';
+import { TaskContext } from '../components/TaskContext';
 import moment from 'jalali-moment';
 
 function VisionPage() {
-    const [selectedYear, setSelectedYear] = useState(1403);
-    const [selectedMonth, setSelectedMonth] = useState(2);
+    const { tasks } = useContext(TaskContext);
+    const navigate = useNavigate();
+
+    const currentJalali = moment().locale('fa');
+    const [selectedYear, setSelectedYear] = useState(parseInt(currentJalali.format('jYYYY')));
+    const [selectedMonth, setSelectedMonth] = useState(parseInt(currentJalali.format('jMM')));
 
     const persianMonths = [
         { value: 1, label: 'فروردین' },
@@ -24,90 +30,33 @@ function VisionPage() {
         { value: 12, label: 'اسفند' },
     ];
 
-    const mockCompletedTasks = [
-        {
-            id: '1',
-            title: 'گل دادن به آبها',
-            description: 'همه گلدان‌های خانه را آبیاری کردم',
-            completed_date: '1403/02/03',
-            tags: [
-                { name: 'خانه', color: '#4CAF50' },
-                { name: 'روزانه', color: '#2196F3' }
-            ],
-            subtasks: [
-                { id: '1', title: 'گلدان اتاق خواب', isDone: true },
-                { id: '2', title: 'گلدان پذیرایی', isDone: true }
-            ]
-        },
-        {
-            id: '2',
-            title: 'ورزش کردن',
-            description: 'یک ساعت دویدن در پارک',
-            completed_date: '1403/02/03',
-            tags: [
-                { name: 'سلامتی', color: '#FF9800' }
-            ],
-            subtasks: []
-        },
-        {
-            id: '3',
-            title: 'مطالعه کتاب',
-            description: 'خواندن 50 صفحه از کتاب',
-            completed_date: '1403/02/05',
-            tags: [
-                { name: 'مطالعه', color: '#9C27B0' },
-                { name: 'شخصی', color: '#607D8B' }
-            ],
-            subtasks: [
-                { id: '1', title: 'فصل اول', isDone: true },
-                { id: '2', title: 'فصل دوم', isDone: true },
-                { id: '3', title: 'فصل سوم', isDone: true }
-            ]
-        },
-        {
-            id: '4',
-            title: 'تمیز کردن خانه',
-            description: 'نظافت کامل آشپزخانه و حمام',
-            completed_date: '1403/02/10',
-            tags: [
-                { name: 'خانه', color: '#4CAF50' }
-            ],
-            subtasks: []
-        },
-        {
-            id: '5',
-            title: 'جلسه تیمی',
-            description: 'شرکت در جلسه هفتگی تیم',
-            completed_date: '1403/02/15',
-            tags: [
-                { name: 'کاری', color: '#F44336' }
-            ],
-            subtasks: [
-                { id: '1', title: 'آماده‌سازی گزارش', isDone: true },
-                { id: '2', title: 'ارائه پروژه', isDone: true }
-            ]
-        }
-    ];
+    // تسک‌های انجام شده
+    const completedTasks = tasks
+        .filter(task => task.isDone)
+        .map(task => ({
+            ...task,
+            completed_date: task.completed_date || task.deadline_date || moment().format('jYYYY/jMM/jDD'),
+        }));
 
-    const filteredTasks = mockCompletedTasks.filter(task => {
+    // فیلتر بر اساس سال و ماه
+    const filteredTasks = completedTasks.filter(task => {
         const taskDate = moment(task.completed_date, 'jYYYY/jMM/jDD');
-        return taskDate.jYear() === selectedYear && taskDate.jMonth() + 1 === selectedMonth;
+        return taskDate.isValid() &&
+            taskDate.jYear() === selectedYear &&
+            (taskDate.jMonth() + 1) === selectedMonth;
     });
 
+    // گروه‌بندی بر اساس تاریخ
     const groupedTasks = filteredTasks.reduce((acc, task) => {
-        const date = task.completed_date;
-        if (!acc[date]) {
-            acc[date] = [];
-        }
-        acc[date].push(task);
+        const dateKey = moment(task.completed_date, 'jYYYY/jMM/jDD').format('jYYYY/jMM/jDD');
+        if (!acc[dateKey]) acc[dateKey] = [];
+        acc[dateKey].push(task);
         return acc;
     }, {});
 
-    const sortedDates = Object.keys(groupedTasks).sort((a, b) => {
-        const dateA = moment(a, 'jYYYY/jMM/jDD');
-        const dateB = moment(b, 'jYYYY/jMM/jDD');
-        return dateB.diff(dateA);
-    });
+    const sortedDates = Object.keys(groupedTasks).sort((a, b) =>
+        moment(b, 'jYYYY/jMM/jDD').diff(moment(a, 'jYYYY/jMM/jDD'))
+    );
 
     const handlePreviousMonth = () => {
         if (selectedMonth === 1) {
@@ -127,6 +76,12 @@ function VisionPage() {
         }
     };
 
+    const handleEditTask = (taskId) => {
+        navigate('/task-management', {
+            state: { openEditModalFor: taskId }
+        });
+    };
+
     return (
         <div className="d-flex vision-page" dir="rtl">
             <SidebarMenu />
@@ -134,17 +89,17 @@ function VisionPage() {
                 <div className="vision-header">
                     <h1 className="vision-title">چشم انداز</h1>
                     <div className="month-selector">
-                        <button type="button" className="nav-button" onClick={handlePreviousMonth} aria-label="ماه قبل">
-                            ◄
+                        <button type="button" className="nav-button" onClick={handlePreviousMonth}>
+                            Previous
                         </button>
                         <div className="current-month">
-            <span className="month-name">
-              {persianMonths.find(m => m.value === selectedMonth)?.label}
-            </span>
+                            <span className="month-name">
+                                {persianMonths.find(m => m.value === selectedMonth)?.label}
+                            </span>
                             <span className="year">{selectedYear}</span>
                         </div>
-                        <button type="button" className="nav-button" onClick={handleNextMonth} aria-label="ماه بعد">
-                            ►
+                        <button type="button" className="nav-button" onClick={handleNextMonth}>
+                            Next
                         </button>
                     </div>
                 </div>
@@ -160,7 +115,11 @@ function VisionPage() {
                                 <h2 className="date-header">{date}</h2>
                                 <div className="tasks-grid">
                                     {groupedTasks[date].map(task => (
-                                        <VisionTaskCard key={task.id} task={task}/>
+                                        <VisionTaskCard
+                                            key={task.id}
+                                            task={task}
+                                            onEdit={() => handleEditTask(task.id)}
+                                        />
                                     ))}
                                 </div>
                             </div>
