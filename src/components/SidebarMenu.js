@@ -35,6 +35,7 @@ function SidebarMenu() {
               {t("sidebarMenu.dashboard")}
             </Link>
           </li>
+
           <li>
             <img
                 className="sidebar__icons"
@@ -48,6 +49,22 @@ function SidebarMenu() {
               {t("sidebarMenu.taskManagement")}
             </Link>
           </li>
+
+          {/* تب جدید چشم‌انداز */}
+          <li>
+            <img
+                className="sidebar__icons"
+                src="/assets/icons/vision.svg"
+                alt="vision"
+            />
+            <Link
+                to="/vision"
+                onClick={(e) => handleNavigation(e, "/vision")}
+            >
+              {t("sidebarMenu.vision")}
+            </Link>
+          </li>
+
           <li>
             <img
                 className="sidebar__icons"
@@ -56,6 +73,7 @@ function SidebarMenu() {
             />
             <a href="#">{t("sidebarMenu.charts")}</a>
           </li>
+
           <li>
             <img
                 className="sidebar__icons"
@@ -67,6 +85,7 @@ function SidebarMenu() {
             </Link>
           </li>
         </ul>
+
         <div className="sidebar__logout">
           <button onClick={handleLogout}>
             <img className="sidebar__icons" src="/assets/icons/exit.svg" alt="exit" />

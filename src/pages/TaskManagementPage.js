@@ -1,3 +1,4 @@
+// pages/TaskManagementPage.js
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import './TaskManagementPage.scss';
@@ -6,14 +7,11 @@ import TaskCard from "../components/TaskCard";
 import TaskComponentApi from "../api/TaskComponentApi";
 import AddTaskModal from "../components/AddTaskModal";
 import { TaskContext } from "../components/TaskContext";
+import { tasksAPI } from "../api/apiService";
 import moment from 'jalali-moment';
-import axios from 'axios';
-
-const API_BASE = 'http://171.22.24.204:8000';
 
 function TaskManagementPage({ useApi }) {
     const { tasks, setTasks, editTask, deleteTask, toggleTask } = useContext(TaskContext);
-    const isJalali = true;
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
     const [selectedDate, setSelectedDate] = useState(null);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
@@ -68,37 +66,31 @@ function TaskManagementPage({ useApi }) {
         console.log('New Task being sent:', newTask);
 
         try {
-            const response = await axios.post(
-                `${API_BASE}/tasks/add_task/`,
-                {
-                    title: newTask.title,
-                    description: newTask.description,
-                    deadline_date: newTask.deadline_date,
-                    flag_tuNobat: newTask.flag_tuNobat,
-                    hour: newTask.hour,
-                    selectedDays: newTask.selectedDays,
-                    subtasks: newTask.subtasks,
-                    tags: newTask.tags,
-                    isDone: newTask.isDone,
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
+            const data = await tasksAPI.addTask({
+                title: newTask.title,
+                description: newTask.description,
+                deadline_date: newTask.deadline_date,
+                flag_tuNobat: newTask.flag_tuNobat,
+                hour: newTask.hour,
+                selectedDays: newTask.selectedDays,
+                subtasks: newTask.subtasks,
+                tags: newTask.tags,
+                isDone: newTask.isDone,
+            });
 
-            console.log('API Response:', response.data);
+            console.log('API Response:', data);
 
             const addedTask = {
-                id: response.data.id.toString(),
-                title: response.data.title || 'بدون عنوان',
-                description: response.data.description || '',
-                flag_tuNobat: response.data.flag_tuNobat || false,
-                isDone: response.data.isDone || false,
-                subtasks: response.data.subtasks || [],
-                tags: response.data.tags || [],
-                deadline_date: response.data.deadline_date || '',
-                hour: response.data.hour || '',
-                selectedDays: response.data.selectedDays || [],
+                id: data.id.toString(),
+                title: data.title || 'بدون عنوان',
+                description: data.description || '',
+                flag_tuNobat: data.flag_tuNobat || false,
+                isDone: data.isDone || false,
+                subtasks: data.subtasks || [],
+                tags: data.tags || [],
+                deadline_date: data.deadline_date || '',
+                hour: data.hour || '',
+                selectedDays: data.selectedDays || [],
                 originalIndex: tasks.length,
             };
 
@@ -107,21 +99,7 @@ function TaskManagementPage({ useApi }) {
         } catch (err) {
             console.error('Error adding task:', err.response?.data || err.message);
             if (err.response?.status === 401) {
-                const refresh = localStorage.getItem('refreshToken');
-                if (refresh) {
-                    try {
-                        const refreshResponse = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
-                        localStorage.setItem('accessToken', refreshResponse.data.access);
-                        handleAddTask(newTask);
-                    } catch (refreshErr) {
-                        console.error('Token refresh failed:', refreshErr.response?.data || refreshErr.message);
-                        localStorage.removeItem('accessToken');
-                        localStorage.removeItem('refreshToken');
-                        navigate('/login');
-                    }
-                } else {
-                    navigate('/login');
-                }
+                navigate('/login');
             }
         }
     };

@@ -1,29 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
-
-const API_BASE = 'http://5.202.57.77:8000';
+// api/TaskComponentApi.js
+import { useEffect, useState, useRef } from 'react';
+import { tasksAPI } from './apiService';
 
 function TaskComponentApi({ onTasksFetched, useApi }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const isFetching = useRef(false);
-
-    const refreshToken = async () => {
-        const refresh = localStorage.getItem('refreshToken');
-        if (!refresh) {
-            console.log('No refresh token available');
-            return false;
-        }
-        try {
-            const response = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
-            localStorage.setItem('accessToken', response.data.access);
-            console.log('Token refreshed successfully');
-            return true;
-        } catch (err) {
-            console.error('Token refresh failed:', err.response?.data || err.message);
-            return false;
-        }
-    };
 
     const fetchTasks = async () => {
         if (!useApi) {
@@ -52,10 +34,8 @@ function TaskComponentApi({ onTasksFetched, useApi }) {
         }
 
         try {
-            const response = await axios.get(`${API_BASE}/tasks/all_tasks/`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const fetchedTasks = Array.isArray(response.data) ? response.data.map((task, index) => ({
+            const data = await tasksAPI.getAllTasks();
+            const fetchedTasks = Array.isArray(data) ? data.map((task, index) => ({
                 id: task.id.toString(),
                 title: task.title || 'Untitled',
                 description: task.description || '',
@@ -71,29 +51,14 @@ function TaskComponentApi({ onTasksFetched, useApi }) {
             setLoading(false);
             onTasksFetched(fetchedTasks, false);
         } catch (err) {
-            console.error(`Error fetching tasks:`, err.response?.data || err.message);
-            if (err.response?.status === 401) {
-                const refreshed = await refreshToken();
-                if (refreshed) {
-                    fetchTasks();
-                } else {
-                    setError('لطفاً دوباره وارد سیستم شوید');
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('userId');
-                    setLoading(false);
-                    onTasksFetched([], true);
-                }
-            } else if (err.response?.status === 500) {
+            console.error('Error fetching tasks:', err.response?.data || err.message);
+            if (err.response?.status === 500) {
                 setError('خطای سرور رخ داد. لطفاً بعداً تلاش کنید یا با پشتیبانی تماس بگیرید.');
-                setLoading(false);
-                onTasksFetched([], true);
             } else {
                 setError(err.response?.data?.detail || 'خطایی در دریافت تسک‌ها رخ داد');
-                setLoading(false);
-                onTasksFetched([], true);
             }
+            setLoading(false);
+            onTasksFetched([], true);
         } finally {
             isFetching.current = false;
         }

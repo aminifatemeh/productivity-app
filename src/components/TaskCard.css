@@ -7,7 +7,6 @@
   position: relative;
   overflow: hidden;
   transition: height 0.3s ease, background-color 0.3s ease, opacity 0.3s ease;
-  /* تنظیمات برای RTL */
 }
 .TaskCard.done {
   background-color: #e0e0e0;
@@ -145,6 +144,9 @@
   text-align: center;
   margin-inline-end: 5px; /* سازگار با RTL/LTR */
   opacity: inherit;
+}
+.TaskCard {
+  /* تنظیمات برای RTL */
 }
 .TaskCard[dir=rtl] .TaskCard__description-labels .task-icons {
   flex-direction: row-reverse; /* معکوس کردن ترتیب آیکون‌ها */

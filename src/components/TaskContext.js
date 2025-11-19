@@ -5,27 +5,36 @@ export const TaskContext = createContext();
 export const TaskProvider = ({ children }) => {
     const [tasks, setTasks] = useState([]);
     const [timers, setTimers] = useState({});
-    const [initialDuration, setInitialDuration] = useState((parseInt(localStorage.getItem("timerDuration")) || 5) * 60);
+    const [initialDuration, setInitialDuration] = useState(
+        (parseInt(localStorage.getItem("timerDuration")) || 5) * 60
+    );
 
     const getCurrentUserId = () => localStorage.getItem('userId') || 'offline_user';
+
+    // تابع تولید id منحصر به فرد و همیشه string
+    const generateUniqueId = () => {
+        return Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+    };
 
     const fetchTasks = () => {
         const userId = getCurrentUserId();
         let storedTasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
 
+        // اگر هیچ تسکی وجود نداشت → تسک‌های پیش‌فرض بساز
         if (storedTasks.length === 0) {
+            const baseTime = Date.now();
             storedTasks = [
                 {
-                    id: Date.now().toString() + '1',
+                    id: `${baseTime}_default_1`,
                     title: 'آماده‌سازی اسلایدهای ارائه',
                     description: 'اسلایدهای پاورپوینت برای ارائه درس هوش مصنوعی (حداقل 10 اسلاید شامل مقدمه، روش‌ها، و نتیجه‌گیری)',
                     flag_tuNobat: false,
                     isDone: false,
                     subtasks: [
-                        { id: '1', title: 'جمع‌آوری منابع تحقیقاتی', isDone: false },
-                        { id: '2', title: 'طراحی نمودارها و جداول', isDone: false },
-                        { id: '3', title: 'نوشتن متن اسلایدها', isDone: false },
-                        { id: '4', title: 'تمرین ارائه', isDone: false },
+                        { id: 'sub1', title: 'جمع‌آوری منابع تحقیقاتی', isDone: false },
+                        { id: 'sub2', title: 'طراحی نمودارها و جداول', isDone: false },
+                        { id: 'sub3', title: 'نوشتن متن اسلایدها', isDone: false },
+                        { id: 'sub4', title: 'تمرین ارائه', isDone: false },
                     ],
                     tags: [
                         { name: 'دانشگاه', color: '#FF5733', isDefault: true },
@@ -35,18 +44,17 @@ export const TaskProvider = ({ children }) => {
                     deadline_date: '2025-09-01',
                     hour: '14:00',
                     selectedDays: [],
-                    originalIndex: 0,
                 },
                 {
-                    id: Date.now().toString() + '2',
+                    id: `${baseTime}_default_2`,
                     title: 'خرید مواد غذایی',
                     description: 'خرید اقلام ضروری برای هفته (شامل لبنیات، میوه، سبزیجات، و مواد پروتئینی)',
                     flag_tuNobat: false,
                     isDone: false,
                     subtasks: [
-                        { id: '1', title: 'تهیه لیست خرید', isDone: false },
-                        { id: '2', title: 'بازدید از سوپرمارکت', isDone: false },
-                        { id: '3', title: 'بررسی تاریخ انقضای محصولات', isDone: false },
+                        { id: 'sub1', title: 'تهیه لیست خرید', isDone: false },
+                        { id: 'sub2', title: 'بازدید از سوپرمارکت', isDone: false },
+                        { id: 'sub3', title: 'بررسی تاریخ انقضای محصولات', isDone: false },
                     ],
                     tags: [
                         { name: 'خرید', color: '#28A745', isDefault: true },
@@ -56,18 +64,17 @@ export const TaskProvider = ({ children }) => {
                     deadline_date: '2025-09-01',
                     hour: '18:00',
                     selectedDays: ['Saturday'],
-                    originalIndex: 1,
                 },
                 {
-                    id: Date.now().toString() + '3',
+                    id: `${baseTime}_default_3`,
                     title: 'هماهنگی جلسه تیمی',
                     description: 'تنظیم جلسه با تیم پروژه برای بررسی پیشرفت پروژه اپلیکیشن',
                     flag_tuNobat: false,
                     isDone: false,
                     subtasks: [
-                        { id: '1', title: 'رزرو اتاق جلسه', isDone: false },
-                        { id: '2', title: 'ارسال دعوت‌نامه به اعضا', isDone: false },
-                        { id: '3', title: 'آماده‌سازی دستور جلسه', isDone: false },
+                        { id: 'sub1', title: 'رزرو اتاق جلسه', isDone: false },
+                        { id: 'sub2', title: 'ارسال دعوت‌نامه به اعضا', isDone: false },
+                        { id: 'sub3', title: 'آماده‌سازی دستور جلسه', isDone: false },
                     ],
                     tags: [
                         { name: 'کار', color: '#007BFF', isDefault: true },
@@ -77,18 +84,17 @@ export const TaskProvider = ({ children }) => {
                     deadline_date: '2025-09-01',
                     hour: '10:00',
                     selectedDays: [],
-                    originalIndex: 2,
                 },
                 {
-                    id: Date.now().toString() + '4',
+                    id: `${baseTime}_default_4`,
                     title: 'تمرین ورزشی',
                     description: '30 دقیقه ورزش شامل دویدن و تمرینات کششی',
                     flag_tuNobat: false,
                     isDone: false,
                     subtasks: [
-                        { id: '1', title: 'گرم کردن (5 دقیقه)', isDone: false },
-                        { id: '2', title: 'دویدن (20 دقیقه)', isDone: false },
-                        { id: '3', title: 'تمرینات کششی (5 دقیقه)', isDone: false },
+                        { id: 'sub1', title: 'گرم کردن (5 دقیقه)', isDone: false },
+                        { id: 'sub2', title: 'دویدن (20 دقیقه)', isDone: false },
+                        { id: 'sub3', title: 'تمرینات کششی (5 دقیقه)', isDone: false },
                     ],
                     tags: [
                         { name: 'ورزش', color: '#20C997', isDefault: true },
@@ -98,147 +104,152 @@ export const TaskProvider = ({ children }) => {
                     deadline_date: '2025-09-01',
                     hour: '07:00',
                     selectedDays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                    originalIndex: 3,
                 },
             ];
             localStorage.setItem(`tasks_${userId}`, JSON.stringify(storedTasks));
         }
 
-        const fetchedTasks = storedTasks.map((task, index) => ({
-            id: task.id.toString(),
-            title: task.title || 'Untitled',
-            description: task.description || '',
-            flag_tuNobat: task.flag_tuNobat || false,
-            isDone: task.isDone || false,
-            subtasks: task.subtasks || [],
-            tags: task.tags || [],
-            deadline_date: task.deadline_date || '',
-            hour: task.hour || '',
-            selectedDays: task.selectedDays || [],
-            originalIndex: index,
-        }));
+        // تبدیل امن و یکسان‌سازی داده‌ها
+        const fetchedTasks = storedTasks.map((task, index) => {
+            const safeId = task.id && typeof task.id === 'string' && task.id.trim() !== ''
+                ? task.id
+                : generateUniqueId();
+
+            return {
+                id: safeId,
+                title: task.title || 'بدون عنوان',
+                description: task.description || '',
+                flag_tuNobat: task.flag_tuNobat ?? false,
+                isDone: task.isDone ?? false,
+                subtasks: Array.isArray(task.subtasks) ? task.subtasks.map(sub => ({
+                    ...sub,
+                    id: sub.id || generateUniqueId()
+                })) : [],
+                tags: Array.isArray(task.tags) ? task.tags : [],
+                deadline_date: task.deadline_date || '',
+                hour: task.hour || '',
+                selectedDays: Array.isArray(task.selectedDays) ? task.selectedDays : [],
+                originalIndex: typeof task.originalIndex === 'number' ? task.originalIndex : index,
+            };
+        });
+
         setTasks(fetchedTasks);
-        setTimers((prev) => {
-            const updatedTimers = { ...prev };
-            fetchedTasks.forEach((task) => {
-                if (!updatedTimers[task.id]) {
-                    updatedTimers[task.id] = { remaining: initialDuration, isRunning: false };
+
+        // مقداردهی اولیه تایمرها
+        setTimers(prev => {
+            const newTimers = { ...prev };
+            fetchedTasks.forEach(task => {
+                if (!newTimers[task.id]) {
+                    newTimers[task.id] = { remaining: initialDuration, isRunning: false };
                 }
             });
-            return updatedTimers;
+            return newTimers;
         });
     };
 
-    const editTask = (task) => {
+    // ویرایش تسک
+    const editTask = (updatedTask) => {
         const userId = getCurrentUserId();
         const storedTasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
-        const updatedTasks = storedTasks.map((t) => (t.id === task.id ? task : t));
-        localStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
-        setTasks(updatedTasks);
-        return { success: true, task };
+        const newTasks = storedTasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+        localStorage.setItem(`tasks_${userId}`, JSON.stringify(newTasks));
+        setTasks(newTasks);
+        return { success: true, task: updatedTask };
     };
 
+    // حذف تسک
     const deleteTask = (taskId) => {
         const userId = getCurrentUserId();
         const storedTasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
-        const updatedTasks = storedTasks.filter((task) => task.id !== taskId);
-        localStorage.setItem(`tasks_${userId}`, JSON.stringify(updatedTasks));
-        setTasks(updatedTasks);
-        setTimers((prevTimers) => {
-            const updatedTimers = { ...prevTimers };
-            delete updatedTimers[taskId];
-            return updatedTimers;
+        const newTasks = storedTasks.filter(t => t.id !== taskId);
+        localStorage.setItem(`tasks_${userId}`, JSON.stringify(newTasks));
+        setTasks(newTasks);
+
+        setTimers(prev => {
+            const { [taskId]: _, ...rest } = prev;
+            return rest;
         });
+
         return { success: true };
     };
 
+    // تغییر وضعیت انجام/انجام نشده
     const toggleTask = (taskId) => {
-        const currentTask = tasks.find((t) => t.id === taskId);
-        if (!currentTask) {
-            return { success: false, error: 'تسک یافت نشد' };
-        }
-        const done = !currentTask.isDone;
-        const updatedTask = { ...currentTask, isDone: done };
-        return editTask(updatedTask);
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return { success: false, error: 'تسک یافت نشد' };
+        return editTask({ ...task, isDone: !task.isDone });
     };
 
+    // کنترل تایمر
     const startTimer = (taskId) => {
-        setTimers((prev) => {
-            const timer = prev[taskId] || { remaining: initialDuration, isRunning: false };
-            if (!timer.isRunning) {
-                return { ...prev, [taskId]: { ...timer, isRunning: true } };
-            }
-            return prev;
-        });
+        setTimers(prev => ({
+            ...prev,
+            [taskId]: { ...prev[taskId], isRunning: true }
+        }));
     };
 
     const stopTimer = (taskId) => {
-        setTimers((prev) => {
-            const timer = prev[taskId];
-            if (timer && timer.isRunning) {
-                return { ...prev, [taskId]: { ...timer, isRunning: false } };
-            }
-            return prev;
-        });
+        setTimers(prev => ({
+            ...prev,
+            [taskId]: { ...prev[taskId], isRunning: false }
+        }));
     };
 
     const resetTimerForTask = (taskId) => {
-        setTimers((prev) => {
-            const timer = prev[taskId] || { remaining: initialDuration, isRunning: false };
-            return { ...prev, [taskId]: { ...timer, remaining: initialDuration, isRunning: false } };
-        });
+        setTimers(prev => ({
+            ...prev,
+            [taskId]: { remaining: initialDuration, isRunning: false }
+        }));
     };
 
+    // لود اولیه
     useEffect(() => {
         fetchTasks();
     }, []);
 
+    // همگام‌سازی با تغییر timerDuration در localStorage
     useEffect(() => {
-        const handleStorageChange = () => {
-            const newDuration = (parseInt(localStorage.getItem("timerDuration")) || 5) * 60;
-            setInitialDuration(newDuration);
-            setTimers((prev) => {
-                const updatedTimers = {};
-                Object.keys(prev).forEach((taskId) => {
-                    updatedTimers[taskId] = { remaining: newDuration, isRunning: false };
+        const handleStorageChange = (e) => {
+            if (e.key === "timerDuration") {
+                const newDuration = (parseInt(e.newValue) || 5) * 60;
+                setInitialDuration(newDuration);
+                setTimers(prev => {
+                    const updated = {};
+                    Object.keys(prev).forEach(id => {
+                        updated[id] = { remaining: newDuration, isRunning: false };
+                    });
+                    return updated;
                 });
-                return updatedTimers;
-            });
+            }
         };
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
-    // ✅ FIX: تایمر اصلاح‌شده
+    // تایمر اصلی (هر ثانیه)
     useEffect(() => {
         const interval = setInterval(() => {
-            setTimers((prev) => {
-                const updatedTimers = { ...prev };
-                let hasChanges = false;
+            setTimers(prev => {
+                const updated = { ...prev };
+                let changed = false;
 
-                Object.keys(updatedTimers).forEach((id) => {
-                    const timer = updatedTimers[id];
-                    if (timer.isRunning && timer.remaining > 0) {
-                        updatedTimers[id] = {
-                            ...timer,
-                            remaining: timer.remaining - 1
-                        };
-                        hasChanges = true;
-                    } else if (timer.remaining <= 0 && timer.isRunning) {
-                        updatedTimers[id] = {
-                            ...timer,
-                            isRunning: false
-                        };
-                        hasChanges = true;
+                Object.keys(updated).forEach(id => {
+                    const t = updated[id];
+                    if (t.isRunning && t.remaining > 0) {
+                        t.remaining -= 1;
+                        changed = true;
+                    } else if (t.isRunning && t.remaining <= 0) {
+                        t.isRunning = false;
+                        changed = true;
                     }
                 });
 
-                return hasChanges ? updatedTimers : prev;
+                return changed ? updated : prev;
             });
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []); // ✅ dependency array خالی
+    }, []);
 
     return (
         <TaskContext.Provider
@@ -253,6 +264,7 @@ export const TaskProvider = ({ children }) => {
                 editTask,
                 deleteTask,
                 toggleTask,
+                generateUniqueId, // در صورت نیاز در کامپوننت‌های دیگر
             }}
         >
             {children}

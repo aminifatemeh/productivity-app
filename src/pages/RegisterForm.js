@@ -1,9 +1,8 @@
+// pages/RegisterForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { authAPI } from '../api/apiService';
 import './RegisterPage.scss';
-
-const API_BASE = 'http://5.202.57.77/:8000';
 
 function RegisterForm() {
     const [username, setUsername] = useState('');
@@ -18,7 +17,6 @@ function RegisterForm() {
         setError('');
         setIsLoading(true);
 
-        // Basic phone number validation (Iran format: 11 digits)
         if (!/^\d{11}$/.test(phoneNumber)) {
             setError('شماره تلفن باید ۱۱ رقم باشد');
             setIsLoading(false);
@@ -26,17 +24,7 @@ function RegisterForm() {
         }
 
         try {
-            const response = await axios.post(`${API_BASE}/register/`, {
-                username,
-                phone_number: phoneNumber,
-                password,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            const { access, refresh, user_id } = response.data;
+            const { access, refresh, user_id } = await authAPI.register(username, phoneNumber, password);
             localStorage.setItem('accessToken', access);
             localStorage.setItem('refreshToken', refresh);
             localStorage.setItem('userId', user_id);

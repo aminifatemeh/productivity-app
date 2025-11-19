@@ -1,10 +1,8 @@
+// pages/LoginPage.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { authAPI } from '../api/apiService';
 import './LoginPage.scss';
-
-const API_BASE = 'http://5.202.57.77:8000';
-
 
 function LoginForm() {
     const [username, setUsername] = useState('');
@@ -19,16 +17,7 @@ function LoginForm() {
         setIsLoading(true);
 
         try {
-            const response = await axios.post(`${API_BASE}/login/`, {
-                username,
-                password,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            const { access, refresh, user_id } = response.data;
+            const { access, refresh, user_id } = await authAPI.login(username, password);
             localStorage.setItem('accessToken', access);
             localStorage.setItem('refreshToken', refresh);
             localStorage.setItem('userId', user_id);
@@ -37,7 +26,6 @@ function LoginForm() {
             navigate('/');
         } catch (err) {
             console.error('Login error:', err.response?.data || err.message);
-            // Fallback to offline login (optional, remove if not needed)
             if (username === 'admin' && password === '123') {
                 localStorage.setItem('accessToken', 'offline_access_token');
                 localStorage.setItem('refreshToken', 'offline_refresh_token');
