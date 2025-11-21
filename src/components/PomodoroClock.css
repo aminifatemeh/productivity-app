@@ -36,15 +36,48 @@
 .pomodoro-clock__time {
   width: 100px;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   font-size: 30px;
   font-weight: bold;
   color: #333;
   z-index: 2;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+.pomodoro-clock__time:hover {
+  transform: scale(1.05);
+}
+.pomodoro-clock__time-input {
+  width: 80px;
+  height: 35px;
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #2C868B;
+  border-radius: 10px;
   background-color: #fff;
+  color: #2C868B;
+  outline: none;
+  padding: 2px;
+  z-index: 3;
+}
+.pomodoro-clock__time-input:focus {
+  border-color: #5ecea8;
+  box-shadow: 0 0 8px rgba(94, 206, 168, 0.5);
+}
+.pomodoro-clock__time-input::-webkit-inner-spin-button, .pomodoro-clock__time-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.pomodoro-clock__time-input {
+  -moz-appearance: textfield;
 }
 .pomodoro-clock__controls {
   position: absolute;
@@ -63,14 +96,27 @@
   color: #f6f6f1;
   font-size: 20px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .pomodoro-clock__play-pause img, .pomodoro-clock__stop img {
   width: 20px;
   height: 20px;
 }
-.pomodoro-clock__play-pause:hover, .pomodoro-clock__stop:hover {
+.pomodoro-clock__play-pause:hover:not(:disabled), .pomodoro-clock__stop:hover:not(:disabled) {
   transform: scale(1.1);
+}
+.pomodoro-clock__play-pause:active:not(:disabled), .pomodoro-clock__stop:active:not(:disabled) {
+  transform: scale(0.95);
+}
+.pomodoro-clock__play-pause:disabled, .pomodoro-clock__stop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pomodoro-clock__play-pause:disabled img, .pomodoro-clock__stop:disabled img {
+  opacity: 0.6;
 }
 
 /*# sourceMappingURL=PomodoroClock.css.map */

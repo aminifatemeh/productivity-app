@@ -22,12 +22,12 @@ const cardConfigs = {
 };
 
 function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
-  const { timers, initialDuration, startTimer, stopTimer } = useContext(TaskContext);
+  const { timers, initialDuration, startTimer, stopTimer, setTimers } = useContext(TaskContext);
   const { t } = useContext(LanguageContext);
-  const config = cardConfigs[cardName] || cardConfigs.active; // Fallback to active if cardName invalid
+  const config = cardConfigs[cardName] || cardConfigs.active;
 
   const filteredTasks = (tasks || []).filter((task) => {
-    if (!task || !task.id) return false; // Skip invalid tasks
+    if (!task || !task.id) return false;
     if (cardName === "active") return task.flag_tuNobat && !task.isDone;
     if (cardName === "upNext") return !task.flag_tuNobat && !task.isDone;
     if (cardName === "archived") return task.isDone;
@@ -42,13 +42,26 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
 
   const handleTaskClick = (task) => {
     if (!task || !task.id) return;
+
+    // اگر تایمر وجود نداره، ایجادش کن
+    if (!timers[task.id]) {
+      setTimers(prev => ({
+        ...prev,
+        [task.id]: { remaining: initialDuration || 300, isRunning: false }
+      }));
+    }
+
     const timer = timers[task.id] || { remaining: initialDuration || 300, isRunning: false };
+
     if (timer.isRunning) {
       stopTimer(task.id);
     } else {
       startTimer(task.id);
     }
-    if (setSelectedTask) setSelectedTask(task);
+
+    if (setSelectedTask) {
+      setSelectedTask(task);
+    }
   };
 
   return (
@@ -62,16 +75,24 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
               <span>{t("taskPreviewCard.noTasks")}</span>
           ) : (
               filteredTasks.map((task) => {
-                if (!task || !task.id) return null; // Skip invalid tasks
-                const timer = timers[task.id] || { remaining: initialDuration || 300, isRunning: false };
-                const progress = initialDuration > 0
-                    ? Math.min(((initialDuration - timer.remaining) / initialDuration) * 100, 100)
+                if (!task || !task.id) return null;
+
+                const timer = timers[task.id] || {
+                  remaining: initialDuration || 300,
+                  isRunning: false
+                };
+
+                const totalDuration = initialDuration || 300;
+                const progress = totalDuration > 0
+                    ? Math.min(((totalDuration - timer.remaining) / totalDuration) * 100, 100)
                     : 0;
+
                 return (
                     <div
                         key={task.id}
                         className="task-preview__card-task"
                         style={{ "--progress": `${progress}%` }}
+                        onClick={() => setSelectedTask && setSelectedTask(task)}
                     >
                       <div className="circle"></div>
                       <span>{task.title || "Untitled"}</span>
@@ -86,7 +107,7 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
                       />
                     </div>
                 );
-              }).filter(Boolean) // Remove null entries
+              }).filter(Boolean)
           )}
         </div>
       </div>

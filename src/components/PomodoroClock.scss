@@ -38,17 +38,55 @@
   &__time {
     width: 100px;
     height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     font-size: 30px;
     font-weight: bold;
     color: #333;
     z-index: 2;
-    background-color: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
   }
 
+  &__time-input {
+    width: 80px;
+    height: 35px;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    border: 2px solid #2C868B;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #2C868B;
+    outline: none;
+    padding: 2px;
+    z-index: 3;
+
+    &:focus {
+      border-color: #5ecea8;
+      box-shadow: 0 0 8px rgba(94, 206, 168, 0.5);
+    }
+
+    // حذف فلش‌های number input
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    // برای Firefox
+    -moz-appearance: textfield;
+  }
 
   &__controls {
     position: absolute;
@@ -69,16 +107,31 @@
     color: #f6f6f1;
     font-size: 20px;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.2s, opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    img{
+    img {
       width: 20px;
       height: 20px;
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
       transform: scale(1.1);
     }
-  }
 
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      img {
+        opacity: 0.6;
+      }
+    }
+  }
 }
