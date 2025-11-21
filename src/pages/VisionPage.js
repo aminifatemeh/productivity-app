@@ -30,27 +30,27 @@ function VisionPage() {
         { value: 12, label: 'اسفند' },
     ];
 
-    // تسک‌های انجام شده
-    const completedTasks = tasks
-        .filter(task => task.isDone)
-        .map(task => ({
-            ...task,
-            completed_date: task.completed_date || task.deadline_date || moment().format('jYYYY/jMM/jDD'),
-        }));
+    const tasksInSelectedMonth = tasks
+        .filter(task => task.deadline_date)
+        .map(task => {
+            const date = moment(task.deadline_date, ['YYYY-MM-DD', 'jYYYY/jMM/jDD']);
+            if (!date.isValid()) return null;
 
-    // فیلتر بر اساس سال و ماه
-    const filteredTasks = completedTasks.filter(task => {
-        const taskDate = moment(task.completed_date, 'jYYYY/jMM/jDD');
-        return taskDate.isValid() &&
-            taskDate.jYear() === selectedYear &&
-            (taskDate.jMonth() + 1) === selectedMonth;
-    });
+            const jYear = date.jYear();
+            const jMonth = date.jMonth() + 1;
+            const jDateStr = date.format('jYYYY/jMM/jDD');
 
-    // گروه‌بندی بر اساس تاریخ
-    const groupedTasks = filteredTasks.reduce((acc, task) => {
-        const dateKey = moment(task.completed_date, 'jYYYY/jMM/jDD').format('jYYYY/jMM/jDD');
-        if (!acc[dateKey]) acc[dateKey] = [];
-        acc[dateKey].push(task);
+            if (jYear === selectedYear && jMonth === selectedMonth) {
+                return { ...task, jalaliDateStr: jDateStr };
+            }
+            return null;
+        })
+        .filter(Boolean);
+
+    const groupedTasks = tasksInSelectedMonth.reduce((acc, task) => {
+        const key = task.jalaliDateStr;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(task);
         return acc;
     }, {});
 
@@ -77,49 +77,59 @@ function VisionPage() {
     };
 
     const handleEditTask = (taskId) => {
-        navigate('/task-management', {
-            state: { openEditModalFor: taskId }
-        });
+        navigate('/task-management', { state: { openEditModalFor: taskId } });
     };
+
+    const currentMonthLabel = persianMonths.find(m => m.value === selectedMonth)?.label || 'نامشخص';
 
     return (
         <div className="d-flex vision-page" dir="rtl">
             <SidebarMenu />
             <div className="main-content d-flex flex-column flex-grow-1">
                 <div className="vision-header">
-                    <h1 className="vision-title">چشم انداز</h1>
+                    <h1 className="vision-title">چشم‌انداز</h1>
                     <div className="month-selector">
                         <button type="button" className="nav-button" onClick={handlePreviousMonth}>
-                            Previous
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M15 18L9 12L15 6" />
+                            </svg>
                         </button>
+
                         <div className="current-month">
-                            <span className="month-name">
-                                {persianMonths.find(m => m.value === selectedMonth)?.label}
-                            </span>
+                            <span className="month-name">{currentMonthLabel}</span>
                             <span className="year">{selectedYear}</span>
                         </div>
+
                         <button type="button" className="nav-button" onClick={handleNextMonth}>
-                            Next
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9 18L15 12L9 6" />
+                            </svg>
                         </button>
                     </div>
                 </div>
 
                 <div className="vision-content">
-                    {sortedDates.length === 0 ? (
+                    {tasks.length === 0 ? (
+                        <div className="empty-message">در حال بارگذاری تسک‌ها...</div>
+                    ) : sortedDates.length === 0 ? (
                         <div className="empty-message">
-                            هیچ تسک تکمیل شده‌ای در این ماه یافت نشد
+                            هیچ تسکی در {currentMonthLabel} {selectedYear} وجود ندارد
                         </div>
                     ) : (
                         sortedDates.map(date => (
                             <div key={date} className="date-group">
                                 <h2 className="date-header">{date}</h2>
-                                <div className="tasks-grid">
+                                <div className="row gy-4">
                                     {groupedTasks[date].map(task => (
-                                        <VisionTaskCard
-                                            key={task.id}
-                                            task={task}
-                                            onEdit={() => handleEditTask(task.id)}
-                                        />
+                                        <div className="col-12 col-sm-6 col-lg-4 col-xl-3" key={task.id}>
+                                            <VisionTaskCard
+                                                task={{
+                                                    ...task,
+                                                    deadline_date: date,
+                                                }}
+                                                onEdit={() => handleEditTask(task.id)}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             </div>

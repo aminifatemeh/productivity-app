@@ -61,10 +61,6 @@ export const authAPI = {
         });
         return response.data;
     },
-    refreshToken: async (refresh) => {
-        const response = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
-        return response.data;
-    },
 };
 
 export const tasksAPI = {
@@ -77,11 +73,14 @@ export const tasksAPI = {
         return response.data;
     },
     updateTask: async (taskId, taskData) => {
-        const response = await apiClient.put(`/tasks/update_task/${taskId}/`, taskData);
+        const response = await apiClient.put(`/tasks/${taskId}/edit_task/`, taskData);
         return response.data;
     },
     deleteTask: async (taskId) => {
-        const response = await apiClient.delete(`/tasks/delete_task/${taskId}/`);
+        await apiClient.delete(`/tasks/${taskId}/delete_task/`);
+    },
+    toggleTask: async (taskId) => {
+        const response = await apiClient.post(`/tasks/${taskId}/toggle/`);
         return response.data;
     },
 };

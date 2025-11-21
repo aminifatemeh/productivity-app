@@ -37,19 +37,28 @@
         color: white;
         border: none;
         cursor: pointer;
-        padding: 12px 20px;
-        border-radius: 10px;
-        font-size: 20px;
-        transition: all 0.2s ease;
-        font-weight: bold;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 
         &:hover {
           background-color: #45a049;
-          transform: scale(1.05);
+          transform: translateY(-3px);
+          box-shadow: 0 8px 16px rgba(76, 175, 80, 0.4);
         }
 
         &:active {
-          transform: scale(0.95);
+          transform: translateY(0);
+        }
+
+        svg {
+          width: 32px;
+          height: 32px;
         }
       }
 
@@ -96,32 +105,6 @@
         border-radius: 10px;
         border-right: 4px solid #4CAF50;
       }
-
-      .tasks-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 30px 24px; /* فاصله عمودی 30px و افقی 24px */
-      }
-
-      @media (max-width: 1400px) {
-        .tasks-grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-
-      @media (max-width: 992px) {
-        .tasks-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 24px 20px;
-        }
-      }
-
-      @media (max-width: 576px) {
-        .tasks-grid {
-          grid-template-columns: 1fr;
-          gap: 20px;
-        }
-      }
     }
 
     .empty-message {
@@ -136,59 +119,26 @@
   }
 }
 
-/* Responsive adjustments */
+/* ریسپانسیو — بدون تغییر در طرح اصلی */
 @media (max-width: 1600px) {
-  .vision-page .vision-content {
-    max-width: 1400px;
-    padding: 0 30px;
-  }
+  .vision-page .vision-content { max-width: 1400px; padding: 0 30px; }
 }
-
 @media (max-width: 1200px) {
-  .vision-page .vision-content {
-    max-width: 1140px;
-    padding: 0 20px;
-  }
+  .vision-page .vision-content { max-width: 1140px; padding: 0 20px; }
 }
-
 @media (max-width: 992px) {
-  .vision-page {
-    .main-content {
-      padding: 20px 25px;
-    }
-    .vision-content {
-      padding: 0 15px;
-    }
-  }
+  .vision-page .main-content { padding: 20px 25px; }
+  .vision-page .vision-content { padding: 0 15px; }
 }
-
 @media (max-width: 768px) {
-  .vision-page {
-    .main-content {
-      padding: 15px 20px;
-    }
-
-    .vision-header {
-      padding: 20px;
-      .vision-title { font-size: 24px; }
-      .month-selector {
-        gap: 20px;
-        .nav-button { padding: 10px 16px; font-size: 18px; }
-        .current-month {
-          min-width: 140px;
-          .month-name { font-size: 22px; }
-          .year { font-size: 18px; }
-        }
-      }
-    }
-
-    .vision-content {
-      padding: 0 10px;
-      gap: 40px;
-
-      .date-group {
-        .date-header { font-size: 18px; }
-      }
-    }
-  }
+  .vision-page .main-content { padding: 15px 20px; }
+  .vision-page .vision-header { padding: 20px; }
+  .vision-page .vision-title { font-size: 24px; }
+  .vision-page .month-selector { gap: 20px; }
+  .vision-page .nav-button { width: 48px; height: 48px; }
+  .vision-page .nav-button svg { width: 28px; height: 28px; }
+  .vision-page .current-month .month-name { font-size: 22px; }
+  .vision-page .current-month .year { font-size: 18px; }
+  .vision-page .vision-content { padding: 0 10px; gap: 40px; }
+  .vision-page .date-header { font-size: 18px; }
 }
