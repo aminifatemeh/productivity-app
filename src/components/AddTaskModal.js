@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import './AddTaskModal.scss';
 import moment from 'jalali-moment';
 import { TaskContext } from './TaskContext';
+import CompactCalendar from './CompactClendar';
 
 const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate }) => {
     const { addTask, editTask } = useContext(TaskContext);
@@ -13,6 +14,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
     const [isRoutine, setIsRoutine] = useState(false);
     const [isInNobat, setIsInNobat] = useState(false);
     const [selectedDays, setSelectedDays] = useState([]);
+    const [showCalendar, setShowCalendar] = useState(false);
     const modalRef = useRef(null);
 
     const [tags, setTags] = useState([
@@ -45,9 +47,8 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             setIsRoutine(!!initialTask.selectedDays?.length);
             setSelectedDays(initialTask.selectedDays || []);
 
-            // فقط ساب‌تسک‌های سرور (id عددی) → id واقعی، بقیه حذف میشه
             const serverSubtasks = (initialTask.subtasks || [])
-                .filter(sub => sub.id && Number.isInteger(sub.id)) // فقط ساب‌تسک‌های ذخیره‌شده در دیتابیس
+                .filter(sub => sub.id && Number.isInteger(sub.id))
                 .map(sub => ({
                     id: sub.id,
                     title: sub.title || '',
@@ -121,6 +122,17 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         }
     };
 
+    /* ------------------- تقویم ------------------- */
+    const handleDateSelect = (date) => {
+        setDueDate(date);
+        setShowCalendar(false);
+    };
+
+    const getJalaliDate = () => {
+        if (!dueDate) return '';
+        return moment(dueDate, 'YYYY-MM-DD').locale('fa').format('jYYYY/jMM/jDD');
+    };
+
     /* ------------------- ارسال فرم ------------------- */
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -146,7 +158,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             subtasks: subtasks
                 .filter(s => s.title.trim() !== '')
                 .map(s => ({
-                    id: typeof s.id === 'number' ? s.id : null, // فقط id عددی (واقعی) می‌فرستیم
+                    id: typeof s.id === 'number' ? s.id : null,
                     title: s.title.trim(),
                     done_date: s.done_date
                 })),
@@ -172,6 +184,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         setIsRoutine(false); setIsInNobat(false); setSelectedDays([]);
         setTags(prev => prev.map(t => ({ ...t, selected: false })));
         setErrors({ name: '', dueDate: '', form: '' });
+        setShowCalendar(false);
     };
 
     /* ------------------- ارتفاع خط کنار مودال ------------------- */
@@ -185,7 +198,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         updateHeight();
         window.addEventListener('resize', updateHeight);
         return () => window.removeEventListener('resize', updateHeight);
-    }, [showAdvanced, subtaskCount, subtasks, isRoutine, selectedDays]);
+    }, [showAdvanced, subtaskCount, subtasks, isRoutine, selectedDays, showCalendar]);
 
     const routineDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
 
@@ -217,10 +230,29 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                     </div>
                     <div className="form-group flex-grow-1">
                         <label>تاریخ انقضا <span className="required-star">★</span></label>
-                        <input type="date" className="form-control" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                        <div className="date-input-wrapper">
+                            <input
+                                type="text"
+                                className="form-control date-display"
+                                value={getJalaliDate()}
+                                onClick={() => setShowCalendar(!showCalendar)}
+                                readOnly
+                                placeholder="انتخاب تاریخ"
+                            />
+                        </div>
                         {errors.dueDate && <span className="error-message">{errors.dueDate}</span>}
                     </div>
                 </div>
+
+                {showCalendar && (
+                    <div className="calendar-section">
+                        <CompactCalendar
+                            selectedDate={dueDate}
+                            onDateSelect={handleDateSelect}
+                            onClose={() => setShowCalendar(false)}
+                        />
+                    </div>
+                )}
 
                 <div className="checkbox-group mt-3">
                     <label>
