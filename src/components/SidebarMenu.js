@@ -12,7 +12,7 @@ function SidebarMenu() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("username");
-    navigate("/");
+    navigate("/login");
   };
 
   const handleNavigation = (e, path) => {
@@ -50,7 +50,6 @@ function SidebarMenu() {
             </Link>
           </li>
 
-          {/* تب جدید چشم‌انداز */}
           <li>
             <img
                 className="sidebar__icons"
@@ -71,7 +70,12 @@ function SidebarMenu() {
                 src="/assets/icons/performance-graph.svg"
                 alt="charts"
             />
-            <a href="#">{t("sidebarMenu.charts")}</a>
+            <Link
+                to="/charts"
+                onClick={(e) => handleNavigation(e, "/charts")}
+            >
+              {t("sidebarMenu.charts")}
+            </Link>
           </li>
 
           <li>

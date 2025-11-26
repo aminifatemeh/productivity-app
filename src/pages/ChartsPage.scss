@@ -1,0 +1,142 @@
+.charts-page {
+  min-height: 100vh;
+  background-color: #f6f6f1;
+  direction: rtl;
+
+  .main-content {
+    padding: 40px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .charts-header {
+    margin-bottom: 30px;
+  }
+
+  .charts-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #2C868B;
+    margin: 0;
+  }
+
+  .charts-content {
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  .loading-message,
+  .error-message {
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #7C7C7C;
+  }
+
+  .error-message {
+    color: #D32F2F;
+  }
+
+  .performance-card {
+    background-color: #F6F6F1;
+    border-radius: 23px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    padding: 30px;
+    max-width: 600px;
+    margin: 0 auto;
+
+    &__content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 25px;
+    }
+
+    &__text {
+      flex: 1;
+    }
+
+    &__title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2C868B;
+      margin: 0 0 10px 0;
+    }
+
+    &__description {
+      font-size: 14px;
+      color: #7C7C7C;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    &__chart {
+      flex-shrink: 0;
+      width: 160px;
+      height: 160px;
+
+      .donut-chart {
+        width: 100%;
+        height: 100%;
+        transform: rotate(0deg);
+
+        circle {
+          transition: stroke-dashoffset 0.6s ease;
+        }
+      }
+    }
+
+    &__stats {
+      border-top: 1px solid rgba(127, 116, 116, 0.3);
+      padding-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #7C7C7C;
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #2C868B;
+      }
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 768px) {
+    .main-content {
+      padding: 20px;
+    }
+
+    .performance-card {
+      &__content {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      &__text {
+        text-align: center;
+      }
+
+      &__title {
+        font-size: 20px;
+      }
+
+      &__description {
+        font-size: 13px;
+      }
+    }
+  }
+}

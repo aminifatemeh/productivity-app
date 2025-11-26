@@ -8,6 +8,7 @@ import DashboardPage from "./pages/DashboardPage";
 import TaskManagementPage from "./pages/TaskManagementPage";
 import SettingsPage from "./pages/SettingsPage";
 import VisionPage from "./pages/VisionPage";
+import ChartsPage from "./pages/ChartsPage";
 
 function App() {
     return (
@@ -23,6 +24,7 @@ function App() {
                             element={<TaskManagementPage useApi={true} />}
                         />
                         <Route path="/vision" element={<VisionPage />} />
+                        <Route path="/charts" element={<ChartsPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                     </Routes>
                 </Router>

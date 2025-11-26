@@ -80,5 +80,10 @@
   "confirmDeleteModal.title": "حذف تسک",
   "confirmDeleteModal.message": "آیا مطمئن هستید که می‌خواهید تسک '{title}' را حذف کنید؟",
   "confirmDeleteModal.confirm": "حذف",
-  "confirmDeleteModal.cancel": "لغو"
+  "confirmDeleteModal.cancel": "لغو",
+  "charts.title": "نمودارها",
+  "charts.todayProgress": "پیشرفت امروز",
+  "charts.todayProgressDescription": "بهره‌وری امروز: درصد کارهای با deadline امروز که تکمیل شده‌اند. تعداد کل تکمیل‌شده امروز: {completed} تسک",
+  "charts.completed": "تکمیل شده",
+  "charts.tasksCompleted": "تسک‌های تکمیل شده امروز"
 }

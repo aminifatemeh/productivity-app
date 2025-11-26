@@ -29,6 +29,7 @@
   "sidebarMenu.home": "Home",
   "sidebarMenu.dashboard": "Dashboard",
   "sidebarMenu.taskManagement": "Task Management",
+  "sidebarMenu.vision": "Vision",
   "sidebarMenu.charts": "Charts",
   "sidebarMenu.settings": "Settings",
   "sidebarMenu.logout": "Logout",
@@ -79,5 +80,10 @@
   "confirmDeleteModal.title": "Delete Task",
   "confirmDeleteModal.message": "Are you sure you want to delete the task '{title}'?",
   "confirmDeleteModal.confirm": "Delete",
-  "confirmDeleteModal.cancel": "Cancel"
+  "confirmDeleteModal.cancel": "Cancel",
+  "charts.title": "Charts",
+  "charts.todayProgress": "Today's Progress",
+  "charts.todayProgressDescription": "Today's productivity: Percentage of tasks with today's deadline that have been completed. Total completed today: {completed} tasks",
+  "charts.completed": "Completed",
+  "charts.tasksCompleted": "Tasks Completed Today"
 }
