@@ -35,19 +35,31 @@ function TaskComponentApi({ onTasksFetched, useApi }) {
 
         try {
             const data = await tasksAPI.getAllTasks();
-            const fetchedTasks = Array.isArray(data) ? data.map((task, index) => ({
-                id: task.id.toString(),
-                title: task.title || 'Untitled',
-                description: task.description || '',
-                flag_tuNobat: task.flag_tuNobat || false,
-                isDone: task.isDone || false,
-                subtasks: task.subtasks || [],
-                tags: task.tags || [],
-                deadline_date: task.deadline_date || '',
-                hour: task.hour || '',
-                selectedDays: task.selectedDays || [],
-                originalIndex: index,
-            })) : [];
+
+            // فیلتر کردن: فقط تسک‌های اصلی (بدون parent)
+            const fetchedTasks = Array.isArray(data)
+                ? data
+                    .filter(task => !task.parent) // فیلتر ساب‌تسک‌ها
+                    .map((task, index) => ({
+                        id: task.id.toString(),
+                        title: task.title || 'Untitled',
+                        description: task.description || '',
+                        flag_tuNobat: task.flag_tuNobat || false,
+                        isDone: !!task.done_date, // استفاده از done_date
+                        subtasks: Array.isArray(task.subtasks) ? task.subtasks.map(sub => ({
+                            id: sub.id,
+                            title: sub.title || '',
+                            isDone: !!sub.done_date,
+                            done_date: sub.done_date || null,
+                        })) : [],
+                        tags: task.tags || [],
+                        deadline_date: task.deadline_date || '',
+                        hour: task.hour || '',
+                        selectedDays: task.selectedDays || [],
+                        originalIndex: index,
+                    }))
+                : [];
+
             setLoading(false);
             onTasksFetched(fetchedTasks, false);
         } catch (err) {

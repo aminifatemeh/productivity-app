@@ -1,4 +1,3 @@
-// components/TaskCard.js
 import React, { useState, useEffect } from "react";
 import "./TaskCard.scss";
 import SubtaskBar from "./SubtaskBar";

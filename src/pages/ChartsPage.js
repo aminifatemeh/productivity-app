@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import './ChartsPage.scss';
 import SidebarMenu from '../components/SidebarMenu';
 import { LanguageContext } from '../context/LanguageContext';
-import apiClient from '../api/apiService';
+import { tasksAPI } from '../api/apiService';
 
 function ChartsPage() {
     const { t } = useContext(LanguageContext);
@@ -18,8 +18,8 @@ function ChartsPage() {
     const fetchTodayPerformance = async () => {
         try {
             setLoading(true);
-            const response = await apiClient.get('/tasks/report/today_performance/');
-            setTodayPerformance(response.data);
+            const response = await tasksAPI.getTodayPerformance();
+            setTodayPerformance(response);
             setError(null);
         } catch (err) {
             console.error('Error fetching today performance:', err);

@@ -1,6 +1,9 @@
 // components/TaskContext.js
 import React, { createContext, useState, useEffect } from "react";
 import { tasksAPI } from "../api/apiService";
+import axios from 'axios';
+
+const API_BASE = 'http://5.202.57.77:8000';
 
 export const TaskContext = createContext();
 
@@ -25,24 +28,30 @@ export const TaskProvider = ({ children }) => {
         try {
             setIsLoading(true);
             const data = await tasksAPI.getAllTasks();
-            const fetchedTasks = Array.isArray(data) ? data.map((task, index) => ({
-                id: task.id.toString(),
-                title: task.title || 'بدون عنوان',
-                description: task.description || '',
-                flag_tuNobat: task.flag_tuNobat || false,
-                isDone: task.isDone || false,
-                subtasks: Array.isArray(task.subtasks) ? task.subtasks.map(sub => ({
-                    id: sub.id,
-                    title: sub.title || '',
-                    isDone: !!sub.done_date,
-                    done_date: sub.done_date || null,
-                })) : [],
-                tags: Array.isArray(task.tags) ? task.tags : [],
-                deadline_date: task.deadline_date || '',
-                hour: task.hour || '',
-                selectedDays: Array.isArray(task.selectedDays) ? task.selectedDays : [],
-                originalIndex: index,
-            })) : [];
+
+            // فیلتر کردن تسک‌ها: فقط تسک‌های اصلی (بدون parent)
+            const fetchedTasks = Array.isArray(data)
+                ? data
+                    .filter(task => !task.parent) // فقط تسک‌های اصلی
+                    .map((task, index) => ({
+                        id: task.id.toString(),
+                        title: task.title || 'بدون عنوان',
+                        description: task.description || '',
+                        flag_tuNobat: task.flag_tuNobat || false,
+                        isDone: !!task.done_date, // چک کردن done_date برای isDone
+                        subtasks: Array.isArray(task.subtasks) ? task.subtasks.map(sub => ({
+                            id: sub.id,
+                            title: sub.title || '',
+                            isDone: !!sub.done_date,
+                            done_date: sub.done_date || null,
+                        })) : [],
+                        tags: Array.isArray(task.tags) ? task.tags : [],
+                        deadline_date: task.deadline_date || '',
+                        hour: task.hour || '',
+                        selectedDays: Array.isArray(task.selectedDays) ? task.selectedDays : [],
+                        originalIndex: index,
+                    }))
+                : [];
 
             setTasks(fetchedTasks);
             setIsLoading(false);
@@ -179,22 +188,54 @@ export const TaskProvider = ({ children }) => {
     };
 
     const toggleTask = async (taskId) => {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return { success: false, error: 'تسک یافت نشد' };
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return { success: false, error: 'لطفاً ابتدا وارد سیستم شوید' };
+        }
+
+        const currentTask = tasks.find((t) => t.id === taskId);
+        if (!currentTask) {
+            return { success: false, error: 'تسک یافت نشد' };
+        }
+
+        const done = !currentTask.isDone;
 
         try {
-            const response = await tasksAPI.toggleTask(taskId);
-            const updatedTask = {
-                ...task,
-                isDone: response.isDone !== undefined ? response.isDone : !task.isDone,
-            };
-            setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
-            return { success: true, task: updatedTask };
+            const response = await tasksAPI.toggleTask(taskId, done);
+
+            // استفاده از response.data.done مطابق کد قدیمی
+            const isDone = response.done !== undefined ? response.done : done;
+
+            setTasks((prevTasks) =>
+                prevTasks.map((t) => (t.id === taskId ? { ...t, isDone } : t))
+            );
+
+            return { success: true, task: { ...currentTask, isDone } };
         } catch (err) {
             console.error('Error toggling task:', err.response?.data || err.message);
+
+            // اگر 401 بود، refresh token
+            if (err.response?.status === 401) {
+                const refresh = localStorage.getItem('refreshToken');
+                if (refresh) {
+                    try {
+                        const refreshResponse = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
+                        localStorage.setItem('accessToken', refreshResponse.data.access);
+                        // دوباره تلاش
+                        return await toggleTask(taskId);
+                    } catch (refreshErr) {
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('userId');
+                        return { success: false, error: 'لطفاً دوباره وارد سیستم شوید' };
+                    }
+                }
+            }
+
             return {
                 success: false,
-                error: err.response?.data?.detail || 'خطایی در تغییر وضعیت تسک رخ داد'
+                error: err.response?.data?.error || err.response?.data?.detail || 'خطایی در تغییر وضعیت تسک رخ داد'
             };
         }
     };

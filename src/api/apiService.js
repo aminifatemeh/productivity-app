@@ -79,8 +79,15 @@ export const tasksAPI = {
     deleteTask: async (taskId) => {
         await apiClient.delete(`/tasks/${taskId}/delete_task/`);
     },
-    toggleTask: async (taskId) => {
-        const response = await apiClient.post(`/tasks/${taskId}/toggle/`);
+    toggleTask: async (taskId, done) => {
+        const response = await apiClient.post(`/tasks/${taskId}/toggle/`, {
+            done: done
+        });
+        // برگرداندن کل response.data
+        return response.data;
+    },
+    getTodayPerformance: async () => {
+        const response = await apiClient.get('/tasks/report/today_performance/');
         return response.data;
     },
 };
