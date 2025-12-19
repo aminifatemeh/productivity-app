@@ -83,11 +83,14 @@ export const tasksAPI = {
         const response = await apiClient.post(`/tasks/${taskId}/toggle/`, {
             done: done
         });
-        // برگرداندن کل response.data
         return response.data;
     },
     getTodayPerformance: async () => {
         const response = await apiClient.get('/tasks/report/today_performance/');
+        return response.data;
+    },
+    getWeekPerformance: async () => {
+        const response = await apiClient.get('/tasks/report/week_performance/');
         return response.data;
     },
 };

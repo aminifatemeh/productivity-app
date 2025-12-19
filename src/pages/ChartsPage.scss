@@ -29,7 +29,6 @@
     margin: 10px;
   }
 
-
   .charts-content {
     width: 100%;
   }
@@ -53,6 +52,11 @@
     padding: 10px 20px;
     width: 100%;
     max-width: none;
+    margin-bottom: 25px;
+
+    &.weekly-chart {
+      padding: 20px 30px;
+    }
 
     &__content {
       display: flex;
@@ -79,18 +83,17 @@
       line-height: 1.6;
     }
 
+    .stat-item {
+      display: flex;
+      gap: 10px;
+    }
 
-      .stat-item {
-        display: flex;
-        gap: 10px;
-      }
-
-      .stat-label, .stat-value {
-        font-size: 15px;
-        font-weight: bold;
-        color: #323434;
-      }
-
+    .stat-label,
+    .stat-value {
+      font-size: 15px;
+      font-weight: bold;
+      color: #323434;
+    }
 
     &__chart {
       flex-shrink: 0;
@@ -108,7 +111,15 @@
       }
     }
 
+    &__header {
+      margin-bottom: 20px;
+    }
 
+    &__bar-chart {
+      width: 100%;
+      min-height: 300px;
+      direction: ltr;
+    }
   }
 
   // Responsive design
@@ -131,6 +142,11 @@
 
     .performance-card {
       padding: 25px;
+      margin-bottom: 20px;
+
+      &.weekly-chart {
+        padding: 20px;
+      }
 
       &__content {
         flex-direction: column;
@@ -155,14 +171,20 @@
         height: 160px;
       }
 
-      &__stats {
-        .stat-value {
-          font-size: 28px;
-        }
+      &__bar-chart {
+        min-height: 250px;
+      }
 
-        .stat-label {
-          font-size: 14px;
-        }
+      .stat-item {
+        justify-content: center;
+      }
+
+      .stat-value {
+        font-size: 14px;
+      }
+
+      .stat-label {
+        font-size: 14px;
       }
     }
   }
