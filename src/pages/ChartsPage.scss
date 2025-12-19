@@ -4,25 +4,34 @@
   direction: rtl;
 
   .main-content {
-    padding: 40px;
+    margin-right: 321px;
+    margin-left: 0;
+    justify-content: flex-start;
+    padding: 30px 40px;
     overflow-y: auto;
     flex: 1;
+    width: calc(100% - 321px);
+    max-width: 100%;
   }
 
   .charts-header {
-    margin-bottom: 30px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
   }
 
   .charts-title {
     font-size: 32px;
     font-weight: bold;
     color: #2C868B;
-    margin: 0;
+    margin: 10px;
   }
+
 
   .charts-content {
     width: 100%;
-    max-width: 1200px;
   }
 
   .loading-message,
@@ -38,19 +47,18 @@
   }
 
   .performance-card {
-    background-color: #F6F6F1;
-    border-radius: 23px;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    padding: 30px;
-    max-width: 600px;
-    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    width: 100%;
+    max-width: none;
 
     &__content {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 30px;
-      margin-bottom: 25px;
+      gap: 50px;
     }
 
     &__text {
@@ -61,20 +69,33 @@
       font-size: 24px;
       font-weight: bold;
       color: #2C868B;
-      margin: 0 0 10px 0;
+      margin: 0 0 12px 0;
     }
 
     &__description {
-      font-size: 14px;
+      font-size: 15px;
       color: #7C7C7C;
       margin: 0;
       line-height: 1.6;
     }
 
+
+      .stat-item {
+        display: flex;
+        gap: 10px;
+      }
+
+      .stat-label, .stat-value {
+        font-size: 15px;
+        font-weight: bold;
+        color: #323434;
+      }
+
+
     &__chart {
       flex-shrink: 0;
-      width: 160px;
-      height: 160px;
+      width: 180px;
+      height: 180px;
 
       .donut-chart {
         width: 100%;
@@ -87,43 +108,34 @@
       }
     }
 
-    &__stats {
-      border-top: 1px solid rgba(127, 116, 116, 0.3);
-      padding-top: 20px;
-      display: flex;
-      justify-content: center;
-      gap: 40px;
 
-      .stat-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .stat-label {
-        font-size: 14px;
-        color: #7C7C7C;
-      }
-
-      .stat-value {
-        font-size: 28px;
-        font-weight: bold;
-        color: #2C868B;
-      }
-    }
   }
 
   // Responsive design
+  @media (max-width: 1024px) {
+    .main-content {
+      margin-right: 0;
+      width: 100%;
+      padding: 30px 40px;
+    }
+  }
+
   @media (max-width: 768px) {
     .main-content {
       padding: 20px;
     }
 
+    .charts-title {
+      font-size: 24px;
+    }
+
     .performance-card {
+      padding: 25px;
+
       &__content {
         flex-direction: column;
         text-align: center;
+        gap: 25px;
       }
 
       &__text {
@@ -131,11 +143,26 @@
       }
 
       &__title {
-        font-size: 20px;
+        font-size: 22px;
       }
 
       &__description {
-        font-size: 13px;
+        font-size: 14px;
+      }
+
+      &__chart {
+        width: 160px;
+        height: 160px;
+      }
+
+      &__stats {
+        .stat-value {
+          font-size: 28px;
+        }
+
+        .stat-label {
+          font-size: 14px;
+        }
       }
     }
   }

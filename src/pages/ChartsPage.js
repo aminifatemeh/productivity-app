@@ -13,16 +13,33 @@ function ChartsPage() {
 
     useEffect(() => {
         fetchTodayPerformance();
+
+        // هر 30 ثانیه یکبار refresh
+        const interval = setInterval(() => {
+            fetchTodayPerformance();
+        }, 30000);
+
+        return () => clearInterval(interval);
     }, []);
 
     const fetchTodayPerformance = async () => {
         try {
             setLoading(true);
             const response = await tasksAPI.getTodayPerformance();
-            setTodayPerformance(response);
+            console.log('Today Performance Response:', response);
+
+            // تبدیل نام فیلدها برای سازگاری با UI
+            const normalizedData = {
+                completion_percentage: response.done_percent,
+                tasks_completed_today: response.done_today_count,
+                undone_percent: response.undone_percent
+            };
+
+            setTodayPerformance(normalizedData);
             setError(null);
         } catch (err) {
             console.error('Error fetching today performance:', err);
+            console.error('Error details:', err.response?.data);
             setError('خطا در دریافت اطلاعات');
         } finally {
             setLoading(false);
@@ -41,92 +58,95 @@ function ChartsPage() {
     };
 
     return (
-        <div className="d-flex charts-page" dir="rtl">
-            <SidebarMenu />
-            <div className="main-content d-flex flex-column flex-grow-1">
-                <div className="charts-header">
-                    <h1 className="charts-title">{t('charts.title')}</h1>
+      <div className="d-flex charts-page" dir="rtl">
+        <SidebarMenu />
+        <div className="main-content d-flex flex-column flex-grow-1">
+          <div className="charts-header">
+            <h1 className="charts-title">{t("charts.title")}</h1>
+          </div>
+
+          <div className="charts-content">
+            {loading ? (
+              <div className="loading-message">در حال بارگذاری...</div>
+            ) : error ? (
+              <div className="error-message">{error}</div>
+            ) : (
+              <div className="performance-card">
+                <div className="performance-card__content">
+                  <div className="performance-card__text">
+                    <h2 className="performance-card__title">
+                      {t("charts.todayProgress")}
+                    </h2>
+                    <p className="performance-card__description">
+                      {t("charts.todayProgressDescription", {
+                        completed: todayPerformance?.tasks_completed_today || 0,
+                      })}
+                    </p>
+                    <div className="stat-item">
+                      <span className="stat-label">
+                        {t("charts.tasksCompleted")} :
+                      </span>
+                      <span className="stat-value">
+                        {todayPerformance?.tasks_completed_today || 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="performance-card__chart">
+                    <svg className="donut-chart" viewBox="0 0 160 160">
+                      {/* Background circle */}
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="70"
+                        fill="none"
+                        stroke="#E0E0E0"
+                        strokeWidth="12"
+                      />
+                      {/* Progress circle */}
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="70"
+                        fill="none"
+                        stroke="#57CC99"
+                        strokeWidth="12"
+                        strokeLinecap="round"
+                        style={getDonutStyle(
+                          todayPerformance?.completion_percentage || 0
+                        )}
+                        transform="rotate(-90 80 80)"
+                      />
+                      {/* Center text */}
+                      <text
+                        x="80"
+                        y="75"
+                        textAnchor="middle"
+                        fontSize="32"
+                        fontWeight="bold"
+                        fill="#2C868B"
+                      >
+                        {todayPerformance?.completion_percentage || 0}%
+                      </text>
+                      <text
+                        x="80"
+                        y="95"
+                        textAnchor="middle"
+                        fontSize="12"
+                        fill="#7C7C7C"
+                      >
+                        {t("charts.completed")}
+                      </text>
+                    </svg>
+                  </div>
                 </div>
 
-                <div className="charts-content">
-                    {loading ? (
-                        <div className="loading-message">در حال بارگذاری...</div>
-                    ) : error ? (
-                        <div className="error-message">{error}</div>
-                    ) : (
-                        <div className="performance-card">
-                            <div className="performance-card__content">
-                                <div className="performance-card__text">
-                                    <h2 className="performance-card__title">
-                                        {t('charts.todayProgress')}
-                                    </h2>
-                                    <p className="performance-card__description">
-                                        {t('charts.todayProgressDescription', {
-                                            completed: todayPerformance?.tasks_completed_today || 0,
-                                        })}
-                                    </p>
-                                </div>
-
-                                <div className="performance-card__chart">
-                                    <svg className="donut-chart" viewBox="0 0 160 160">
-                                        {/* Background circle */}
-                                        <circle
-                                            cx="80"
-                                            cy="80"
-                                            r="70"
-                                            fill="none"
-                                            stroke="#E0E0E0"
-                                            strokeWidth="12"
-                                        />
-                                        {/* Progress circle */}
-                                        <circle
-                                            cx="80"
-                                            cy="80"
-                                            r="70"
-                                            fill="none"
-                                            stroke="#57CC99"
-                                            strokeWidth="12"
-                                            strokeLinecap="round"
-                                            style={getDonutStyle(todayPerformance?.completion_percentage || 0)}
-                                            transform="rotate(-90 80 80)"
-                                        />
-                                        {/* Center text */}
-                                        <text
-                                            x="80"
-                                            y="75"
-                                            textAnchor="middle"
-                                            fontSize="32"
-                                            fontWeight="bold"
-                                            fill="#2C868B"
-                                        >
-                                            {todayPerformance?.completion_percentage || 0}%
-                                        </text>
-                                        <text
-                                            x="80"
-                                            y="95"
-                                            textAnchor="middle"
-                                            fontSize="12"
-                                            fill="#7C7C7C"
-                                        >
-                                            {t('charts.completed')}
-                                        </text>
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <div className="performance-card__stats">
-                                <div className="stat-item">
-                                    <span className="stat-label">{t('charts.tasksCompleted')}</span>
-                                    <span className="stat-value">
-                                        {todayPerformance?.tasks_completed_today || 0}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
+                <div className="performance-card__stats"></div>
+              </div>
+            )}
+          </div>
         </div>
+      </div>
     );
 }
 

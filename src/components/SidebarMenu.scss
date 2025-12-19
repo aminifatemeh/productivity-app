@@ -1,12 +1,14 @@
 .sidebar {
   width: 321px;
   top: 0;
-  inset-inline-start: 0; /* در فارسی به راست، در انگلیسی به چپ */
+  inset-inline-start: 0;
   height: 100vh;
   padding: 2rem;
   background-color: #eaffeb;
   position: fixed;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
 
   &__title {
     text-align: start;
@@ -15,6 +17,7 @@
   &__items {
     text-align: start;
     list-style: none;
+    flex: 1;
     li {
       margin: 30px 0;
       padding: 10px;
@@ -37,11 +40,10 @@
   }
 
   &__logout {
-    display: flex;
-    height: 150px;
-    align-items: end;
+    margin-top: auto;
+    padding-bottom: 1rem;
     button {
-      width: 260px;
+      width: 100%;
       height: 60px;
       border-radius: 15px;
       border: none;
@@ -50,6 +52,17 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: #6bc070;
+      }
+
+      span {
+        font-size: 16px;
+        font-weight: 500;
+      }
     }
   }
 }
