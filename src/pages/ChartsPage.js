@@ -4,24 +4,26 @@ import './ChartsPage.scss';
 import SidebarMenu from '../components/SidebarMenu';
 import { LanguageContext } from '../context/LanguageContext';
 import { tasksAPI } from '../api/apiService';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import moment from 'moment-jalaali';
 
 function ChartsPage() {
     const { t } = useContext(LanguageContext);
     const [todayPerformance, setTodayPerformance] = useState(null);
     const [weekPerformance, setWeekPerformance] = useState(null);
+    const [monthPerformance, setMonthPerformance] = useState(null);
+    const [overallPerformance, setOverallPerformance] = useState(null);
+    const [currentMonth, setCurrentMonth] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchAllData();
 
-        // هر 30 ثانیه یکبار refresh
-        const interval = setInterval(() => {
-            fetchAllData();
-        }, 30000);
-
-        return () => clearInterval(interval);
+        // تشخیص ماه فارسی
+        moment.loadPersian({ usePersianDigits: false });
+        const persianMonth = moment().format('jMMMM');
+        setCurrentMonth(persianMonth);
     }, []);
 
     const fetchAllData = async () => {
@@ -42,6 +44,15 @@ function ChartsPage() {
             const processedWeekData = processWeekData(weekResponse);
             setWeekPerformance(processedWeekData);
 
+            // دریافت داده ماهانه
+            const monthResponse = await tasksAPI.getMonthPerformance();
+            const processedMonthData = processMonthData(monthResponse);
+            setMonthPerformance(processedMonthData);
+
+            // دریافت داده عملکرد کلی
+            const performanceResponse = await tasksAPI.getPerformance();
+            setOverallPerformance(performanceResponse);
+
             setError(null);
         } catch (err) {
             console.error('Error fetching data:', err);
@@ -54,9 +65,8 @@ function ChartsPage() {
     const processWeekData = (data) => {
         const persianDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
         const today = new Date();
-        const todayIndex = (today.getDay() + 1) % 7; // تبدیل به ایندکس فارسی (شنبه = 0)
+        const todayIndex = (today.getDay() + 1) % 7;
 
-        // تبدیل object به array و معکوس کردن (از 6 روز قبل تا امروز)
         const dataArray = [];
         for (let i = 6; i >= 0; i--) {
             const dayData = data[i.toString()];
@@ -64,6 +74,31 @@ function ChartsPage() {
 
             dataArray.push({
                 day: persianDays[dayNameIndex],
+                done: dayData.done,
+                undone: dayData.undone,
+                total: dayData.done + dayData.undone,
+                isToday: i === 0
+            });
+        }
+
+        return dataArray;
+    };
+
+    const processMonthData = (data) => {
+        moment.loadPersian({ usePersianDigits: false });
+        const today = moment();
+        const currentDay = parseInt(today.format('jD'));
+
+        const dataArray = [];
+
+        // از 29 روز قبل تا امروز (مجموعاً 30 روز)
+        for (let i = 29; i >= 0; i--) {
+            const dayData = data[i.toString()];
+            const targetDate = moment().subtract(i, 'days');
+            const dayNumber = parseInt(targetDate.format('jD'));
+
+            dataArray.push({
+                day: dayNumber,
                 done: dayData.done,
                 undone: dayData.undone,
                 total: dayData.done + dayData.undone,
@@ -85,6 +120,24 @@ function ChartsPage() {
         };
     };
 
+    const getMultiColorDonutStyle = (percentages) => {
+        const radius = 70;
+        const circumference = 2 * Math.PI * radius;
+
+        let currentOffset = 0;
+        const segments = percentages.map(percentage => {
+            const segmentLength = (percentage / 100) * circumference;
+            const segment = {
+                strokeDasharray: `${segmentLength} ${circumference}`,
+                strokeDashoffset: -currentOffset,
+            };
+            currentOffset += segmentLength;
+            return segment;
+        });
+
+        return segments;
+    };
+
     const CustomBar = (props) => {
         const { fill, x, y, width, height, payload } = props;
         const isToday = payload.isToday;
@@ -104,7 +157,7 @@ function ChartsPage() {
         );
     };
 
-    const CustomTooltip = ({ active, payload }) => {
+    const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
@@ -114,7 +167,9 @@ function ChartsPage() {
                     border: '1px solid #ccc',
                     borderRadius: '5px'
                 }}>
-                    <p style={{ margin: 0, fontWeight: 'bold' }}>{data.day}</p>
+                    <p style={{ margin: 0, fontWeight: 'bold' }}>
+                        {typeof data.day === 'number' ? `روز ${data.day}` : data.day}
+                    </p>
                     <p style={{ margin: '5px 0', color: '#57CC99' }}>
                         انجام شده: {data.done}
                     </p>
@@ -145,7 +200,7 @@ function ChartsPage() {
                         <div className="error-message">{error}</div>
                     ) : (
                         <>
-                            {/* کارت نمودار دونات */}
+                            {/* کارت نمودار دونات امروز */}
                             <div className="performance-card">
                                 <div className="performance-card__content">
                                     <div className="performance-card__text">
@@ -212,6 +267,105 @@ function ChartsPage() {
                                 </div>
                             </div>
 
+                            {/* کارت نمودار عملکرد کلی */}
+                            <div className="performance-card">
+                                <div className="performance-card__content">
+                                    <div className="performance-card__text">
+                                        <h2 className="performance-card__title">
+                                            نمودار عملکرد کلی
+                                        </h2>
+                                        <p className="performance-card__description">
+                                            وضعیت کلی انجام تسک‌های شما
+                                        </p>
+                                        <div className="performance-stats">
+                                            <div className="stat-item-inline">
+                                                <div className="stat-color-box" style={{ backgroundColor: '#57CC99' }}></div>
+                                                <span className="stat-label">به موقع:</span>
+                                                <span className="stat-value">{overallPerformance?.on_time_percentage || 0}%</span>
+                                            </div>
+                                            <div className="stat-item-inline">
+                                                <div className="stat-color-box" style={{ backgroundColor: '#FFA726' }}></div>
+                                                <span className="stat-label">با تاخیر:</span>
+                                                <span className="stat-value">{overallPerformance?.late_percentage || 0}%</span>
+                                            </div>
+                                            <div className="stat-item-inline">
+                                                <div className="stat-color-box" style={{ backgroundColor: '#FF6B6B' }}></div>
+                                                <span className="stat-label">تمام نشده:</span>
+                                                <span className="stat-value">{overallPerformance?.unfinished_percentage || 0}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="performance-card__chart">
+                                        <svg className="donut-chart" viewBox="0 0 160 160">
+                                            <circle
+                                                cx="80"
+                                                cy="80"
+                                                r="70"
+                                                fill="none"
+                                                stroke="#E0E0E0"
+                                                strokeWidth="12"
+                                            />
+                                            <circle
+                                                cx="80"
+                                                cy="80"
+                                                r="70"
+                                                fill="none"
+                                                stroke="#57CC99"
+                                                strokeWidth="12"
+                                                strokeLinecap="round"
+                                                style={getMultiColorDonutStyle([
+                                                    overallPerformance?.on_time_percentage || 0,
+                                                    overallPerformance?.late_percentage || 0,
+                                                    overallPerformance?.unfinished_percentage || 0
+                                                ])[0]}
+                                                transform="rotate(-90 80 80)"
+                                            />
+                                            <circle
+                                                cx="80"
+                                                cy="80"
+                                                r="70"
+                                                fill="none"
+                                                stroke="#FFA726"
+                                                strokeWidth="12"
+                                                strokeLinecap="round"
+                                                style={getMultiColorDonutStyle([
+                                                    overallPerformance?.on_time_percentage || 0,
+                                                    overallPerformance?.late_percentage || 0,
+                                                    overallPerformance?.unfinished_percentage || 0
+                                                ])[1]}
+                                                transform="rotate(-90 80 80)"
+                                            />
+                                            <circle
+                                                cx="80"
+                                                cy="80"
+                                                r="70"
+                                                fill="none"
+                                                stroke="#FF6B6B"
+                                                strokeWidth="12"
+                                                strokeLinecap="round"
+                                                style={getMultiColorDonutStyle([
+                                                    overallPerformance?.on_time_percentage || 0,
+                                                    overallPerformance?.late_percentage || 0,
+                                                    overallPerformance?.unfinished_percentage || 0
+                                                ])[2]}
+                                                transform="rotate(-90 80 80)"
+                                            />
+                                            <text
+                                                x="80"
+                                                y="80"
+                                                textAnchor="middle"
+                                                fontSize="14"
+                                                fontWeight="bold"
+                                                fill="#2C868B"
+                                            >
+                                                عملکرد کلی
+                                            </text>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* کارت نمودار میله‌ای هفتگی */}
                             <div className="performance-card weekly-chart">
                                 <div className="performance-card__header">
@@ -234,6 +388,60 @@ function ChartsPage() {
                                                 dataKey="day"
                                                 tick={{ fill: '#7C7C7C', fontSize: 14 }}
                                                 tickLine={{ stroke: '#E0E0E0' }}
+                                            />
+                                            <YAxis
+                                                tick={{ fill: '#7C7C7C', fontSize: 14 }}
+                                                tickLine={{ stroke: '#E0E0E0' }}
+                                            />
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <Legend
+                                                wrapperStyle={{ paddingTop: '20px' }}
+                                                formatter={(value) => {
+                                                    if (value === 'done') return 'انجام شده';
+                                                    if (value === 'undone') return 'انجام نشده';
+                                                    return value;
+                                                }}
+                                            />
+                                            <Bar
+                                                dataKey="done"
+                                                stackId="a"
+                                                fill="#57CC99"
+                                                shape={<CustomBar />}
+                                            />
+                                            <Bar
+                                                dataKey="undone"
+                                                stackId="a"
+                                                fill="#FF6B6B"
+                                                shape={<CustomBar />}
+                                            />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            {/* کارت نمودار میله‌ای ماهانه */}
+                            <div className="performance-card monthly-chart">
+                                <div className="performance-card__header">
+                                    <h2 className="performance-card__title">
+                                        نمودار پیشرفت ماهانه - {currentMonth}
+                                    </h2>
+                                    <p className="performance-card__description">
+                                        عملکرد شما در 30 روز گذشته
+                                    </p>
+                                </div>
+
+                                <div className="performance-card__bar-chart">
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <BarChart
+                                            data={monthPerformance}
+                                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+                                            <XAxis
+                                                dataKey="day"
+                                                tick={{ fill: '#7C7C7C', fontSize: 11 }}
+                                                tickLine={{ stroke: '#E0E0E0' }}
+                                                interval={0}
                                             />
                                             <YAxis
                                                 tick={{ fill: '#7C7C7C', fontSize: 14 }}

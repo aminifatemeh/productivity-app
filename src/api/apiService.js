@@ -93,6 +93,14 @@ export const tasksAPI = {
         const response = await apiClient.get('/tasks/report/week_performance/');
         return response.data;
     },
+    getMonthPerformance: async () => {
+        const response = await apiClient.get('/tasks/report/month_performance/');
+        return response.data;
+    },
+    getPerformance: async () => {
+        const response = await apiClient.get('/tasks/report/performance/');
+        return response.data;
+    },
 };
 
 export default apiClient;

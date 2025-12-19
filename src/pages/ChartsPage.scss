@@ -58,6 +58,10 @@
       padding: 20px 30px;
     }
 
+    &.monthly-chart {
+      padding: 20px 30px;
+    }
+
     &__content {
       display: flex;
       justify-content: space-between;
@@ -93,6 +97,26 @@
       font-size: 15px;
       font-weight: bold;
       color: #323434;
+    }
+
+    .performance-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .stat-item-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-color-box {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      flex-shrink: 0;
     }
 
     &__chart {
@@ -148,6 +172,10 @@
         padding: 20px;
       }
 
+      &.monthly-chart {
+        padding: 20px;
+      }
+
       &__content {
         flex-direction: column;
         text-align: center;
@@ -185,6 +213,14 @@
 
       .stat-label {
         font-size: 14px;
+      }
+
+      .performance-stats {
+        align-items: center;
+      }
+
+      .stat-item-inline {
+        justify-content: center;
       }
     }
   }
