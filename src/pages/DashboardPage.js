@@ -54,7 +54,7 @@ function DashboardPage() {
         <div className="dashboard-page d-flex">
             <UtilitySidebar selectedTask={selectedTask} selectedDate={selectedDate} />
             <main className="main-content d-flex flex-column align-items-center w-100 gap-4">
-                <div className="d-flex justify-content-center gap-4 mt-5">
+                <div className="d-flex justify-content-center gap-4 mt-2">
                     <TaskPreviewCard
                         cardName="archived"
                         tasks={tasks}

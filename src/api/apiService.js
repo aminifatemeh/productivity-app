@@ -105,6 +105,12 @@ export const tasksAPI = {
         const response = await apiClient.get('/tasks/report/average_delay/');
         return response.data;
     },
+    setTaskDuration: async (taskId, durationFormatted) => {
+        const response = await apiClient.post(`/tasks/${taskId}/set_duration/`, {
+            duration: durationFormatted  // فرمت: "H:MM:SS" مثل "0:00:40"
+        });
+        return response.data;
+    },
 };
 
 export default apiClient;

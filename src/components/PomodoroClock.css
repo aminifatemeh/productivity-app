@@ -25,59 +25,41 @@
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  background: conic-gradient(#2C868B 0% 25%, #5ecea8 25% 100%);
+  background: #5ecea8;
   display: flex;
   justify-content: center;
   align-items: center;
   position: absolute;
   top: 10px;
   left: 10px;
+  transition: background 0.3s ease;
+}
+.pomodoro-clock__time-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 10px 15px;
+  z-index: 2;
 }
 .pomodoro-clock__time {
-  width: 100px;
-  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  font-size: 30px;
-  font-weight: bold;
-  color: #333;
-  z-index: 2;
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.2s ease;
-}
-.pomodoro-clock__time:hover {
-  transform: scale(1.05);
-}
-.pomodoro-clock__time-input {
-  width: 80px;
-  height: 35px;
   font-size: 28px;
   font-weight: bold;
-  text-align: center;
-  border: 2px solid #2C868B;
-  border-radius: 10px;
-  background-color: #fff;
   color: #2C868B;
-  outline: none;
-  padding: 2px;
-  z-index: 3;
+  user-select: none;
 }
-.pomodoro-clock__time-input:focus {
-  border-color: #5ecea8;
-  box-shadow: 0 0 8px rgba(94, 206, 168, 0.5);
-}
-.pomodoro-clock__time-input::-webkit-inner-spin-button, .pomodoro-clock__time-input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.pomodoro-clock__time-input {
-  -moz-appearance: textfield;
+.pomodoro-clock__total-time {
+  font-size: 12px;
+  color: #7C7C7C;
+  font-weight: 500;
 }
 .pomodoro-clock__controls {
   position: absolute;

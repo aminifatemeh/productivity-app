@@ -22,7 +22,7 @@ const cardConfigs = {
 };
 
 function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
-  const { timers, initialDuration, startTimer, stopTimer, setTimers } = useContext(TaskContext);
+  const { timers, startTimer, stopTimer, setTimers } = useContext(TaskContext);
   const { t } = useContext(LanguageContext);
   const config = cardConfigs[cardName] || cardConfigs.active;
 
@@ -35,8 +35,13 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
   });
 
   const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }
     return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
@@ -47,11 +52,11 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
     if (!timers[task.id]) {
       setTimers(prev => ({
         ...prev,
-        [task.id]: { remaining: initialDuration || 300, isRunning: false }
+        [task.id]: { elapsed: 0, isRunning: false }
       }));
     }
 
-    const timer = timers[task.id] || { remaining: initialDuration || 300, isRunning: false };
+    const timer = timers[task.id] || { elapsed: 0, isRunning: false };
 
     if (timer.isRunning) {
       stopTimer(task.id);
@@ -77,15 +82,12 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
               filteredTasks.map((task) => {
                 if (!task || !task.id) return null;
 
-                const timer = timers[task.id] || {
-                  remaining: initialDuration || 300,
-                  isRunning: false
-                };
+                const timer = timers[task.id] || { elapsed: 0, isRunning: false };
+                const totalTime = (task.totalDuration || 0) + timer.elapsed;
 
-                const totalDuration = initialDuration || 300;
-                const progress = totalDuration > 0
-                    ? Math.min(((totalDuration - timer.remaining) / totalDuration) * 100, 100)
-                    : 0;
+                // Progress bar - نمایش زمان کل نسبت به یک مقدار ثابت (مثلاً 1 ساعت)
+                const maxDuration = 3600; // 1 ساعت
+                const progress = Math.min((totalTime / maxDuration) * 100, 100);
 
                 return (
                     <div
@@ -95,7 +97,14 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
                         onClick={() => setSelectedTask && setSelectedTask(task)}
                     >
                       <div className="circle"></div>
-                      <span>{task.title || "Untitled"}</span>
+                      <span title={task.title || "Untitled"}>
+                        {task.title || "Untitled"}
+                        {totalTime > 0 && (
+                            <small style={{ marginRight: '5px', fontSize: '0.75rem', color: '#666' }}>
+                              ({formatTime(totalTime)})
+                            </small>
+                        )}
+                      </span>
                       <img
                           src={timer.isRunning ? "/assets/icons/pause.svg" : "/assets/icons/Polygon.svg"}
                           alt={timer.isRunning ? "Pause" : "Play"}

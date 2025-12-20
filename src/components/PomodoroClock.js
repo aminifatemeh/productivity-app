@@ -1,28 +1,30 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import "./PomodoroClock.scss";
 import { TaskContext } from "./TaskContext";
 
 const PomodoroClock = ({ selectedTask }) => {
-    const { timers, startTimer, stopTimer, resetTimerForTask, initialDuration, setTimers } = useContext(TaskContext);
-    const [isEditingTime, setIsEditingTime] = useState(false);
-    const [editMinutes, setEditMinutes] = useState(Math.floor(initialDuration / 60));
+    const { timers, startTimer, stopTimer, resetTimerForTask, setTimers, tasks } = useContext(TaskContext);
 
     // Initialize timer for selected task if it doesn't exist
     useEffect(() => {
         if (selectedTask && !timers[selectedTask.id]) {
             setTimers(prev => ({
                 ...prev,
-                [selectedTask.id]: { remaining: initialDuration, isRunning: false }
+                [selectedTask.id]: { elapsed: 0, isRunning: false }
             }));
         }
-    }, [selectedTask, timers, initialDuration, setTimers]);
+    }, [selectedTask, timers, setTimers]);
 
     const currentTimer = selectedTask && timers[selectedTask.id]
         ? timers[selectedTask.id]
-        : { remaining: initialDuration, isRunning: false };
+        : { elapsed: 0, isRunning: false };
 
-    const time = currentTimer.remaining;
+    const time = currentTimer.elapsed;
     const isActive = currentTimer.isRunning;
+
+    // محاسبه زمان کل (زمان قبلی + زمان جاری)
+    const currentTask = tasks.find(t => t.id === selectedTask?.id);
+    const totalTime = (currentTask?.totalDuration || 0) + time;
 
     const toggleTimer = () => {
         if (!selectedTask) return;
@@ -39,46 +41,19 @@ const PomodoroClock = ({ selectedTask }) => {
         resetTimerForTask(selectedTask.id);
     };
 
-    const handleTimeClick = () => {
-        if (!isActive && selectedTask) {
-            setIsEditingTime(true);
-            setEditMinutes(Math.floor(time / 60));
-        }
-    };
-
-    const handleTimeChange = (e) => {
-        const value = parseInt(e.target.value) || 0;
-        setEditMinutes(Math.max(1, Math.min(99, value))); // بین 1 تا 99 دقیقه
-    };
-
-    const handleTimeSubmit = () => {
-        if (selectedTask && editMinutes > 0) {
-            const newDuration = editMinutes * 60;
-            setTimers(prev => ({
-                ...prev,
-                [selectedTask.id]: { remaining: newDuration, isRunning: false }
-            }));
-        }
-        setIsEditingTime(false);
-    };
-
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleTimeSubmit();
-        } else if (e.key === 'Escape') {
-            setIsEditingTime(false);
-        }
-    };
-
     const formatTime = (seconds) => {
-        const mins = Math.floor(seconds / 60);
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
+
+        if (hours > 0) {
+            return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+        }
         return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     };
 
-    const progressPercentage = initialDuration && time
-        ? ((initialDuration - time) / initialDuration) * 100
-        : 0;
+    // Progress برای نمایش - چون کرنومتره، فقط وقتی active هست progress داره
+    const progressPercentage = isActive ? 75 : 0; // یا می‌تونی براساس زمان یه فرمول دیگه بنویسی
 
     return (
         <div className="pomodoro-clock">
@@ -86,31 +61,21 @@ const PomodoroClock = ({ selectedTask }) => {
                 <div
                     className="pomodoro-clock__timer-circle"
                     style={{
-                        background: `conic-gradient(#2C868B ${progressPercentage}%, #5ecea8 ${progressPercentage}% 100%)`,
+                        background: isActive
+                            ? `conic-gradient(#2C868B ${progressPercentage}%, #5ecea8 ${progressPercentage}% 100%)`
+                            : '#5ecea8',
                     }}
                 >
-                    {isEditingTime ? (
-                        <input
-                            type="number"
-                            className="pomodoro-clock__time-input"
-                            value={editMinutes}
-                            onChange={handleTimeChange}
-                            onBlur={handleTimeSubmit}
-                            onKeyDown={handleKeyPress}
-                            autoFocus
-                            min="1"
-                            max="99"
-                        />
-                    ) : (
-                        <span
-                            className="pomodoro-clock__time"
-                            onClick={handleTimeClick}
-                            style={{ cursor: !isActive && selectedTask ? 'pointer' : 'default' }}
-                            title={!isActive && selectedTask ? 'کلیک برای تغییر زمان' : ''}
-                        >
+                    <div className="pomodoro-clock__time-container">
+                        <span className="pomodoro-clock__time">
                             {formatTime(time)}
                         </span>
-                    )}
+                        {totalTime > 0 && (
+                            <span className="pomodoro-clock__total-time">
+                                کل: {formatTime(totalTime)}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
             <div className="pomodoro-clock__controls">

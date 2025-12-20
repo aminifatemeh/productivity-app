@@ -9,11 +9,8 @@ export const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
     const [tasks, setTasks] = useState([]);
-    const [timers, setTimers] = useState({});
+    const [timers, setTimers] = useState({}); // { taskId: { elapsed: seconds, isRunning: bool } }
     const [isLoading, setIsLoading] = useState(true);
-    const [initialDuration, setInitialDuration] = useState(
-        (parseInt(localStorage.getItem("timerDuration")) || 5) * 60
-    );
 
     const generateUniqueId = () => Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
 
@@ -29,16 +26,15 @@ export const TaskProvider = ({ children }) => {
             setIsLoading(true);
             const data = await tasksAPI.getAllTasks();
 
-            // فیلتر کردن تسک‌ها: فقط تسک‌های اصلی (بدون parent)
             const fetchedTasks = Array.isArray(data)
                 ? data
-                    .filter(task => !task.parent) // فقط تسک‌های اصلی
+                    .filter(task => !task.parent)
                     .map((task, index) => ({
                         id: task.id.toString(),
                         title: task.title || 'بدون عنوان',
                         description: task.description || '',
                         flag_tuNobat: task.flag_tuNobat || false,
-                        isDone: !!task.done_date, // چک کردن done_date برای isDone
+                        isDone: !!task.done_date,
                         subtasks: Array.isArray(task.subtasks) ? task.subtasks.map(sub => ({
                             id: sub.id,
                             title: sub.title || '',
@@ -49,6 +45,7 @@ export const TaskProvider = ({ children }) => {
                         deadline_date: task.deadline_date || '',
                         hour: task.hour || '',
                         selectedDays: Array.isArray(task.selectedDays) ? task.selectedDays : [],
+                        totalDuration: task.total_duration || 0, // زمان کل ذخیره شده
                         originalIndex: index,
                     }))
                 : [];
@@ -67,7 +64,6 @@ export const TaskProvider = ({ children }) => {
 
     const addTask = async (taskData) => {
         try {
-            // فیلتر کردن ساب‌تسک‌های خالی
             const validSubtasks = (taskData.subtasks || [])
                 .filter(sub => sub.title && sub.title.trim() !== '')
                 .map(sub => ({
@@ -102,6 +98,7 @@ export const TaskProvider = ({ children }) => {
                 deadline_date: response.deadline_date || '',
                 hour: response.hour || '',
                 selectedDays: Array.isArray(response.selectedDays) ? response.selectedDays : [],
+                totalDuration: 0,
                 originalIndex: tasks.length,
             };
 
@@ -118,7 +115,6 @@ export const TaskProvider = ({ children }) => {
 
     const editTask = async (updatedTask) => {
         try {
-            // فیلتر کردن ساب‌تسک‌های خالی
             const validSubtasks = (updatedTask.subtasks || [])
                 .filter(sub => sub.title && sub.title.trim() !== '')
                 .map(sub => ({
@@ -155,6 +151,7 @@ export const TaskProvider = ({ children }) => {
                 deadline_date: response.deadline_date || '',
                 hour: response.hour || '',
                 selectedDays: Array.isArray(response.selectedDays) ? response.selectedDays : [],
+                totalDuration: response.total_duration || updatedTask.totalDuration || 0,
                 originalIndex: updatedTask.originalIndex || 0,
             };
 
@@ -202,8 +199,6 @@ export const TaskProvider = ({ children }) => {
 
         try {
             const response = await tasksAPI.toggleTask(taskId, done);
-
-            // استفاده از response.data.done مطابق کد قدیمی
             const isDone = response.done !== undefined ? response.done : done;
 
             setTasks((prevTasks) =>
@@ -214,14 +209,12 @@ export const TaskProvider = ({ children }) => {
         } catch (err) {
             console.error('Error toggling task:', err.response?.data || err.message);
 
-            // اگر 401 بود، refresh token
             if (err.response?.status === 401) {
                 const refresh = localStorage.getItem('refreshToken');
                 if (refresh) {
                     try {
                         const refreshResponse = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
                         localStorage.setItem('accessToken', refreshResponse.data.access);
-                        // دوباره تلاش
                         return await toggleTask(taskId);
                     } catch (refreshErr) {
                         localStorage.removeItem('accessToken');
@@ -240,58 +233,93 @@ export const TaskProvider = ({ children }) => {
         }
     };
 
-    const startTimer = (taskId) => setTimers(prev => ({
-        ...prev,
-        [taskId]: { ...prev[taskId], isRunning: true }
-    }));
+    const startTimer = (taskId) => {
+        setTimers(prev => ({
+            ...prev,
+            [taskId]: {
+                elapsed: prev[taskId]?.elapsed || 0,
+                isRunning: true
+            }
+        }));
+    };
 
-    const stopTimer = (taskId) => setTimers(prev => ({
-        ...prev,
-        [taskId]: { ...prev[taskId], isRunning: false }
-    }));
+    const formatDurationForAPI = (seconds) => {
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
 
-    const resetTimerForTask = (taskId) => setTimers(prev => ({
-        ...prev,
-        [taskId]: { remaining: initialDuration, isRunning: false }
-    }));
+        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
 
+    const stopTimer = async (taskId) => {
+        const currentTimer = timers[taskId];
+        if (!currentTimer) return;
+
+        setTimers(prev => ({
+            ...prev,
+            [taskId]: { ...prev[taskId], isRunning: false }
+        }));
+
+        try {
+            const currentTask = tasks.find(t => t.id === taskId);
+            const previousDuration = currentTask?.totalDuration || 0;
+            const newTotalDuration = previousDuration + currentTimer.elapsed;
+
+            const formattedDuration = formatDurationForAPI(newTotalDuration);
+            const response = await tasksAPI.setTaskDuration(taskId, formattedDuration);
+
+            setTasks(prev => prev.map(t =>
+                t.id === taskId ? { ...t, totalDuration: newTotalDuration } : t
+            ));
+
+            setTimers(prev => ({
+                ...prev,
+                [taskId]: { elapsed: 0, isRunning: false }
+            }));
+
+        } catch (err) {
+            console.error('Error sending duration:', err.message);
+        }
+    };
+
+    const resetTimerForTask = async (taskId) => {
+        const currentTimer = timers[taskId];
+
+        // اگر تایمر در حال اجرا بود، اول stop کن و زمان رو بفرست
+        if (currentTimer?.isRunning && currentTimer.elapsed > 0) {
+            await stopTimer(taskId);
+        }
+
+        // ریست کردن تایمر
+        setTimers(prev => ({
+            ...prev,
+            [taskId]: { elapsed: 0, isRunning: false }
+        }));
+    };
+
+    // کرنومتر - هر ثانیه elapsed رو افزایش بده
     useEffect(() => {
         const interval = setInterval(() => {
             setTimers(prev => {
                 const updated = { ...prev };
                 let changed = false;
+
                 Object.keys(updated).forEach(id => {
-                    if (updated[id]?.isRunning && updated[id].remaining > 0) {
-                        updated[id].remaining -= 1;
-                        changed = true;
-                    } else if (updated[id]?.isRunning) {
-                        updated[id].isRunning = false;
+                    if (updated[id]?.isRunning) {
+                        updated[id] = {
+                            ...updated[id],
+                            elapsed: updated[id].elapsed + 1
+                        };
                         changed = true;
                     }
                 });
+
                 return changed ? updated : prev;
             });
         }, 1000);
-        return () => clearInterval(interval);
-    }, []);
 
-    useEffect(() => {
-        const handleStorage = (e) => {
-            if (e.key === "timerDuration") {
-                const newDuration = (parseInt(e.newValue) || 5) * 60;
-                setInitialDuration(newDuration);
-                setTimers(prev => {
-                    const updated = {};
-                    Object.keys(prev).forEach(id => {
-                        updated[id] = { remaining: newDuration, isRunning: false };
-                    });
-                    return updated;
-                });
-            }
-        };
-        window.addEventListener('storage', handleStorage);
-        return () => window.removeEventListener('storage', handleStorage);
-    }, []);
+        return () => clearInterval(interval);
+    }, []); // dependencies خالی - فقط یکبار اجرا بشه
 
     return (
         <TaskContext.Provider value={{
@@ -299,7 +327,6 @@ export const TaskProvider = ({ children }) => {
             setTasks,
             timers,
             setTimers,
-            initialDuration,
             isLoading,
             addTask,
             editTask,
