@@ -13,6 +13,7 @@ function ChartsPage() {
     const [weekPerformance, setWeekPerformance] = useState(null);
     const [monthPerformance, setMonthPerformance] = useState(null);
     const [overallPerformance, setOverallPerformance] = useState(null);
+    const [averageDelay, setAverageDelay] = useState(null);
     const [currentMonth, setCurrentMonth] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -52,6 +53,10 @@ function ChartsPage() {
             // دریافت داده عملکرد کلی
             const performanceResponse = await tasksAPI.getPerformance();
             setOverallPerformance(performanceResponse);
+
+            // دریافت داده اهمال‌کاری
+            const delayResponse = await tasksAPI.getAverageDelay();
+            setAverageDelay(delayResponse);
 
             setError(null);
         } catch (err) {
@@ -136,6 +141,24 @@ function ChartsPage() {
         });
 
         return segments;
+    };
+
+    const convertDaysToTime = (days) => {
+        if (!days || days === 0) {
+            return { days: 0, hours: 0, minutes: 0 };
+        }
+
+        const totalDays = Math.floor(days);
+        const remainingHours = (days - totalDays) * 24;
+        const hours = Math.floor(remainingHours);
+        const minutes = Math.floor((remainingHours - hours) * 60);
+
+        return { days: totalDays, hours, minutes };
+    };
+
+    const formatDelayTime = (days) => {
+        const { days: d, hours: h, minutes: m } = convertDaysToTime(days);
+        return `${d} روز ${h} ساعت ${m} دقیقه`;
     };
 
     const CustomBar = (props) => {
@@ -362,6 +385,48 @@ function ChartsPage() {
                                                 عملکرد کلی
                                             </text>
                                         </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* کارت نمودار اهمال‌کاری */}
+                            <div className="performance-card delay-card">
+                                <div className="performance-card__header">
+                                    <h2 className="performance-card__title">
+                                        نمودار اهمال‌کاری
+                                    </h2>
+                                    <p className="performance-card__description">
+                                        میانگین تاخیر در انجام تسک‌ها
+                                    </p>
+                                </div>
+
+                                <div className="delay-content">
+                                    <div className="delay-item">
+                                        <div className="delay-icon" style={{ backgroundColor: '#FFA726' }}>
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="white"/>
+                                            </svg>
+                                        </div>
+                                        <div className="delay-info">
+                                            <span className="delay-label">تسک‌های با تاخیر</span>
+                                            <span className="delay-time">
+                                                {formatDelayTime(averageDelay?.average_late_delay_days || 0)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="delay-item">
+                                        <div className="delay-icon" style={{ backgroundColor: '#FF6B6B' }}>
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="white"/>
+                                            </svg>
+                                        </div>
+                                        <div className="delay-info">
+                                            <span className="delay-label">تسک‌های تمام نشده</span>
+                                            <span className="delay-time">
+                                                {formatDelayTime(averageDelay?.average_unfinished_delay_days || 0)}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -101,6 +101,10 @@ export const tasksAPI = {
         const response = await apiClient.get('/tasks/report/performance/');
         return response.data;
     },
+    getAverageDelay: async () => {
+        const response = await apiClient.get('/tasks/report/average_delay/');
+        return response.data;
+    },
 };
 
 export default apiClient;

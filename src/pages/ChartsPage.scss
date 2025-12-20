@@ -62,6 +62,10 @@
       padding: 20px 30px;
     }
 
+    &.delay-card {
+      padding: 20px 30px;
+    }
+
     &__content {
       display: flex;
       justify-content: space-between;
@@ -146,12 +150,74 @@
     }
   }
 
+  .delay-content {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 40px;
+    margin-top: 20px;
+  }
+
+  .delay-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+  }
+
+  .delay-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .delay-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .delay-label {
+    font-size: 16px;
+    color: #7C7C7C;
+    font-weight: 500;
+  }
+
+  .delay-time {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2C868B;
+    line-height: 1.2;
+  }
+
   // Responsive design
   @media (max-width: 1024px) {
     .main-content {
       margin-right: 0;
       width: 100%;
       padding: 30px 40px;
+    }
+
+    .delay-content {
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .delay-item {
+      width: 100%;
     }
   }
 
@@ -173,6 +239,10 @@
       }
 
       &.monthly-chart {
+        padding: 20px;
+      }
+
+      &.delay-card {
         padding: 20px;
       }
 
@@ -221,6 +291,20 @@
 
       .stat-item-inline {
         justify-content: center;
+      }
+    }
+
+    .delay-time {
+      font-size: 18px;
+    }
+
+    .delay-icon {
+      width: 48px;
+      height: 48px;
+
+      svg {
+        width: 24px;
+        height: 24px;
       }
     }
   }
