@@ -38,11 +38,19 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             setName(initialTask.title || '');
             setDescription(initialTask.description || '');
             setHour(initialTask.hour || '');
-            setDueDate(
-                initialTask.deadline_date
-                    ? moment(initialTask.deadline_date, 'jYYYY/jMM/jDD').format('YYYY-MM-DD')
-                    : ''
-            );
+
+            // تبدیل تاریخ به فرمت میلادی (YYYY-MM-DD) برای input
+            if (initialTask.deadline_date) {
+                const date = moment(initialTask.deadline_date, ['YYYY-MM-DD', 'jYYYY/jMM/jDD']);
+                if (date.isValid()) {
+                    setDueDate(date.format('YYYY-MM-DD'));
+                } else {
+                    setDueDate('');
+                }
+            } else {
+                setDueDate('');
+            }
+
             setIsInNobat(!!initialTask.flag_tuNobat);
             setIsRoutine(!!initialTask.selectedDays?.length);
             setSelectedDays(initialTask.selectedDays || []);
@@ -63,7 +71,12 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                 selected: initialTask.tags?.some(t => t.name === tag.name) || false
             })));
         } else if (selectedDate) {
-            setDueDate(moment(selectedDate, 'jYYYY/jMM/jDD').format('YYYY-MM-DD'));
+            const date = moment(selectedDate, ['YYYY-MM-DD', 'jYYYY/jMM/jDD']);
+            if (date.isValid()) {
+                setDueDate(date.format('YYYY-MM-DD'));
+            } else {
+                setDueDate('');
+            }
             setSubtasks([]);
             setSubtaskCount(0);
             setIsRoutine(false);
