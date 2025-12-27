@@ -74,7 +74,7 @@ function ChartsPage() {
 
         const dataArray = [];
         for (let i = 6; i >= 0; i--) {
-            const dayData = data[i.toString()];
+            const dayData = data[i.toString()] || { done: 0, undone: 0 }; // اضافه کردن مقدار پیش‌فرض
             const dayNameIndex = (todayIndex - i + 7) % 7;
 
             dataArray.push({
@@ -98,7 +98,7 @@ function ChartsPage() {
 
         // از 29 روز قبل تا امروز (مجموعاً 30 روز)
         for (let i = 29; i >= 0; i--) {
-            const dayData = data[i.toString()];
+            const dayData = data[i.toString()] || { done: 0, undone: 0 }; // اضافه کردن مقدار پیش‌فرض
             const targetDate = moment().subtract(i, 'days');
             const dayNumber = parseInt(targetDate.format('jD'));
 

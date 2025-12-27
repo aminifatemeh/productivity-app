@@ -1,134 +1,279 @@
 .task-management-page {
   min-height: 100vh;
   display: flex;
-
-  /* جهت توسط ویژگی dir در JSX تنظیم می‌شود، بنابراین اینجا نیازی به direction نیست */
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 
   .main-content {
     flex-grow: 1;
-    max-width: calc(100% - 220px); /* عرض محتوا با جبران عرض SidebarMenu (200px + 20px فاصله) */
-    margin-inline-start: 220px; /* فاصله از SidebarMenu */
-    margin-inline-end: 20px; /* فاصله از لبه دیگر */
-    padding-inline: 20px; /* فاصله داخلی برای محتوا */
+    max-width: 100%;
+    width: 100%;
+    margin-inline-start: 260px;
+    margin-inline-end: 0;
+    padding: 0 20px;
     display: flex;
     flex-direction: column;
-    align-items: center; /* مرکز کردن محتوای داخلی */
+    align-items: center;
+    transition: margin 0.3s ease;
+
+    @media (max-width: 1200px) {
+      margin-inline-start: 240px;
+    }
+
+    @media (max-width: 992px) {
+      margin-inline-start: 0;
+      padding: 0 15px;
+    }
+
+    @media (max-width: 576px) {
+      padding: 0 10px;
+    }
   }
 
   .header-placeholder {
-    height: 60px; /* برای هدر */
+    height: 60px;
+    width: 100%;
+
+    @media (max-width: 768px) {
+      height: 50px;
+    }
   }
 
   .tab-container {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* وسط‌چین عمودی */
-    align-items: center; /* وسط‌چین افقی */
-    padding: 1rem;
-    background-color: #EAFFEB;
-    border-radius: 23px; /* بردردیوس ۲۳ پیکسل */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* باکس شدو */
-    min-height: 80px; /* ارتفاع حداقل */
-    width: 100%; /* پر کردن عرض main-content */
-    max-width: 1000px; /* محدود کردن عرض تب‌ها */
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    background: rgba(234, 255, 235, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 23px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    min-height: 80px;
+    width: 100%;
+    max-width: 1000px;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+
+    @media (max-width: 992px) {
+      max-width: 100%;
+      padding: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      padding: 1rem;
+      border-radius: 18px;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 576px) {
+      padding: 0.75rem;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+    }
   }
 
   .tabs-wrapper {
     display: flex;
     justify-content: center;
-    align-items: center; /* وسط‌چین عمودی تب‌ها */
-    gap: 10px;
+    align-items: center;
+    gap: 15px;
     margin-bottom: 10px;
-    position: relative; /* برای موقعیت‌دهی شبه‌المنت */
-    width: 100%; /* پر کردن عرض tab-container */
-    max-width: 600px; /* محدود کردن عرض تب‌ها */
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    flex-wrap: wrap;
+
+    @media (max-width: 768px) {
+      gap: 10px;
+      max-width: 100%;
+    }
+
+    @media (max-width: 576px) {
+      gap: 8px;
+      flex-direction: column;
+    }
   }
 
   .tab-button {
     display: flex;
     align-items: center;
-    justify-content: center; /* وسط‌چین افقی متن و آیکون */
-    padding: 10px 20px;
+    justify-content: center;
+    padding: 12px 24px;
     border: none;
     background-color: transparent;
     font-size: 16px;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
     position: relative;
-    z-index: 1; /* تب‌ها بالای مستطیل متحرک */
-    height: 100%; /* پر کردن ارتفاع tabs-wrapper */
+    z-index: 1;
+    border-radius: 45px;
+    white-space: nowrap;
+    color: #333;
+    font-weight: 500;
+
+    @media (max-width: 992px) {
+      padding: 10px 20px;
+      font-size: 15px;
+    }
+
+    @media (max-width: 768px) {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 576px) {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+    }
+
+    &:hover {
+      background-color: rgba(225, 243, 150, 0.3);
+    }
 
     &.active {
       color: #01575c;
+      background-color: #e1f396;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      font-weight: 600;
     }
 
     .tab-icon {
       width: 24px;
       height: 24px;
-      margin-inline-end: 8px; /* فاصله آیکون از متن، سازگار با RTL/LTR */
-    }
-  }
+      margin-inline-end: 8px;
+      transition: transform 0.3s ease;
 
-  .tabs-wrapper::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    inset-inline-end: var(--slider-left, 0); /* سازگار با RTL/LTR */
-    width: var(--slider-width, 0); /* عرض مستطیل */
-    height: 100%; /* ارتفاع کامل تب */
-    background-color: #e1f396;
-    border-radius: 45px;
-    transition: all 0.3s ease; /* انیمیشن برای عرض و موقعیت */
-    z-index: 0; /* پشت تب‌ها */
+      @media (max-width: 768px) {
+        width: 20px;
+        height: 20px;
+        margin-inline-end: 6px;
+      }
+    }
+
+    &:hover .tab-icon {
+      transform: scale(1.1);
+    }
   }
 
   .tab-separator {
     width: 1px;
     height: 30px;
-    background-color: #ccc;
+    background-color: rgba(204, 204, 204, 0.5);
     align-self: center;
-    z-index: 1; /* بالای مستطیل متحرک */
+    z-index: 1;
+
+    @media (max-width: 768px) {
+      height: 25px;
+    }
+
+    @media (max-width: 576px) {
+      display: none;
+    }
   }
 
   .date-filter-info {
     display: flex;
     align-items: center;
-    justify-content: center; /* وسط‌چین افقی */
-    gap: 10px;
+    justify-content: center;
+    gap: 12px;
     font-size: 14px;
-    color: #333;
+    color: #01575c;
     margin-top: 10px;
+    padding: 8px 16px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+
+    @media (max-width: 576px) {
+      font-size: 13px;
+      gap: 8px;
+      padding: 6px 12px;
+    }
   }
 
   .clear-date-filter-btn {
-    padding: 5px 10px;
+    padding: 6px 14px;
     background-color: #ff6b6b;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 15px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+
+    @media (max-width: 576px) {
+      padding: 5px 12px;
+      font-size: 12px;
+    }
 
     &:hover {
       background-color: #e55a5a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 
   .tasks-grid {
-    padding: 2rem;
+    padding: 2rem 1rem;
     flex-grow: 1;
-    width: 100%; /* پر کردن عرض main-content */
+    width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center; /* مرکز کردن محتوای داخلی */
+    align-items: center;
 
-    &.overflow-hidden {
-      overflow: hidden;
+    @media (max-width: 992px) {
+      padding: 1.5rem 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      padding: 1rem 0.5rem;
+    }
+
+    @media (max-width: 576px) {
+      padding: 0.75rem 0.25rem;
     }
 
     .row {
       width: 100%;
-      max-width: 1000px; /* محدود کردن عرض کارت‌ها */
+      max-width: 1200px;
+      margin: 0 auto;
+
+      @media (max-width: 1400px) {
+        max-width: 1000px;
+      }
+
+      @media (max-width: 992px) {
+        max-width: 100%;
+      }
+    }
+
+    .col-12 {
+      @media (min-width: 1400px) {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+      }
+
+      @media (min-width: 992px) and (max-width: 1399px) {
+        flex: 0 0 50%;
+        max-width: 50%;
+      }
+
+      @media (min-width: 768px) and (max-width: 991px) {
+        flex: 0 0 50%;
+        max-width: 50%;
+      }
+
+      @media (max-width: 767px) {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
     }
 
     .empty-message {
@@ -136,64 +281,123 @@
       font-size: 18px;
       color: #666;
       margin-top: 50px;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 15px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+      @media (max-width: 768px) {
+        font-size: 16px;
+        margin-top: 30px;
+        padding: 1.5rem;
+      }
+
+      @media (max-width: 576px) {
+        font-size: 14px;
+        margin-top: 20px;
+        padding: 1rem;
+      }
+    }
+  }
+
+  .footer-section {
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+
+    @media (max-width: 768px) {
+      padding: 15px;
+    }
+
+    @media (max-width: 576px) {
+      padding: 10px;
     }
   }
 
   .add-task-button {
-    padding: 10px 100px;
-    background-color: #e1f396;
+    padding: 12px 100px;
+    background: linear-gradient(135deg, #e1f396 0%, #c8e6c9 100%);
     color: #01575c;
     border: none;
     border-radius: 45px;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-bottom: 20px;
-    font-weight: bold;
+    margin-bottom: 10px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+    @media (max-width: 992px) {
+      padding: 10px 80px;
+      font-size: 15px;
+    }
+
+    @media (max-width: 768px) {
+      padding: 10px 60px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 576px) {
+      padding: 10px 40px;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
 
     &:hover {
-      background-color: #d1e386;
+      background: linear-gradient(135deg, #d1e386 0%, #a5d6a7 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(-1px);
     }
   }
 
   .modal-overlay {
     position: fixed;
     top: 0;
-    inset-inline-start: 0; /* سازگار با RTL/LTR */
+    inset-inline-start: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 2000;
-    padding: 40px;
+    padding: 20px;
     overflow: auto;
+
+    @media (max-width: 576px) {
+      padding: 10px;
+    }
   }
 
-  /* تنظیمات برای RTL */
+  .text-center {
+    text-align: center;
+  }
+
+  .text-warning {
+    color: #ffc107;
+    padding: 1rem;
+    background: rgba(255, 193, 7, 0.1);
+    border-radius: 10px;
+    margin: 1rem 0;
+    font-weight: 500;
+  }
+
   &[dir="rtl"] {
     .tab-icon {
-      margin-inline-start: 8px; /* در RTL، آیکون بعد از متن */
+      margin-inline-start: 8px;
       margin-inline-end: 0;
-    }
-  }
-
-  /* تنظیمات برای صفحه‌نمایش‌های کوچک‌تر */
-  @media (max-width: 768px) {
-    .main-content {
-      max-width: 100%; /* در موبایل، عرض کامل */
-      margin-inline-start: 0; /* حذف حاشیه برای جلوگیری از تداخل */
-      padding-inline: 10px;
-    }
-
-    .tab-container {
-      max-width: 100%; /* عرض کامل در موبایل */
-      margin: 10px;
-    }
-
-    .tasks-grid .row {
-      max-width: 100%;
     }
   }
 }
