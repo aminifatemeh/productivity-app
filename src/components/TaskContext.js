@@ -9,12 +9,122 @@ export const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
     const [tasks, setTasks] = useState([]);
-    const [timers, setTimers] = useState({}); // { taskId: { elapsed: seconds, isRunning: bool } }
+    const [timers, setTimers] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [currentCategory, setCurrentCategory] = useState('khak_khorde');
 
     const generateUniqueId = () => Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
 
-    // Fetch all tasks on mount
+    // Helper function to normalize task data from API response
+    const normalizeTask = (task, index) => {
+        console.log('Normalizing task:', {
+            id: task.id,
+            title: task.title,
+            done_date: task.done_date,
+            categories: task.categories,
+            deadline_time: task.deadline_time,
+            duration: task.duration
+        });
+
+        return {
+            id: task.id.toString(),
+            title: task.title || 'بدون عنوان',
+            description: task.description || '',
+            flag_tuNobat: task.flag_tuNobat || false,
+            isDone: !!task.done_date,
+            done_date: task.done_date || null,
+            subtasks: Array.isArray(task.subtasks) ? task.subtasks.map(sub => ({
+                id: sub.id,
+                title: sub.title || '',
+                isDone: !!sub.done_date,
+                done_date: sub.done_date || null,
+            })) : [],
+            tags: Array.isArray(task.categories) ? task.categories : [],
+            deadline_date: task.deadline_date || '',
+            hour: task.deadline_time || '',
+            selectedDays: Array.isArray(task.repeat_days) ? task.repeat_days : [],
+            totalDuration: task.duration ? parseDuration(task.duration) : 0,
+            originalIndex: index,
+        };
+    };
+
+    // Parse duration string "HH:MM:SS" to seconds
+    const parseDuration = (durationStr) => {
+        if (!durationStr) return 0;
+        const parts = durationStr.split(':');
+        const hours = parseInt(parts[0] || 0);
+        const mins = parseInt(parts[1] || 0);
+        const secs = parseInt(parts[2] || 0);
+        return hours * 3600 + mins * 60 + secs;
+    };
+
+    // Fetch tasks by category
+    const fetchTasksByCategory = async (category) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            let data;
+
+            console.log(`Fetching tasks for category: ${category}`);
+
+            switch (category) {
+                case 'khak_khorde':
+                    data = await tasksAPI.getKhakKhordeTasks();
+                    break;
+                case 'rumiz':
+                    data = await tasksAPI.getRumizTasks();
+                    break;
+                case 'nobatesh_mishe':
+                    data = await tasksAPI.getNobateshMisheTasks();
+                    break;
+                default:
+                    data = [];
+            }
+
+            console.log(`Raw API response for ${category}:`, data);
+
+            // Handle different response formats
+            let tasksArray = [];
+            if (Array.isArray(data)) {
+                // Direct array response
+                tasksArray = data;
+            } else if (data && typeof data === 'object') {
+                // Object with completed_tasks and not_completed_tasks
+                if (category === 'rumiz') {
+                    tasksArray = [
+                        ...(data.completed_tasks || []),
+                        ...(data.not_completed_tasks || [])
+                    ];
+                } else {
+                    // For other categories, try to find tasks in common keys
+                    tasksArray = data.tasks || data.not_completed_tasks || data.completed_tasks || [];
+                }
+            }
+
+            console.log(`Tasks array for ${category}:`, tasksArray);
+            console.log(`Is array: ${Array.isArray(tasksArray)}, Length: ${tasksArray?.length}`);
+
+            const fetchedTasks = Array.isArray(tasksArray)
+                ? tasksArray.map((task, index) => normalizeTask(task, index))
+                : [];
+
+            console.log(`Normalized tasks for ${category}:`, fetchedTasks);
+
+            setTasks(fetchedTasks);
+            setCurrentCategory(category);
+            setIsLoading(false);
+        } catch (err) {
+            console.error('Error fetching tasks:', err.response?.data || err.message);
+            setIsLoading(false);
+        }
+    };
+
+    // Fetch all tasks (kept for compatibility)
     const fetchAllTasks = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
@@ -29,25 +139,7 @@ export const TaskProvider = ({ children }) => {
             const fetchedTasks = Array.isArray(data)
                 ? data
                     .filter(task => !task.parent)
-                    .map((task, index) => ({
-                        id: task.id.toString(),
-                        title: task.title || 'بدون عنوان',
-                        description: task.description || '',
-                        flag_tuNobat: task.flag_tuNobat || false,
-                        isDone: !!task.done_date,
-                        subtasks: Array.isArray(task.subtasks) ? task.subtasks.map(sub => ({
-                            id: sub.id,
-                            title: sub.title || '',
-                            isDone: !!sub.done_date,
-                            done_date: sub.done_date || null,
-                        })) : [],
-                        tags: Array.isArray(task.tags) ? task.tags : [],
-                        deadline_date: task.deadline_date || '',
-                        hour: task.hour || '',
-                        selectedDays: Array.isArray(task.selectedDays) ? task.selectedDays : [],
-                        totalDuration: task.total_duration || 0, // زمان کل ذخیره شده
-                        originalIndex: index,
-                    }))
+                    .map((task, index) => normalizeTask(task, index))
                 : [];
 
             setTasks(fetchedTasks);
@@ -82,27 +174,12 @@ export const TaskProvider = ({ children }) => {
                 tags: taskData.tags || [],
             });
 
-            const newTask = {
-                id: response.id.toString(),
-                title: response.title || 'بدون عنوان',
-                description: response.description || '',
-                flag_tuNobat: response.flag_tuNobat || false,
-                isDone: response.isDone || false,
-                subtasks: Array.isArray(response.subtasks) ? response.subtasks.map(sub => ({
-                    id: sub.id,
-                    title: sub.title || '',
-                    isDone: !!sub.done_date,
-                    done_date: sub.done_date || null,
-                })) : [],
-                tags: Array.isArray(response.tags) ? response.tags : [],
-                deadline_date: response.deadline_date || '',
-                hour: response.hour || '',
-                selectedDays: Array.isArray(response.selectedDays) ? response.selectedDays : [],
-                totalDuration: 0,
-                originalIndex: tasks.length,
-            };
-
+            const newTask = normalizeTask(response, tasks.length);
             setTasks(prev => [...prev, newTask]);
+
+            // Refresh current category to get updated list
+            await fetchTasksByCategory(currentCategory);
+
             return { success: true, task: newTask };
         } catch (err) {
             console.error('Error adding task:', err.response?.data || err.message);
@@ -135,27 +212,12 @@ export const TaskProvider = ({ children }) => {
                 isDone: updatedTask.isDone,
             });
 
-            const editedTask = {
-                id: response.id.toString(),
-                title: response.title || 'بدون عنوان',
-                description: response.description || '',
-                flag_tuNobat: response.flag_tuNobat || false,
-                isDone: response.isDone || false,
-                subtasks: Array.isArray(response.subtasks) ? response.subtasks.map(sub => ({
-                    id: sub.id,
-                    title: sub.title || '',
-                    isDone: !!sub.done_date,
-                    done_date: sub.done_date || null,
-                })) : [],
-                tags: Array.isArray(response.tags) ? response.tags : [],
-                deadline_date: response.deadline_date || '',
-                hour: response.hour || '',
-                selectedDays: Array.isArray(response.selectedDays) ? response.selectedDays : [],
-                totalDuration: response.total_duration || updatedTask.totalDuration || 0,
-                originalIndex: updatedTask.originalIndex || 0,
-            };
-
+            const editedTask = normalizeTask(response, updatedTask.originalIndex || 0);
             setTasks(prev => prev.map(t => t.id === editedTask.id ? editedTask : t));
+
+            // Refresh current category to get updated list
+            await fetchTasksByCategory(currentCategory);
+
             return { success: true, task: editedTask };
         } catch (err) {
             console.error('Error updating task:', err.response?.data || err.message);
@@ -174,6 +236,10 @@ export const TaskProvider = ({ children }) => {
                 const { [taskId]: _, ...rest } = prev;
                 return rest;
             });
+
+            // Refresh current category to get updated list
+            await fetchTasksByCategory(currentCategory);
+
             return { success: true };
         } catch (err) {
             console.error('Error deleting task:', err.response?.data || err.message);
@@ -204,6 +270,9 @@ export const TaskProvider = ({ children }) => {
             setTasks((prevTasks) =>
                 prevTasks.map((t) => (t.id === taskId ? { ...t, isDone } : t))
             );
+
+            // Refresh current category to get updated list
+            await fetchTasksByCategory(currentCategory);
 
             return { success: true, task: { ...currentTask, isDone } };
         } catch (err) {
@@ -266,7 +335,7 @@ export const TaskProvider = ({ children }) => {
             const newTotalDuration = previousDuration + currentTimer.elapsed;
 
             const formattedDuration = formatDurationForAPI(newTotalDuration);
-            const response = await tasksAPI.setTaskDuration(taskId, formattedDuration);
+            await tasksAPI.setTaskDuration(taskId, formattedDuration);
 
             setTasks(prev => prev.map(t =>
                 t.id === taskId ? { ...t, totalDuration: newTotalDuration } : t
@@ -285,19 +354,16 @@ export const TaskProvider = ({ children }) => {
     const resetTimerForTask = async (taskId) => {
         const currentTimer = timers[taskId];
 
-        // اگر تایمر در حال اجرا بود، اول stop کن و زمان رو بفرست
         if (currentTimer?.isRunning && currentTimer.elapsed > 0) {
             await stopTimer(taskId);
         }
 
-        // ریست کردن تایمر
         setTimers(prev => ({
             ...prev,
             [taskId]: { elapsed: 0, isRunning: false }
         }));
     };
 
-    // کرنومتر - هر ثانیه elapsed رو افزایش بده
     useEffect(() => {
         const interval = setInterval(() => {
             setTimers(prev => {
@@ -319,7 +385,7 @@ export const TaskProvider = ({ children }) => {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []); // dependencies خالی - فقط یکبار اجرا بشه
+    }, []);
 
     return (
         <TaskContext.Provider value={{
@@ -328,6 +394,7 @@ export const TaskProvider = ({ children }) => {
             timers,
             setTimers,
             isLoading,
+            currentCategory,
             addTask,
             editTask,
             deleteTask,
@@ -337,6 +404,7 @@ export const TaskProvider = ({ children }) => {
             resetTimerForTask,
             generateUniqueId,
             fetchAllTasks,
+            fetchTasksByCategory,
         }}>
             {children}
         </TaskContext.Provider>

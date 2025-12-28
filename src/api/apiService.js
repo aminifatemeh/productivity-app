@@ -68,6 +68,19 @@ export const tasksAPI = {
         const response = await apiClient.get('/tasks/all_tasks/');
         return response.data;
     },
+    // New category-specific endpoints
+    getKhakKhordeTasks: async () => {
+        const response = await apiClient.get('/tasks/khak_khorde/');
+        return response.data;
+    },
+    getRumizTasks: async () => {
+        const response = await apiClient.get('/tasks/rumiz/');
+        return response.data;
+    },
+    getNobateshMisheTasks: async () => {
+        const response = await apiClient.get('/tasks/nobatesh_mishe/');
+        return response.data;
+    },
     addTask: async (taskData) => {
         const response = await apiClient.post('/tasks/add_task/', taskData);
         return response.data;
@@ -107,7 +120,7 @@ export const tasksAPI = {
     },
     setTaskDuration: async (taskId, durationFormatted) => {
         const response = await apiClient.post(`/tasks/${taskId}/set_duration/`, {
-            duration: durationFormatted  // فرمت: "H:MM:SS" مثل "0:00:40"
+            duration: durationFormatted
         });
         return response.data;
     },

@@ -4,13 +4,21 @@ import { useNavigate, useLocation } from "react-router-dom";
 import './TaskManagementPage.scss';
 import SidebarMenu from "../components/SidebarMenu";
 import TaskCard from "../components/TaskCard";
-import TaskComponentApi from "../api/TaskComponentApi";
 import AddTaskModal from "../components/AddTaskModal";
 import { TaskContext } from "../components/TaskContext";
 import moment from 'jalali-moment';
 
 function TaskManagementPage() {
-    const { tasks, setTasks, editTask, deleteTask, toggleTask } = useContext(TaskContext);
+    const {
+        tasks,
+        setTasks,
+        editTask,
+        deleteTask,
+        toggleTask,
+        isLoading,
+        fetchTasksByCategory
+    } = useContext(TaskContext);
+
     const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
     const [selectedDate, setSelectedDate] = useState(null);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
@@ -28,27 +36,10 @@ function TaskManagementPage() {
         flag_tuNobat: t.flag_tuNobat
     })));
 
-    // گرفتن تسک‌ها از سرور
-    const { loading, error } = TaskComponentApi({
-        onTasksFetched: (fetchedTasks, hasError) => {
-            console.log('دریافت تسک‌ها از سرور:', fetchedTasks);
-            if (!hasError && fetchedTasks?.length > 0) {
-                setTasks(prev => {
-                    const existingIds = new Set(prev.map(t => t.id));
-                    const newOnes = fetchedTasks
-                        .filter(t => t.id && !existingIds.has(String(t.id)))
-                        .map((t, i) => ({
-                            ...t,
-                            id: String(t.id),
-                            originalIndex: prev.length + i,
-                        }));
-                    console.log('تسک‌های جدید اضافه شده:', newOnes);
-                    return [...prev, ...newOnes];
-                });
-            }
-        },
-        useApi: true,
-    });
+    // Fetch tasks when category changes
+    useEffect(() => {
+        fetchTasksByCategory(selectedCategory);
+    }, [selectedCategory]);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -87,12 +78,14 @@ function TaskManagementPage() {
         navigate('/task-management');
     };
 
-    const handleAddTask = (newTask) => {
-        console.log('تسک جدید اضافه شد (آفلاین یا آنلاین):', newTask);
+    const handleAddTask = async (newTask) => {
+        console.log('تسک جدید اضافه شد:', newTask);
         const token = localStorage.getItem('accessToken');
         if (token) {
             // آنلاین — توسط AddTaskModal و addTask در کانتکست مدیریت میشه
+            // بعد از اضافه شدن، تسک‌ها از سرور دوباره fetch میشن
         } else {
+            // حالت آفلاین
             const userId = localStorage.getItem('userId') || 'offline_user';
             const newId = Date.now().toString(36) + '_' + Math.random().toString(36).substr(2);
             const taskToSave = { ...newTask, id: newId, isDone: false, originalIndex: tasks.length };
@@ -101,6 +94,7 @@ function TaskManagementPage() {
             setTasks(updated);
         }
         setIsAddTaskModalOpen(false);
+        setEditingTask(null);
     };
 
     const handleEditTask = (task) => {
@@ -109,9 +103,9 @@ function TaskManagementPage() {
         setIsAddTaskModalOpen(true);
     };
 
-    const handleTaskUpdated = (updatedTask) => {
+    const handleTaskUpdated = async (updatedTask) => {
         console.log('تسک آپدیت شد:', updatedTask);
-        editTask(updatedTask);
+        await editTask(updatedTask);
         setIsAddTaskModalOpen(false);
         setEditingTask(null);
     };
@@ -122,46 +116,16 @@ function TaskManagementPage() {
         { id: 'nobatesh_mishe', label: 'نوبتش میشه', icon: "/assets/icons/nobatesh_mishe_icon.svg" },
     ];
 
-    // فیلتر تسک‌ها
-    const filteredTasks = tasks.filter(task => {
-        if (!task?.id) return false;
-
-        const today = moment().startOf('day');
-        const taskDate = task.deadline_date ? moment(task.deadline_date, 'YYYY-MM-DD') : null;
-
-        console.log(`فیلتر تسک "${task.title}":`, {
-            category: selectedCategory,
-            deadline_date: task.deadline_date,
-            taskDate: taskDate?.format('YYYY-MM-DD'),
-            isTodayOrAfter: taskDate ? taskDate.isSameOrAfter(today) : 'ندارد',
-            isBeforeToday: taskDate ? taskDate.isBefore(today) : 'ندارد',
-            flag_tuNobat: task.flag_tuNobat,
-            isDone: task.isDone,
-            selectedDateFilter: selectedDate
-        });
-
-        if (selectedDate) {
+    // Filter tasks by selected date only (category filtering is done by API now)
+    const filteredTasks = selectedDate
+        ? tasks.filter(task => {
+            if (!task?.id) return false;
+            const taskDate = task.deadline_date ? moment(task.deadline_date, 'YYYY-MM-DD') : null;
             const match = taskDate?.format('YYYY-MM-DD') === selectedDate;
-            console.log('مقایسه با تاریخ فیلتر:', match);
+            console.log(`فیلتر تاریخ برای تسک "${task.title}":`, match);
             return match;
-        }
-
-        if (selectedCategory === 'nobatesh_mishe') {
-            const condition = (task.flag_tuNobat || (taskDate && taskDate.isSameOrAfter(today))) && !task.isDone;
-            console.log('نوبتش میشه؟', condition);
-            return condition;
-        }
-        if (selectedCategory === 'khak_khorde') {
-            const condition = !task.flag_tuNobat && taskDate && taskDate.isBefore(today) && !task.isDone;
-            console.log('خاک خورده؟', condition);
-            return condition;
-        }
-        if (selectedCategory === 'rumiz') {
-            console.log('رومیز؟', task.isDone);
-            return task.isDone;
-        }
-        return true;
-    });
+        })
+        : tasks;
 
     console.log('تسک‌های نهایی نمایش‌داده‌شده:', filteredTasks.map(t => t.title));
 
@@ -177,6 +141,11 @@ function TaskManagementPage() {
         return formatted;
     };
 
+    const handleCategoryChange = (categoryId) => {
+        console.log('تغییر تب به:', categoryId);
+        setSelectedCategory(categoryId);
+    };
+
     return (
         <div className="d-flex task-management-page" dir="rtl">
             <SidebarMenu />
@@ -189,10 +158,7 @@ function TaskManagementPage() {
                             <React.Fragment key={cat.id}>
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        console.log('تغییر تب به:', cat.id);
-                                        setSelectedCategory(cat.id);
-                                    }}
+                                    onClick={() => handleCategoryChange(cat.id)}
                                     className={`tab-button ${selectedCategory === cat.id ? 'active' : ''}`}
                                     ref={el => tabRefs.current[cat.id] = el}
                                 >
@@ -214,14 +180,8 @@ function TaskManagementPage() {
                     )}
                 </div>
 
-                {error && (
-                    <div className="text-center py-2 text-warning">
-                        اتصال به سرور قطع است — در حالت آفلاین
-                    </div>
-                )}
-
                 <div className="flex-grow-1 d-flex flex-column tasks-grid">
-                    {loading ? (
+                    {isLoading ? (
                         <div className="text-center py-5">در حال بارگذاری از سرور...</div>
                     ) : filteredTasks.length === 0 ? (
                         <div className="empty-message text-center py-5">

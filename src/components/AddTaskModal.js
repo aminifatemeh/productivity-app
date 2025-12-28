@@ -15,31 +15,55 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
     const [isInNobat, setIsInNobat] = useState(false);
     const [selectedDays, setSelectedDays] = useState([]);
     const [showCalendar, setShowCalendar] = useState(false);
+    const [isDoneAlready, setIsDoneAlready] = useState(false);
+    const [doneDate, setDoneDate] = useState('');
+    const [showDoneDateCalendar, setShowDoneDateCalendar] = useState(false);
     const modalRef = useRef(null);
 
-    const [tags, setTags] = useState([
-        { name: 'ورزش', color: '#34AA7B', selected: false },
-        { name: 'کار', color: '#DA348D', selected: false },
-        { name: 'کلاس', color: '#4690E4', selected: false },
+    const [categories, setCategories] = useState([
+        { id: 6, name: 'ورزش', color: '#34AA7B', selected: false },
+        { id: 7, name: 'کار', color: '#DA348D', selected: false },
+        { id: 8, name: 'کلاس', color: '#4690E4', selected: false },
     ]);
-    const [newTag, setNewTag] = useState('');
-    const [showNewTagInput, setShowNewTagInput] = useState(false);
-    const [editingTag, setEditingTag] = useState(null);
+    const [newCategory, setNewCategory] = useState('');
+    const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
 
     const [name, setName] = useState('');
-    const [hour, setHour] = useState('');
+    const [time, setTime] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [description, setDescription] = useState('');
-    const [errors, setErrors] = useState({ name: '', dueDate: '', form: '' });
+    const [duration, setDuration] = useState('');
+    const [errors, setErrors] = useState({ name: '', dueDate: '', doneDate: '', form: '' });
 
-    /* ------------------- پر کردن فرم ------------------- */
+    // Mapping روزهای فارسی به اعداد 1-7
+    const dayMapping = {
+        'شنبه': 1,
+        'یکشنبه': 2,
+        'دوشنبه': 3,
+        'سه‌شنبه': 4,
+        'چهارشنبه': 5,
+        'پنج‌شنبه': 6,
+        'جمعه': 7
+    };
+
+    const reverseDayMapping = {
+        1: 'شنبه',
+        2: 'یکشنبه',
+        3: 'دوشنبه',
+        4: 'سه‌شنبه',
+        5: 'چهارشنبه',
+        6: 'پنج‌شنبه',
+        7: 'جمعه'
+    };
+
+    /* ------------------- پر کردن فرم برای ویرایش ------------------- */
     useEffect(() => {
         if (initialTask) {
             setName(initialTask.title || '');
             setDescription(initialTask.description || '');
-            setHour(initialTask.hour || '');
+            setTime(initialTask.deadline_time || '');
 
-            // تبدیل تاریخ به فرمت میلادی (YYYY-MM-DD) برای input
+            // تبدیل تاریخ deadline به فرمت میلادی
             if (initialTask.deadline_date) {
                 const date = moment(initialTask.deadline_date, ['YYYY-MM-DD', 'jYYYY/jMM/jDD']);
                 if (date.isValid()) {
@@ -52,38 +76,70 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             }
 
             setIsInNobat(!!initialTask.flag_tuNobat);
-            setIsRoutine(!!initialTask.selectedDays?.length);
-            setSelectedDays(initialTask.selectedDays || []);
+            setIsRoutine(!!initialTask.is_routine_active);
 
+            // تبدیل repeat_days از اعداد به نام فارسی روزها
+            if (initialTask.repeat_days && Array.isArray(initialTask.repeat_days)) {
+                const days = initialTask.repeat_days.map(num => reverseDayMapping[num]).filter(Boolean);
+                setSelectedDays(days);
+            } else {
+                setSelectedDays([]);
+            }
+
+            // ساب‌تسک‌ها
             const serverSubtasks = (initialTask.subtasks || [])
                 .filter(sub => sub.id && Number.isInteger(sub.id))
                 .map(sub => ({
                     id: sub.id,
                     title: sub.title || '',
-                    done_date: sub.done_date || null,
                 }));
 
             setSubtasks(serverSubtasks);
             setSubtaskCount(serverSubtasks.length);
 
-            setTags(prev => prev.map(tag => ({
-                ...tag,
-                selected: initialTask.tags?.some(t => t.name === tag.name) || false
+            // دسته‌بندی‌ها
+            setCategories(prev => prev.map(cat => ({
+                ...cat,
+                selected: initialTask.categories?.some(c => c.id === cat.id) || false
             })));
+
+            // اگر تسک قبلاً انجام شده
+            if (initialTask.done_date) {
+                setIsDoneAlready(true);
+                const doneDateMoment = moment(initialTask.done_date, 'YYYY-MM-DD');
+                if (doneDateMoment.isValid()) {
+                    setDoneDate(doneDateMoment.format('YYYY-MM-DD'));
+                }
+            }
+
+            if (initialTask.duration) {
+                setDuration(initialTask.duration);
+            }
+
         } else if (selectedDate) {
+            // حالت افزودن تسک جدید با تاریخ از کالندر
             const date = moment(selectedDate, ['YYYY-MM-DD', 'jYYYY/jMM/jDD']);
             if (date.isValid()) {
                 setDueDate(date.format('YYYY-MM-DD'));
             } else {
                 setDueDate('');
             }
-            setSubtasks([]);
-            setSubtaskCount(0);
-            setIsRoutine(false);
-            setIsInNobat(false);
-            setSelectedDays([]);
+            resetFormFields();
+        } else {
+            resetFormFields();
         }
     }, [initialTask, selectedDate]);
+
+    const resetFormFields = () => {
+        setSubtasks([]);
+        setSubtaskCount(0);
+        setIsRoutine(false);
+        setIsInNobat(false);
+        setSelectedDays([]);
+        setIsDoneAlready(false);
+        setDoneDate('');
+        setDuration('');
+    };
 
     /* ------------------- ساب‌تسک‌ها ------------------- */
     const handleSubtaskChange = (index, value) => {
@@ -98,7 +154,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         setSubtaskCount(c => c + 1);
         setSubtasks(prev => [
             ...prev,
-            { id: `temp-${Date.now()}-${prev.length}`, title: '', done_date: null }
+            { id: null, title: '' }
         ]);
     };
 
@@ -116,69 +172,115 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         );
     };
 
-    /* ------------------- تگ‌ها ------------------- */
-    const toggleTag = (i) => {
-        const newTags = [...tags];
-        newTags[i].selected = !newTags[i].selected;
-        setTags(newTags);
+    /* ------------------- دسته‌بندی‌ها ------------------- */
+    const toggleCategory = (i) => {
+        const newCategories = [...categories];
+        newCategories[i].selected = !newCategories[i].selected;
+        setCategories(newCategories);
     };
 
-    const addNewTag = () => {
-        if (newTag.trim()) {
-            setTags([...tags, {
-                name: newTag.trim(),
+    const addNewCategory = () => {
+        if (newCategory.trim()) {
+            const newId = Math.max(...categories.map(c => c.id), 0) + 1;
+            setCategories([...categories, {
+                id: newId,
+                name: newCategory.trim(),
                 color: '#' + Math.floor(Math.random() * 16777215).toString(16),
                 selected: false
             }]);
-            setNewTag('');
-            setShowNewTagInput(false);
+            setNewCategory('');
+            setShowNewCategoryInput(false);
         }
     };
 
-    /* ------------------- تقویم ------------------- */
+    /* ------------------- تقویم deadline ------------------- */
     const handleDateSelect = (date) => {
         setDueDate(date);
         setShowCalendar(false);
     };
 
-    const getJalaliDate = () => {
-        if (!dueDate) return '';
-        return moment(dueDate, 'YYYY-MM-DD').locale('fa').format('jYYYY/jMM/jDD');
+    const getJalaliDate = (dateStr) => {
+        if (!dateStr) return '';
+        return moment(dateStr, 'YYYY-MM-DD').locale('fa').format('jYYYY/jMM/jDD');
+    };
+
+    /* ------------------- تقویم done date ------------------- */
+    const handleDoneDateSelect = (date) => {
+        setDoneDate(date);
+        setShowDoneDateCalendar(false);
+    };
+
+    /* ------------------- چک کردن آیا deadline در آینده است ------------------- */
+    const isDeadlineInFuture = () => {
+        if (!dueDate) return false;
+        const today = moment().startOf('day');
+        const deadline = moment(dueDate, 'YYYY-MM-DD');
+        return deadline.isAfter(today);
     };
 
     /* ------------------- ارسال فرم ------------------- */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const newErrors = { name: '', dueDate: '', form: '' };
+        const newErrors = { name: '', dueDate: '', doneDate: '', form: '' };
+
         if (!name.trim()) newErrors.name = 'این فیلد الزامی است';
         if (!dueDate) newErrors.dueDate = 'این فیلد الزامی است';
-        if (newErrors.name || newErrors.dueDate) {
+
+        // اگر "قبلاً انجام دادی" تیک خورده، تاریخ انجام الزامی است
+        if (isDoneAlready && !doneDate) {
+            newErrors.doneDate = 'تاریخ انجام الزامی است';
+        }
+
+        if (newErrors.name || newErrors.dueDate || newErrors.doneDate) {
             setErrors(newErrors);
             return;
         }
 
-        const selectedTags = tags.filter(t => t.selected).map(t => ({ name: t.name, color: t.color }));
+        // تبدیل روزهای فارسی به اعداد
+        const repeatDaysNumbers = isRoutine
+            ? selectedDays.map(day => dayMapping[day]).filter(Boolean)
+            : null;
+
+        const selectedCategories = categories
+            .filter(c => c.selected)
+            .map(c => ({ id: c.id, name: c.name }));
+
+        // تاریخ done_date
+        let finalDoneDate = null;
+        if (isDoneAlready && doneDate) {
+            const doneDateMoment = moment(doneDate, 'YYYY-MM-DD');
+            const today = moment().startOf('day');
+
+            // فقط اگر تاریخ انجام امروز یا گذشته باشد
+            if (doneDateMoment.isSameOrBefore(today)) {
+                finalDoneDate = doneDateMoment.format('YYYY-MM-DD');
+            }
+        }
 
         const taskData = {
             id: initialTask?.id,
             title: name.trim(),
             description: description.trim(),
             deadline_date: moment(dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD'),
+            deadline_time: time || '23:59:00',
             flag_tuNobat: isInNobat,
-            hour: hour || null,
-            selectedDays: isRoutine ? selectedDays : [],
+            is_routine_active: isRoutine,
+            repeat_days: repeatDaysNumbers,
             subtasks: subtasks
                 .filter(s => s.title.trim() !== '')
                 .map(s => ({
                     id: typeof s.id === 'number' ? s.id : null,
                     title: s.title.trim(),
-                    done_date: s.done_date
                 })),
-            tags: selectedTags,
-            isDone: initialTask?.isDone || false,
-            originalIndex: initialTask?.originalIndex || 0,
+            categories: selectedCategories,
+            done_date: finalDoneDate,
+            done_time: isDoneAlready && time ? time : null,
+            duration: isDoneAlready && duration ? duration : '00:00:00',
+            routine_father: initialTask?.routine_father || null,
         };
+
+        console.log('Sending task data to API:', taskData);
 
         const result = initialTask ? await editTask(taskData) : await addTask(taskData);
 
@@ -187,17 +289,30 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             onClose();
             resetForm();
         } else {
-            setErrors(prev => ({ ...prev, form: result.error?.detail || result.error || 'خطا در ذخیره تسک' }));
+            setErrors(prev => ({
+                ...prev,
+                form: result.error?.detail || result.error || 'خطا در ذخیره تسک'
+            }));
         }
     };
 
     const resetForm = () => {
-        setName(''); setHour(''); setDueDate(''); setDescription('');
-        setSubtasks([]); setSubtaskCount(0);
-        setIsRoutine(false); setIsInNobat(false); setSelectedDays([]);
-        setTags(prev => prev.map(t => ({ ...t, selected: false })));
-        setErrors({ name: '', dueDate: '', form: '' });
+        setName('');
+        setTime('');
+        setDueDate('');
+        setDescription('');
+        setDuration('');
+        setSubtasks([]);
+        setSubtaskCount(0);
+        setIsRoutine(false);
+        setIsInNobat(false);
+        setSelectedDays([]);
+        setIsDoneAlready(false);
+        setDoneDate('');
+        setCategories(prev => prev.map(c => ({ ...c, selected: false })));
+        setErrors({ name: '', dueDate: '', doneDate: '', form: '' });
         setShowCalendar(false);
+        setShowDoneDateCalendar(false);
     };
 
     /* ------------------- ارتفاع خط کنار مودال ------------------- */
@@ -211,7 +326,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         updateHeight();
         window.addEventListener('resize', updateHeight);
         return () => window.removeEventListener('resize', updateHeight);
-    }, [showAdvanced, subtaskCount, subtasks, isRoutine, selectedDays, showCalendar]);
+    }, [showAdvanced, subtaskCount, subtasks, isRoutine, selectedDays, showCalendar, isDoneAlready, showDoneDateCalendar]);
 
     const routineDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
 
@@ -225,59 +340,45 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             </span>
 
             <form className="AddTaskModal-form" onSubmit={handleSubmit}>
+                {/* نام تسک */}
                 <div className="form-group">
                     <label>نام <span className="required-star">★</span></label>
-                    <input type="text" className="form-control" value={name} onChange={e => setName(e.target.value)} />
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        placeholder="چیکار میخوای بکنی؟"
+                    />
                     {errors.name && <span className="error-message">{errors.name}</span>}
                 </div>
 
+                {/* توضیحات */}
                 <div className="form-group">
                     <label>توضیحات</label>
-                    <textarea className="form-control" rows="1" value={description} onChange={e => setDescription(e.target.value)} />
+                    <textarea
+                        className="form-control"
+                        rows="2"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        placeholder="هرچه دل تنگت میخواهد بگو"
+                    />
                 </div>
 
-                <div className="d-flex justify-content-between gap-3">
-                    <div className="form-group flex-grow-1">
-                        <label>ساعت</label>
-                        <input type="time" className="form-control" value={hour} onChange={e => setHour(e.target.value)} />
-                    </div>
-                    <div className="form-group flex-grow-1">
-                        <label>تاریخ انقضا <span className="required-star">★</span></label>
-                        <div className="date-input-wrapper">
-                            <input
-                                type="text"
-                                className="form-control date-display"
-                                value={getJalaliDate()}
-                                onClick={() => setShowCalendar(!showCalendar)}
-                                readOnly
-                                placeholder="انتخاب تاریخ"
-                            />
-                        </div>
-                        {errors.dueDate && <span className="error-message">{errors.dueDate}</span>}
-                    </div>
-                </div>
-
-                {showCalendar && (
-                    <div className="calendar-section">
-                        <CompactCalendar
-                            selectedDate={dueDate}
-                            onDateSelect={handleDateSelect}
-                            onClose={() => setShowCalendar(false)}
-                        />
-                    </div>
-                )}
-
+                {/* کارت قراره تکرار بشه؟ */}
                 <div className="checkbox-group mt-3">
                     <label>
-                        <input type="checkbox" className="custom-checkbox" checked={isInNobat} onChange={e => setIsInNobat(e.target.checked)} />
-                        دوست داری تو بخش نوبتش میشه ببینی؟
-                    </label>
-                    <label>
-                        <input type="checkbox" className="custom-checkbox" checked={isRoutine} onChange={e => setIsRoutine(e.target.checked)} />
-                        آیا کارت یک روتینه؟
+                        <input
+                            type="checkbox"
+                            className="custom-checkbox"
+                            checked={isRoutine}
+                            onChange={e => setIsRoutine(e.target.checked)}
+                        />
+                        کارت قراره تکرار بشه؟
                     </label>
                 </div>
 
+                {/* انتخاب روزهای هفته */}
                 {isRoutine && (
                     <div className="routine-days mt-3">
                         <div className="days-box">
@@ -294,6 +395,59 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                     </div>
                 )}
 
+                {/* تاریخ و ساعت انقضا */}
+                <div className="d-flex justify-content-between gap-3 mt-3">
+                    <div className="form-group flex-grow-1">
+                        <label>تاریخ انقضا <span className="required-star">★</span></label>
+                        <div className="date-input-wrapper">
+                            <input
+                                type="text"
+                                className="form-control date-display"
+                                value={getJalaliDate(dueDate)}
+                                onClick={() => setShowCalendar(!showCalendar)}
+                                readOnly
+                                placeholder="انتخاب تاریخ"
+                            />
+                        </div>
+                        {errors.dueDate && <span className="error-message">{errors.dueDate}</span>}
+                    </div>
+                    <div className="form-group flex-grow-1">
+                        <label>ساعت</label>
+                        <input
+                            type="time"
+                            className="form-control"
+                            value={time}
+                            onChange={e => setTime(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {showCalendar && (
+                    <div className="calendar-section">
+                        <CompactCalendar
+                            selectedDate={dueDate}
+                            onDateSelect={handleDateSelect}
+                            onClose={() => setShowCalendar(false)}
+                        />
+                    </div>
+                )}
+
+                {/* نوبتش میشه - فقط برای آینده */}
+                {isDeadlineInFuture() && (
+                    <div className="checkbox-group mt-3">
+                        <label>
+                            <input
+                                type="checkbox"
+                                className="custom-checkbox"
+                                checked={isInNobat}
+                                onChange={e => setIsInNobat(e.target.checked)}
+                            />
+                            دوست داری تو بخش نوبتش میشه کارت رو ببینی؟
+                        </label>
+                    </div>
+                )}
+
+                {/* گزینه‌های بیشتر */}
                 <div className="toggle-advanced mt-3" onClick={() => setShowAdvanced(!showAdvanced)}>
                     <span className="toggle-text">گزینه‌های بیشتر</span>
                     <span className="toggle-arrow">{showAdvanced ? '↓' : '↑'}</span>
@@ -301,63 +455,108 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
                 {showAdvanced && (
                     <div className="mt-3">
-                        <label className="subtask-label">
-                            این کارت رو به چند قسمت تقسیم می‌کنی؟
-                            <button type="button" className="btn-circle btn-decrease" onClick={decreaseCount}>-</button>
-                            <span className="subtask-count">{subtaskCount}</span>
-                            <button type="button" className="btn-circle btn-increase" onClick={increaseCount}>+</button>
-                        </label>
-
-                        {subtasks.map((subtask, index) => (
-                            <div className="form-group" key={subtask.id}>
+                        {/* قبلاً انجام دادی؟ */}
+                        <div className="checkbox-group">
+                            <label>
                                 <input
-                                    type="text"
-                                    className="form-control subtask-input"
-                                    value={subtask.title || ''}
-                                    onChange={e => handleSubtaskChange(index, e.target.value)}
-                                    placeholder={`زیرتسک ${index + 1}`}
+                                    type="checkbox"
+                                    className="custom-checkbox"
+                                    checked={isDoneAlready}
+                                    onChange={e => setIsDoneAlready(e.target.checked)}
                                 />
-                            </div>
-                        ))}
+                                پیش پیش کار رو انجام دادی؟ (میخوای فقط گزارشش رو بدی؟)
+                            </label>
+                        </div>
 
+                        {/* تاریخ انجام و مدت زمان */}
+                        {isDoneAlready && (
+                            <div className="mt-3">
+                                <div className="form-group">
+                                    <label>تاریخ انجام <span className="required-star">★</span></label>
+                                    <div className="date-input-wrapper">
+                                        <input
+                                            type="text"
+                                            className="form-control date-display"
+                                            value={getJalaliDate(doneDate)}
+                                            onClick={() => setShowDoneDateCalendar(!showDoneDateCalendar)}
+                                            readOnly
+                                            placeholder="انتخاب تاریخ انجام"
+                                        />
+                                    </div>
+                                    {errors.doneDate && <span className="error-message">{errors.doneDate}</span>}
+                                </div>
+
+                                {showDoneDateCalendar && (
+                                    <div className="calendar-section">
+                                        <CompactCalendar
+                                            selectedDate={doneDate}
+                                            onDateSelect={handleDoneDateSelect}
+                                            onClose={() => setShowDoneDateCalendar(false)}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="form-group">
+                                    <label>مدت زمان انجام</label>
+                                    <input
+                                        type="time"
+                                        className="form-control"
+                                        value={duration}
+                                        onChange={e => setDuration(e.target.value)}
+                                        placeholder="HH:MM:SS"
+                                        step="1"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ساب‌تسک‌ها */}
+                        <div className="mt-3">
+                            <label className="subtask-label">
+                                کارت رو به چند بخش تقسیم میکنی؟
+                                <button type="button" className="btn-circle btn-decrease" onClick={decreaseCount}>-</button>
+                                <span className="subtask-count">{subtaskCount}</span>
+                                <button type="button" className="btn-circle btn-increase" onClick={increaseCount}>+</button>
+                            </label>
+
+                            {subtasks.map((subtask, index) => (
+                                <div className="form-group" key={index}>
+                                    <input
+                                        type="text"
+                                        className="form-control subtask-input"
+                                        value={subtask.title || ''}
+                                        onChange={e => handleSubtaskChange(index, e.target.value)}
+                                        placeholder={`زیرتسک ${index + 1}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* دسته‌بندی‌ها */}
                         <div className="tag-section mt-3">
                             <label>این کار عضو چه دسته‌ای از فعالیت‌هاته؟</label>
                             <div className="tag-container">
-                                {tags.map((tag, i) => (
+                                {categories.map((cat, i) => (
                                     <div
                                         key={i}
-                                        className={`tag ${tag.selected ? 'selected' : ''}`}
-                                        style={{ backgroundColor: tag.color }}
-                                        onClick={() => toggleTag(i)}
+                                        className={`tag ${cat.selected ? 'selected' : ''}`}
+                                        style={{ backgroundColor: cat.color }}
+                                        onClick={() => toggleCategory(i)}
                                     >
-                                        {editingTag === i ? (
-                                            <input
-                                                type="text"
-                                                value={tag.name}
-                                                onChange={e => {
-                                                    const nt = [...tags];
-                                                    nt[i].name = e.target.value;
-                                                    setTags(nt);
-                                                }}
-                                                onBlur={() => setEditingTag(null)}
-                                                autoFocus
-                                            />
-                                        ) : (
-                                            <span onClick={e => { e.stopPropagation(); setEditingTag(i); }}>
-                                                {tag.name}
-                                            </span>
-                                        )}
+                                        <span>{cat.name}</span>
                                     </div>
                                 ))}
-                                <div className="tag more-tag" onClick={() => setShowNewTagInput(true)}>تگ جدید</div>
-                                {showNewTagInput && (
+                                <div className="tag more-tag" onClick={() => setShowNewCategoryInput(true)}>
+                                    دسته جدید
+                                </div>
+                                {showNewCategoryInput && (
                                     <div className="tag new-tag">
                                         <input
                                             type="text"
-                                            value={newTag}
-                                            onChange={e => setNewTag(e.target.value)}
-                                            onBlur={addNewTag}
-                                            onKeyPress={e => e.key === 'Enter' && addNewTag()}
+                                            value={newCategory}
+                                            onChange={e => setNewCategory(e.target.value)}
+                                            onBlur={addNewCategory}
+                                            onKeyPress={e => e.key === 'Enter' && addNewCategory()}
                                             autoFocus
                                         />
                                     </div>
@@ -367,14 +566,14 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                     </div>
                 )}
 
-                {errors.form && <div className="error-message">{errors.form}</div>}
+                {errors.form && <div className="error-message mt-3">{errors.form}</div>}
 
                 <div className="d-flex justify-content-end mt-4 gap-2">
                     <button type="button" className="btn btn-secondary" onClick={onClose}>بستن</button>
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        disabled={!name.trim() || !dueDate}
+                        disabled={!name.trim() || !dueDate || (isDoneAlready && !doneDate)}
                     >
                         {initialTask ? 'ذخیره تغییرات' : 'ذخیره'}
                     </button>
