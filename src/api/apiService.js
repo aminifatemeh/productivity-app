@@ -118,6 +118,18 @@ export const tasksAPI = {
         const response = await apiClient.get('/tasks/report/average_delay/');
         return response.data;
     },
+    getTodayFocus: async () => {
+        const response = await apiClient.get('/tasks/report/today_focus/');
+        return response.data;
+    },
+    getWeekFocus: async () => {
+        const response = await apiClient.get('/tasks/report/week_focus/');
+        return response.data;
+    },
+    getMonthFocus: async () => {
+        const response = await apiClient.get('/tasks/report/month_focus/');
+        return response.data;
+    },
     setTaskDuration: async (taskId, durationFormatted) => {
         const response = await apiClient.post(`/tasks/${taskId}/set_duration/`, {
             duration: durationFormatted
