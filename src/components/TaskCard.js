@@ -3,6 +3,7 @@ import "./TaskCard.scss";
 import SubtaskBar from "./SubtaskBar";
 import ProgressBar from "./ProgressBar";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import moment from 'jalali-moment';
 
 function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, originalIndex }) {
   const [expanded, setExpanded] = useState(false);
@@ -17,6 +18,17 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
+
+  // تابع تبدیل تاریخ میلادی به شمسی برای نمایش
+  const formatDateForDisplay = (dateStr) => {
+    if (!dateStr) return '';
+    const m = moment(dateStr, 'YYYY-MM-DD', true);
+    if (!m.isValid()) {
+      console.log('تاریخ نامعتبر در TaskCard:', dateStr);
+      return '';
+    }
+    return m.locale('fa').format('jYYYY/jMM/jDD');
+  };
 
   useEffect(() => {
     if (task.isDone !== undefined) {
@@ -71,6 +83,7 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
   };
 
   const handleEdit = () => {
+    // ارسال تسک اصلی با تاریخ میلادی به مودال ویرایش
     onEditTask(task);
   };
 
@@ -117,7 +130,9 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
             <div className="TaskCard__description-titles">
               <span>{task.title}</span>
               <span>{task.description}</span>
-              <span>تاریخ انقضا: {task.deadline_date}</span>
+              {task.deadline_date && (
+                  <span>تاریخ انقضا: {formatDateForDisplay(task.deadline_date)}</span>
+              )}
             </div>
             <div className="TaskCard__description-labels">
               <div className="task-icons">

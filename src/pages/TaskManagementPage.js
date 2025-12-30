@@ -55,6 +55,7 @@ function TaskManagementPage() {
             const taskToEdit = tasks.find(t => t.id === taskId);
             if (taskToEdit) {
                 console.log('تسک یافت شد برای ویرایش:', taskToEdit.title);
+                // ارسال تسک اصلی با تاریخ میلادی
                 setEditingTask(taskToEdit);
                 setIsAddTaskModalOpen(true);
                 navigate(location.pathname, { replace: true, state: {} });
@@ -99,7 +100,13 @@ function TaskManagementPage() {
 
     const handleEditTask = (task) => {
         console.log('درخواست ویرایش تسک:', task.title);
-        setEditingTask(task);
+        console.log('تاریخ تسک برای ویرایش (میلادی):', task.deadline_date);
+
+        // Find original task from tasks array to ensure we have the correct date format
+        const originalTask = tasks.find(t => t.id === task.id);
+
+        // Use original task data which has dates in Gregorian format
+        setEditingTask(originalTask || task);
         setIsAddTaskModalOpen(true);
     };
 
@@ -129,7 +136,7 @@ function TaskManagementPage() {
 
     console.log('تسک‌های نهایی نمایش‌داده‌شده:', filteredTasks.map(t => t.title));
 
-    const formatDate = (date) => {
+    const formatDateForDisplay = (date) => {
         if (!date) return '';
         const m = moment(date, 'YYYY-MM-DD', true);
         if (!m.isValid()) {
@@ -137,7 +144,7 @@ function TaskManagementPage() {
             return '';
         }
         const formatted = m.locale('fa').format('jYYYY/jMM/jDD');
-        console.log('تبدیل تاریخ:', date, '→', formatted);
+        console.log('تبدیل تاریخ برای نمایش:', date, '→', formatted);
         return formatted;
     };
 
@@ -172,7 +179,7 @@ function TaskManagementPage() {
 
                     {selectedDate && (
                         <div className="date-filter-info">
-                            <span>فیلتر تاریخ: {formatDate(selectedDate)}</span>
+                            <span>فیلتر تاریخ: {formatDateForDisplay(selectedDate)}</span>
                             <button className="clear-date-filter-btn" onClick={clearDateFilter}>
                                 حذف فیلتر تاریخ
                             </button>
@@ -194,7 +201,7 @@ function TaskManagementPage() {
                             {filteredTasks.map(task => (
                                 <div className="col-12 col-sm-6 col-md-4" key={task.id}>
                                     <TaskCard
-                                        task={{ ...task, deadline_date: formatDate(task.deadline_date) }}
+                                        task={task}
                                         originalIndex={task.originalIndex}
                                         onEditTask={handleEditTask}
                                         onDeleteTask={deleteTask}

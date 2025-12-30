@@ -23,7 +23,8 @@ export const TaskProvider = ({ children }) => {
             done_date: task.done_date,
             categories: task.categories,
             deadline_time: task.deadline_time,
-            duration: task.duration
+            duration: task.duration,
+            deadline_date: task.deadline_date
         });
 
         return {
@@ -40,10 +41,16 @@ export const TaskProvider = ({ children }) => {
                 done_date: sub.done_date || null,
             })) : [],
             tags: Array.isArray(task.categories) ? task.categories : [],
-            deadline_date: task.deadline_date || '',
+            deadline_date: task.deadline_date || null, // نگه‌داری تاریخ میلادی
+            deadline_time: task.deadline_time || '',
             hour: task.deadline_time || '',
             selectedDays: Array.isArray(task.repeat_days) ? task.repeat_days : [],
+            is_routine_active: task.is_routine_active || false,
+            repeat_days: Array.isArray(task.repeat_days) ? task.repeat_days : [],
+            routine_father: task.routine_father || null,
+            categories: Array.isArray(task.categories) ? task.categories : [],
             totalDuration: task.duration ? parseDuration(task.duration) : 0,
+            duration: task.duration || '00:00:00',
             originalIndex: index,
         };
     };
@@ -150,8 +157,9 @@ export const TaskProvider = ({ children }) => {
         }
     };
 
+    // بجای fetchAllTasks، fetchTasksByCategory را اجرا کن
     useEffect(() => {
-        fetchAllTasks();
+        fetchTasksByCategory(currentCategory);
     }, []);
 
     const addTask = async (taskData) => {
@@ -163,15 +171,23 @@ export const TaskProvider = ({ children }) => {
                     done_date: null
                 }));
 
+            // اطمینان از اینکه repeat_days آرایه است
+            const repeatDays = Array.isArray(taskData.repeat_days) ? taskData.repeat_days : [];
+
             const response = await tasksAPI.addTask({
                 title: taskData.title,
                 description: taskData.description || '',
                 deadline_date: taskData.deadline_date,
+                deadline_time: taskData.deadline_time || '23:59:00',
                 flag_tuNobat: taskData.flag_tuNobat || false,
-                hour: taskData.hour || null,
-                selectedDays: taskData.selectedDays || [],
+                is_routine_active: taskData.is_routine_active || false,
+                repeat_days: repeatDays, // همیشه آرایه
                 subtasks: validSubtasks,
-                tags: taskData.tags || [],
+                categories: taskData.categories || [],
+                done_date: taskData.done_date || null,
+                done_time: taskData.done_time || null,
+                duration: taskData.duration || '00:00:00',
+                routine_father: taskData.routine_father || null,
             });
 
             const newTask = normalizeTask(response, tasks.length);
@@ -200,16 +216,23 @@ export const TaskProvider = ({ children }) => {
                     done_date: sub.done_date || null
                 }));
 
+            // اطمینان از اینکه repeat_days آرایه است
+            const repeatDays = Array.isArray(updatedTask.repeat_days) ? updatedTask.repeat_days : [];
+
             const response = await tasksAPI.updateTask(updatedTask.id, {
                 title: updatedTask.title,
                 description: updatedTask.description || '',
                 deadline_date: updatedTask.deadline_date,
+                deadline_time: updatedTask.deadline_time || '23:59:00',
                 flag_tuNobat: updatedTask.flag_tuNobat || false,
-                hour: updatedTask.hour || null,
-                selectedDays: updatedTask.selectedDays || [],
+                is_routine_active: updatedTask.is_routine_active || false,
+                repeat_days: repeatDays, // همیشه آرایه
                 subtasks: validSubtasks,
-                tags: updatedTask.tags || [],
-                isDone: updatedTask.isDone,
+                categories: updatedTask.categories || [],
+                done_date: updatedTask.done_date || null,
+                done_time: updatedTask.done_time || null,
+                duration: updatedTask.duration || '00:00:00',
+                routine_father: updatedTask.routine_father || null,
             });
 
             const editedTask = normalizeTask(response, updatedTask.originalIndex || 0);

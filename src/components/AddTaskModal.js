@@ -20,13 +20,14 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
     const [showDoneDateCalendar, setShowDoneDateCalendar] = useState(false);
     const modalRef = useRef(null);
 
+    // Fixed categories - cannot be modified by user
     const [categories, setCategories] = useState([
-        { id: 6, name: 'ورزش', color: '#34AA7B', selected: false },
-        { id: 7, name: 'کار', color: '#DA348D', selected: false },
-        { id: 8, name: 'کلاس', color: '#4690E4', selected: false },
+        { id: 1, name: 'درس', color: '#4690E4', selected: false },
+        { id: 2, name: 'کار', color: '#DA348D', selected: false },
+        { id: 3, name: 'کلاس', color: '#FFA500', selected: false },
+        { id: 4, name: 'ورزش', color: '#34AA7B', selected: false },
+        { id: 5, name: 'سلامتی', color: '#FF6B6B', selected: false },
     ]);
-    const [newCategory, setNewCategory] = useState('');
-    const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
 
     const [name, setName] = useState('');
     const [time, setTime] = useState('');
@@ -59,18 +60,17 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
     /* ------------------- پر کردن فرم برای ویرایش ------------------- */
     useEffect(() => {
         if (initialTask) {
+            console.log('Initial task در مودال:', initialTask);
+
             setName(initialTask.title || '');
             setDescription(initialTask.description || '');
             setTime(initialTask.deadline_time || '');
 
             // تبدیل تاریخ deadline به فرمت میلادی
             if (initialTask.deadline_date) {
-                const date = moment(initialTask.deadline_date, ['YYYY-MM-DD', 'jYYYY/jMM/jDD']);
-                if (date.isValid()) {
-                    setDueDate(date.format('YYYY-MM-DD'));
-                } else {
-                    setDueDate('');
-                }
+                console.log('deadline_date دریافتی:', initialTask.deadline_date);
+                // تاریخ از سرور همیشه میلادی است (YYYY-MM-DD)
+                setDueDate(initialTask.deadline_date);
             } else {
                 setDueDate('');
             }
@@ -80,7 +80,11 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
             // تبدیل repeat_days از اعداد به نام فارسی روزها
             if (initialTask.repeat_days && Array.isArray(initialTask.repeat_days)) {
-                const days = initialTask.repeat_days.map(num => reverseDayMapping[num]).filter(Boolean);
+                console.log('repeat_days:', initialTask.repeat_days);
+                const days = initialTask.repeat_days
+                    .map(num => reverseDayMapping[num])
+                    .filter(Boolean);
+                console.log('Selected days:', days);
                 setSelectedDays(days);
             } else {
                 setSelectedDays([]);
@@ -97,11 +101,16 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             setSubtasks(serverSubtasks);
             setSubtaskCount(serverSubtasks.length);
 
-            // دسته‌بندی‌ها
-            setCategories(prev => prev.map(cat => ({
-                ...cat,
-                selected: initialTask.categories?.some(c => c.id === cat.id) || false
-            })));
+            // دسته‌بندی‌ها - مارک کردن دسته‌های انتخاب‌شده
+            if (initialTask.categories && Array.isArray(initialTask.categories)) {
+                console.log('categories:', initialTask.categories);
+                setCategories(prev => prev.map(cat => ({
+                    ...cat,
+                    selected: initialTask.categories.some(c =>
+                        c.id === cat.id || c.name === cat.name
+                    )
+                })));
+            }
 
             // اگر تسک قبلاً انجام شده
             if (initialTask.done_date) {
@@ -179,20 +188,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         setCategories(newCategories);
     };
 
-    const addNewCategory = () => {
-        if (newCategory.trim()) {
-            const newId = Math.max(...categories.map(c => c.id), 0) + 1;
-            setCategories([...categories, {
-                id: newId,
-                name: newCategory.trim(),
-                color: '#' + Math.floor(Math.random() * 16777215).toString(16),
-                selected: false
-            }]);
-            setNewCategory('');
-            setShowNewCategoryInput(false);
-        }
-    };
-
     /* ------------------- تقویم deadline ------------------- */
     const handleDateSelect = (date) => {
         setDueDate(date);
@@ -201,7 +196,12 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
     const getJalaliDate = (dateStr) => {
         if (!dateStr) return '';
-        return moment(dateStr, 'YYYY-MM-DD').locale('fa').format('jYYYY/jMM/jDD');
+        const m = moment(dateStr, 'YYYY-MM-DD', true);
+        if (!m.isValid()) {
+            console.log('تاریخ نامعتبر برای تبدیل:', dateStr);
+            return '';
+        }
+        return m.locale('fa').format('jYYYY/jMM/jDD');
     };
 
     /* ------------------- تقویم done date ------------------- */
@@ -225,26 +225,28 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         const newErrors = { name: '', dueDate: '', doneDate: '', form: '' };
 
         if (!name.trim()) newErrors.name = 'این فیلد الزامی است';
-        if (!dueDate) newErrors.dueDate = 'این فیلد الزامی است';
+        // تاریخ انقضا دیگر الزامی نیست
+        // if (!dueDate) newErrors.dueDate = 'این فیلد الزامی است';
 
         // اگر "قبلاً انجام دادی" تیک خورده، تاریخ انجام الزامی است
         if (isDoneAlready && !doneDate) {
             newErrors.doneDate = 'تاریخ انجام الزامی است';
         }
 
-        if (newErrors.name || newErrors.dueDate || newErrors.doneDate) {
+        if (newErrors.name || newErrors.doneDate) {
             setErrors(newErrors);
             return;
         }
 
         // تبدیل روزهای فارسی به اعداد
-        const repeatDaysNumbers = isRoutine
+        const repeatDaysNumbers = isRoutine && selectedDays.length > 0
             ? selectedDays.map(day => dayMapping[day]).filter(Boolean)
-            : null;
+            : [];
 
+        // فقط دسته‌های انتخاب‌شده را ارسال کن (فقط name)
         const selectedCategories = categories
             .filter(c => c.selected)
-            .map(c => ({ id: c.id, name: c.name }));
+            .map(c => ({ name: c.name }));
 
         // تاریخ done_date
         let finalDoneDate = null;
@@ -262,11 +264,11 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             id: initialTask?.id,
             title: name.trim(),
             description: description.trim(),
-            deadline_date: moment(dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD'),
+            deadline_date: dueDate ? moment(dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD') : null,
             deadline_time: time || '23:59:00',
             flag_tuNobat: isInNobat,
             is_routine_active: isRoutine,
-            repeat_days: repeatDaysNumbers,
+            repeat_days: repeatDaysNumbers, // حالا همیشه آرایه است (خالی یا پر)
             subtasks: subtasks
                 .filter(s => s.title.trim() !== '')
                 .map(s => ({
@@ -398,7 +400,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                 {/* تاریخ و ساعت انقضا */}
                 <div className="d-flex justify-content-between gap-3 mt-3">
                     <div className="form-group flex-grow-1">
-                        <label>تاریخ انقضا <span className="required-star">★</span></label>
+                        <label>تاریخ انقضا</label>
                         <div className="date-input-wrapper">
                             <input
                                 type="text"
@@ -532,13 +534,13 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                             ))}
                         </div>
 
-                        {/* دسته‌بندی‌ها */}
+                        {/* دسته‌بندی‌ها - Fixed categories */}
                         <div className="tag-section mt-3">
                             <label>این کار عضو چه دسته‌ای از فعالیت‌هاته؟</label>
                             <div className="tag-container">
                                 {categories.map((cat, i) => (
                                     <div
-                                        key={i}
+                                        key={cat.id}
                                         className={`tag ${cat.selected ? 'selected' : ''}`}
                                         style={{ backgroundColor: cat.color }}
                                         onClick={() => toggleCategory(i)}
@@ -546,21 +548,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                                         <span>{cat.name}</span>
                                     </div>
                                 ))}
-                                <div className="tag more-tag" onClick={() => setShowNewCategoryInput(true)}>
-                                    دسته جدید
-                                </div>
-                                {showNewCategoryInput && (
-                                    <div className="tag new-tag">
-                                        <input
-                                            type="text"
-                                            value={newCategory}
-                                            onChange={e => setNewCategory(e.target.value)}
-                                            onBlur={addNewCategory}
-                                            onKeyPress={e => e.key === 'Enter' && addNewCategory()}
-                                            autoFocus
-                                        />
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -573,7 +560,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        disabled={!name.trim() || !dueDate || (isDoneAlready && !doneDate)}
+                        disabled={!name.trim() || (isDoneAlready && !doneDate)}
                     >
                         {initialTask ? 'ذخیره تغییرات' : 'ذخیره'}
                     </button>

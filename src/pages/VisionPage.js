@@ -1,13 +1,14 @@
 // pages/VisionPage.js
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './VisionPage.scss';
 import SidebarMenu from '../components/SidebarMenu';
-import { TaskContext } from '../components/TaskContext';
+import { tasksAPI } from '../api/apiService';
 import moment from 'jalali-moment';
 
 function VisionPage() {
-    const { tasks } = useContext(TaskContext);
+    const [tasks, setTasks] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     const currentJalali = moment().locale('fa');
@@ -22,6 +23,78 @@ function VisionPage() {
         { value: 9, label: 'آذر' }, { value: 10, label: 'دی' },
         { value: 11, label: 'بهمن' }, { value: 12, label: 'اسفند' },
     ];
+
+    // Normalize task data from different endpoints
+    const normalizeTask = (task) => {
+        return {
+            id: task.id.toString(),
+            title: task.title || 'بدون عنوان',
+            description: task.description || '',
+            deadline_date: task.deadline_date || null,
+            hour: task.deadline_time || task.hour || '',
+            done_date: task.done_date || null,
+            isDone: !!task.done_date,
+        };
+    };
+
+    // Fetch tasks from all three endpoints
+    const fetchAllTasks = async () => {
+        try {
+            setLoading(true);
+
+            const [khakKhordeData, rumizData, nobateshMisheData] = await Promise.all([
+                tasksAPI.getKhakKhordeTasks(),
+                tasksAPI.getRumizTasks(),
+                tasksAPI.getNobateshMisheTasks()
+            ]);
+
+            let allTasks = [];
+
+            // Process Khak Khorde tasks
+            if (Array.isArray(khakKhordeData)) {
+                allTasks.push(...khakKhordeData);
+            } else if (khakKhordeData && typeof khakKhordeData === 'object') {
+                const khakTasks = khakKhordeData.tasks || khakKhordeData.completed_tasks || [];
+                allTasks.push(...khakTasks);
+            }
+
+            // Process Rumiz tasks
+            if (Array.isArray(rumizData)) {
+                allTasks.push(...rumizData);
+            } else if (rumizData && typeof rumizData === 'object') {
+                const rumizTasks = [
+                    ...(rumizData.completed_tasks || []),
+                    ...(rumizData.not_completed_tasks || [])
+                ];
+                allTasks.push(...rumizTasks);
+            }
+
+            // Process Nobatesh Mishe tasks
+            if (Array.isArray(nobateshMisheData)) {
+                allTasks.push(...nobateshMisheData);
+            } else if (nobateshMisheData && typeof nobateshMisheData === 'object') {
+                const nobateshTasks = nobateshMisheData.tasks || nobateshMisheData.not_completed_tasks || [];
+                allTasks.push(...nobateshTasks);
+            }
+
+            // Normalize and deduplicate tasks by id
+            const normalizedTasks = allTasks.map(task => normalizeTask(task));
+            const uniqueTasks = Array.from(
+                new Map(normalizedTasks.map(task => [task.id, task])).values()
+            );
+
+            setTasks(uniqueTasks);
+        } catch (err) {
+            console.error('Error fetching tasks:', err);
+            setTasks([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAllTasks();
+    }, []);
 
     const daysInMonth = moment.jDaysInMonth(selectedYear, selectedMonth - 1);
 
@@ -136,7 +209,7 @@ function VisionPage() {
                     </div>
                 </div>
 
-                {tasks.length === 0 ? (
+                {loading ? (
                     <div className="empty-message-full">
                         <div className="loading-spinner"></div>
                         <p>در حال بارگذاری تسک‌ها...</p>

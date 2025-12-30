@@ -1,12 +1,336 @@
 .dashboard-page {
   min-height: 100vh;
   direction: inherit;
+  background: linear-gradient(135deg, #f6f6f1 0%, #e8ebe4 100%);
+  position: relative;
 }
 
 .main-content {
-  margin-inline-start: 321px; /* فاصله از UtilitySidebar */
-  margin-inline-end: 321px; /* فاصله از SidebarMenu */
+  margin-inline-start: 321px;
+  margin-inline-end: 321px;
   flex-grow: 1;
-  padding: 20px;
+  padding: 40px 50px;
   box-sizing: border-box;
+  overflow-y: auto;
+  min-height: 100vh;
+
+  .task-cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    width: 100%;
+    margin-top: 20px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2C868B;
+    margin: 40px 0 30px;
+    text-align: center;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, #38A3A5 0%, #57CC99 100%);
+      border-radius: 2px;
+    }
+  }
+
+  .bottom-section {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    width: 100%;
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  .chart-wrapper {
+    width: 100%;
+  }
+
+  .chart-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 20px;
+    box-shadow: 0px 4px 20px rgba(44, 134, 139, 0.08);
+    padding: 30px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(44, 134, 139, 0.1);
+
+    &:hover {
+      box-shadow: 0px 8px 30px rgba(44, 134, 139, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .chart-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #2C868B;
+      margin: 0 0 25px 0;
+      text-align: start;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #E8EBE4;
+    }
+
+    .loading-message,
+    .error-message {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 16px;
+      color: #7C7C7C;
+      background: #f9fafb;
+      border-radius: 12px;
+    }
+
+    .error-message {
+      color: #D32F2F;
+      background: #fef2f2;
+    }
+  }
+
+  .calendar-wrapper {
+    width: 100%;
+
+    // استایل برای هماهنگی تقویم با نمودار
+    .calendar-container-wrapper {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 20px;
+      box-shadow: 0px 4px 20px rgba(44, 134, 139, 0.08);
+      padding: 25px;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(44, 134, 139, 0.1);
+
+      &:hover {
+        box-shadow: 0px 8px 30px rgba(44, 134, 139, 0.15);
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+// Large Desktop
+@media (max-width: 1600px) {
+  .main-content {
+    padding: 35px 40px;
+
+    .task-cards-container {
+      gap: 20px;
+    }
+  }
+}
+
+// Desktop
+@media (max-width: 1400px) {
+  .main-content {
+    margin-inline-start: 280px;
+    margin-inline-end: 280px;
+    padding: 30px 35px;
+
+    .task-cards-container {
+      gap: 18px;
+    }
+
+    .bottom-section {
+      gap: 25px;
+    }
+  }
+}
+
+// Tablet Landscape
+@media (max-width: 1200px) {
+  .main-content {
+    margin-inline-start: 0;
+    margin-inline-end: 321px;
+    padding: 25px 30px;
+
+    .task-cards-container {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+
+      .task-preview__card:last-child {
+        grid-column: 1 / -1;
+        max-width: 50%;
+        margin: 0 auto;
+      }
+    }
+
+    .bottom-section {
+      grid-template-columns: 1fr;
+      gap: 25px;
+    }
+
+    .chart-wrapper,
+    .calendar-wrapper {
+      width: 100%;
+    }
+  }
+}
+
+// Tablet Portrait
+@media (max-width: 992px) {
+  .main-content {
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+    padding: 20px 25px;
+
+    .task-cards-container {
+      grid-template-columns: repeat(2, 1fr);
+
+      .task-preview__card:last-child {
+        max-width: 100%;
+      }
+    }
+
+    .section-title {
+      font-size: 24px;
+      margin: 30px 0 25px;
+
+      &::after {
+        width: 60px;
+        height: 2.5px;
+      }
+    }
+
+    .chart-card {
+      padding: 25px;
+
+      .chart-title {
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+// Mobile Large
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px;
+
+    .task-cards-container {
+      grid-template-columns: 1fr;
+      gap: 15px;
+
+      .task-preview__card {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .task-preview__card:last-child {
+        grid-column: auto;
+      }
+    }
+
+    .section-title {
+      font-size: 22px;
+      margin: 25px 0 20px;
+    }
+
+    .bottom-section {
+      gap: 20px;
+    }
+
+    .chart-card {
+      padding: 20px;
+      border-radius: 16px;
+
+      .chart-title {
+        font-size: 18px;
+        margin-bottom: 20px;
+      }
+    }
+
+    .calendar-wrapper {
+      .calendar-container-wrapper {
+        padding: 20px;
+        border-radius: 16px;
+      }
+    }
+  }
+}
+
+// Mobile Medium
+@media (max-width: 576px) {
+  .main-content {
+    padding: 15px;
+
+    .section-title {
+      font-size: 20px;
+      margin: 20px 0 15px;
+
+      &::after {
+        width: 50px;
+        bottom: -8px;
+      }
+    }
+
+    .chart-card {
+      padding: 15px;
+
+      .chart-title {
+        font-size: 17px;
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+      }
+
+      .loading-message,
+      .error-message {
+        padding: 40px 15px;
+        font-size: 14px;
+      }
+    }
+
+    .calendar-wrapper {
+      .calendar-container-wrapper {
+        padding: 15px;
+      }
+    }
+  }
+}
+
+// Mobile Small
+@media (max-width: 480px) {
+  .main-content {
+    padding: 12px;
+
+    .task-cards-container {
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      margin: 15px 0 12px;
+    }
+
+    .bottom-section {
+      gap: 15px;
+    }
+
+    .chart-card {
+      padding: 12px;
+      border-radius: 12px;
+
+      .chart-title {
+        font-size: 16px;
+        margin-bottom: 12px;
+      }
+    }
+
+    .calendar-wrapper {
+      .calendar-container-wrapper {
+        padding: 12px;
+        border-radius: 12px;
+      }
+    }
+  }
 }

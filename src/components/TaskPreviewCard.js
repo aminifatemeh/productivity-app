@@ -1,7 +1,8 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./TaskPreviewCard.scss";
 import { TaskContext } from "../components/TaskContext";
 import { LanguageContext } from "../context/LanguageContext";
+import { tasksAPI } from "../api/apiService";
 
 const cardConfigs = {
   active: {
@@ -9,33 +10,106 @@ const cardConfigs = {
     icon: "/assets/icons/active.svg",
     labelKey: "taskPreviewCard.active",
     gradient: "linear-gradient(135deg, #38A3A5 0%, #4AB8BB 100%)",
+    endpoint: "rumiz"
   },
   upNext: {
     color: "#57CC99",
     icon: "/assets/icons/up-next.svg",
     labelKey: "taskPreviewCard.upNext",
     gradient: "linear-gradient(135deg, #57CC99 0%, #6DE2AF 100%)",
+    endpoint: "nobatesh_mishe"
   },
   archived: {
     color: "#80ED99",
     icon: "/assets/icons/archived.svg",
     labelKey: "taskPreviewCard.archived",
     gradient: "linear-gradient(135deg, #80ED99 0%, #96F5AF 100%)",
+    endpoint: "khak_khorde"
   },
 };
 
-function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
+function TaskPreviewCard({ cardName, setSelectedTask }) {
   const { timers, startTimer, stopTimer, setTimers } = useContext(TaskContext);
   const { t } = useContext(LanguageContext);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const config = cardConfigs[cardName] || cardConfigs.active;
 
-  const filteredTasks = (tasks || []).filter((task) => {
-    if (!task || !task.id) return false;
-    if (cardName === "active") return task.flag_tuNobat && !task.isDone;
-    if (cardName === "upNext") return !task.flag_tuNobat && !task.isDone;
-    if (cardName === "archived") return task.isDone;
-    return false;
-  });
+  const parseDuration = (durationStr) => {
+    if (!durationStr) return 0;
+    const parts = durationStr.split(':');
+    const hours = parseInt(parts[0] || 0);
+    const mins = parseInt(parts[1] || 0);
+    const secs = parseInt(parts[2] || 0);
+    return hours * 3600 + mins * 60 + secs;
+  };
+
+  const normalizeTask = (task) => {
+    return {
+      id: task.id.toString(),
+      title: task.title || 'بدون عنوان',
+      description: task.description || '',
+      flag_tuNobat: task.flag_tuNobat || false,
+      isDone: !!task.done_date,
+      done_date: task.done_date || null,
+      subtasks: Array.isArray(task.subtasks) ? task.subtasks : [],
+      tags: Array.isArray(task.categories) ? task.categories : [],
+      deadline_date: task.deadline_date || null,
+      deadline_time: task.deadline_time || '',
+      totalDuration: task.duration ? parseDuration(task.duration) : 0,
+      duration: task.duration || '00:00:00',
+    };
+  };
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      let data;
+
+      switch (config.endpoint) {
+        case 'khak_khorde':
+          data = await tasksAPI.getKhakKhordeTasks();
+          break;
+        case 'rumiz':
+          data = await tasksAPI.getRumizTasks();
+          break;
+        case 'nobatesh_mishe':
+          data = await tasksAPI.getNobateshMisheTasks();
+          break;
+        default:
+          data = [];
+      }
+
+      let tasksArray = [];
+      if (Array.isArray(data)) {
+        tasksArray = data;
+      } else if (data && typeof data === 'object') {
+        if (config.endpoint === 'rumiz') {
+          tasksArray = [
+            ...(data.completed_tasks || []),
+            ...(data.not_completed_tasks || [])
+          ];
+        } else {
+          tasksArray = data.tasks || data.not_completed_tasks || data.completed_tasks || [];
+        }
+      }
+
+      const normalizedTasks = Array.isArray(tasksArray)
+          ? tasksArray.map(task => normalizeTask(task))
+          : [];
+
+      setTasks(normalizedTasks);
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
+      setTasks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, [cardName]);
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -71,6 +145,25 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
     }
   };
 
+  if (loading) {
+    return (
+        <div className="task-preview__card" style={{ background: config.gradient }}>
+          <div className="task-preview__card-header">
+            <div className="header-content">
+              <img src={config.icon} alt="" className="header-icon" />
+              <span className="header-title">{t(config.labelKey)}</span>
+            </div>
+            <div className="task-count-badge">...</div>
+          </div>
+          <div className="task-preview__card-tasks">
+            <div className="empty-state">
+              <span>در حال بارگذاری...</span>
+            </div>
+          </div>
+        </div>
+    );
+  }
+
   return (
       <div className="task-preview__card" style={{ background: config.gradient }}>
         <div className="task-preview__card-header">
@@ -78,16 +171,16 @@ function TaskPreviewCard({ cardName, tasks = [], setSelectedTask }) {
             <img src={config.icon} alt="" className="header-icon" />
             <span className="header-title">{t(config.labelKey)}</span>
           </div>
-          <div className="task-count-badge">{filteredTasks.length}</div>
+          <div className="task-count-badge">{tasks.length}</div>
         </div>
 
         <div className="task-preview__card-tasks">
-          {filteredTasks.length === 0 ? (
+          {tasks.length === 0 ? (
               <div className="empty-state">
                 <span>{t("taskPreviewCard.noTasks")}</span>
               </div>
           ) : (
-              filteredTasks.map((task) => {
+              tasks.map((task) => {
                 if (!task || !task.id) return null;
 
                 const timer = timers[task.id] || { elapsed: 0, isRunning: false };
