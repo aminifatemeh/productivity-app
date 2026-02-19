@@ -1,0 +1,422 @@
+@charset "UTF-8";
+.vision-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+  position: relative;
+  overflow-x: hidden;
+  width: 100%;
+}
+.vision-page .main-content {
+  padding: 40px 50px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.vision-page .vision-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 50px;
+  padding: 35px 40px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 25px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+.vision-page .vision-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #64B5F6, #66BB6A);
+}
+.vision-page .vision-header .vision-title {
+  font-size: 36px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #01575C 0%, #64B5F6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+.vision-page .vision-header .month-selector {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+.vision-page .vision-header .month-selector .nav-button {
+  background: linear-gradient(135deg, #E1F396 0%, #BFE8D8 100%);
+  color: #01575C;
+  border: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(225, 243, 150, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.vision-page .vision-header .month-selector .nav-button:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 10px 24px rgba(225, 243, 150, 0.5);
+}
+.vision-page .vision-header .month-selector .nav-button:active {
+  transform: translateY(-2px) scale(1.02);
+}
+.vision-page .vision-header .month-selector .nav-button svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 3;
+}
+.vision-page .vision-header .month-selector .current-month {
+  text-align: center;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.vision-page .vision-header .month-selector .current-month .month-name {
+  font-size: 32px;
+  font-weight: 800;
+  color: #01575C;
+  letter-spacing: -0.5px;
+}
+.vision-page .vision-header .month-selector .current-month .year {
+  font-size: 20px;
+  font-weight: 600;
+  color: #666;
+}
+.vision-page .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+  max-width: 100%;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.vision-page .day-card {
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.vision-page .day-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--card-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.vision-page .day-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+.vision-page .day-card:hover::before {
+  opacity: 0.05;
+}
+.vision-page .day-card:hover .day-header {
+  transform: scale(1.02);
+}
+.vision-page .day-card:hover .task-item {
+  transform: translateX(-3px);
+}
+.vision-page .day-header {
+  background: var(--card-gradient);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+.vision-page .day-header .day-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.vision-page .day-header .day-info .day-number {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.vision-page .day-header .day-info .day-name {
+  font-size: 13px;
+  opacity: 0.95;
+  font-weight: 600;
+}
+.vision-page .day-header .month-label {
+  font-size: 14px;
+  opacity: 0.9;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+.vision-page .tasks-list {
+  padding: 16px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 140px;
+  position: relative;
+  z-index: 1;
+}
+.vision-page .task-item {
+  background: linear-gradient(135deg, #F6F6F1 0%, #EAFFEB 100%);
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.vision-page .task-item:hover {
+  background: linear-gradient(135deg, #E1F396 0%, #BFE8D8 100%);
+  border-color: rgba(1, 87, 92, 0.2);
+  transform: translateX(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.vision-page .task-item .task-title {
+  flex: 1;
+  color: #01575C;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.vision-page .task-item .task-time {
+  font-size: 13px;
+  color: #666;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.vision-page .empty-day {
+  color: #999;
+  font-size: 16px;
+  font-style: italic;
+  text-align: center;
+  padding: 30px 15px;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.6;
+  background: linear-gradient(135deg, rgba(225, 243, 150, 0.1) 0%, rgba(191, 232, 216, 0.1) 100%);
+  border-radius: 12px;
+  margin: 4px;
+}
+.vision-page .empty-message-full {
+  text-align: center;
+  padding: 80px 40px;
+  background: white;
+  border-radius: 25px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  max-width: 600px;
+  margin: 100px auto;
+}
+.vision-page .empty-message-full .loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #E1F396;
+  border-top-color: #01575C;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+.vision-page .empty-message-full p {
+  font-size: 20px;
+  color: #666;
+  font-weight: 600;
+  margin: 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.vision-page {
+  /* ریسپانسیو */
+}
+@media (max-width: 1400px) {
+  .vision-page .main-content {
+    padding: 35px 40px;
+  }
+  .vision-page .calendar-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+}
+@media (max-width: 1200px) {
+  .vision-page .main-content {
+    padding: 30px 35px;
+  }
+  .vision-page .calendar-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+  }
+}
+@media (max-width: 992px) {
+  .vision-page .main-content {
+    padding: 25px;
+  }
+  .vision-page .vision-header {
+    padding: 30px;
+    margin-bottom: 40px;
+  }
+  .vision-page .vision-header .vision-title {
+    font-size: 30px;
+  }
+  .vision-page .calendar-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+}
+@media (max-width: 768px) {
+  .vision-page .main-content {
+    padding: 20px;
+  }
+  .vision-page .vision-header {
+    padding: 25px 20px;
+    margin-bottom: 30px;
+  }
+  .vision-page .vision-header .vision-title {
+    font-size: 26px;
+  }
+  .vision-page .vision-header .month-selector {
+    gap: 30px;
+  }
+  .vision-page .vision-header .month-selector .nav-button {
+    width: 52px;
+    height: 52px;
+  }
+  .vision-page .vision-header .month-selector .nav-button svg {
+    width: 24px;
+    height: 24px;
+  }
+  .vision-page .vision-header .month-selector .current-month {
+    min-width: 160px;
+  }
+  .vision-page .vision-header .month-selector .current-month .month-name {
+    font-size: 26px;
+  }
+  .vision-page .vision-header .month-selector .current-month .year {
+    font-size: 18px;
+  }
+  .vision-page .calendar-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  .vision-page .day-card .day-header {
+    padding: 14px 16px;
+  }
+  .vision-page .day-card .day-header .day-info .day-number {
+    font-size: 28px;
+  }
+  .vision-page .day-card .day-header .day-info .day-name {
+    font-size: 12px;
+  }
+  .vision-page .day-card .day-header .month-label {
+    font-size: 12px;
+    padding: 3px 10px;
+  }
+  .vision-page .day-card .tasks-list {
+    padding: 14px;
+    gap: 8px;
+    min-height: 120px;
+  }
+  .vision-page .day-card .task-item {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  .vision-page .day-card .task-item .task-time {
+    font-size: 12px;
+  }
+  .vision-page .day-card .empty-day {
+    font-size: 14px;
+    padding: 25px 12px;
+  }
+}
+@media (max-width: 576px) {
+  .vision-page .main-content {
+    padding: 15px;
+  }
+  .vision-page .vision-header {
+    padding: 20px 15px;
+    gap: 20px;
+  }
+  .vision-page .vision-header .vision-title {
+    font-size: 22px;
+  }
+  .vision-page .vision-header .month-selector {
+    gap: 25px;
+  }
+  .vision-page .vision-header .month-selector .nav-button {
+    width: 48px;
+    height: 48px;
+  }
+  .vision-page .vision-header .month-selector .nav-button svg {
+    width: 22px;
+    height: 22px;
+  }
+  .vision-page .vision-header .month-selector .current-month {
+    min-width: 140px;
+  }
+  .vision-page .vision-header .month-selector .current-month .month-name {
+    font-size: 22px;
+  }
+  .vision-page .vision-header .month-selector .current-month .year {
+    font-size: 16px;
+  }
+  .vision-page .calendar-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .vision-page .empty-message-full {
+    padding: 60px 30px;
+    margin: 60px auto;
+  }
+  .vision-page .empty-message-full .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+  .vision-page .empty-message-full p {
+    font-size: 18px;
+  }
+}
+
+/*# sourceMappingURL=VisionPage.css.map */

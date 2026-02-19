@@ -1,0 +1,395 @@
+.charts-page {
+  min-height: 100vh;
+  background-color: #f6f6f1;
+  direction: rtl;
+}
+.charts-page .main-content {
+  margin-right: 321px;
+  margin-left: 0;
+  justify-content: flex-start;
+  padding: 30px 40px;
+  overflow-y: auto;
+  flex: 1;
+  width: calc(100% - 321px);
+  max-width: 100%;
+}
+.charts-page .charts-header {
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.charts-page .charts-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #2C868B;
+  margin: 10px;
+}
+.charts-page .charts-content {
+  width: 100%;
+}
+.charts-page .loading-message,
+.charts-page .error-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #7C7C7C;
+}
+.charts-page .error-message {
+  color: #D32F2F;
+}
+.charts-page .performance-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px 20px;
+  width: 100%;
+  max-width: none;
+  margin-bottom: 25px;
+}
+.charts-page .performance-card.weekly-chart {
+  padding: 20px 30px;
+}
+.charts-page .performance-card.monthly-chart {
+  padding: 20px 30px;
+}
+.charts-page .performance-card.delay-card {
+  padding: 20px 30px;
+}
+.charts-page .performance-card__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 50px;
+}
+.charts-page .performance-card__text {
+  flex: 1;
+}
+.charts-page .performance-card__title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2C868B;
+  margin: 0 0 12px 0;
+}
+.charts-page .performance-card__description {
+  font-size: 15px;
+  color: #7C7C7C;
+  margin: 0;
+  line-height: 1.6;
+}
+.charts-page .performance-card .stat-item {
+  display: flex;
+  gap: 10px;
+}
+.charts-page .performance-card .stat-label,
+.charts-page .performance-card .stat-value {
+  font-size: 15px;
+  font-weight: bold;
+  color: #323434;
+}
+.charts-page .performance-card .performance-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 15px;
+}
+.charts-page .performance-card .stat-item-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.charts-page .performance-card .stat-color-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.charts-page .performance-card__chart {
+  flex-shrink: 0;
+  width: 180px;
+  height: 180px;
+}
+.charts-page .performance-card__chart .donut-chart {
+  width: 100%;
+  height: 100%;
+  transform: rotate(0deg);
+}
+.charts-page .performance-card__chart .donut-chart circle {
+  transition: stroke-dashoffset 0.6s ease;
+}
+.charts-page .performance-card__header {
+  margin-bottom: 20px;
+}
+.charts-page .performance-card__bar-chart {
+  width: 100%;
+  min-height: 300px;
+  direction: ltr;
+}
+.charts-page .delay-content {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 40px;
+  margin-top: 20px;
+}
+.charts-page .delay-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+.charts-page .delay-item:hover {
+  transform: translateY(-5px);
+}
+.charts-page .delay-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.charts-page .delay-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.charts-page .delay-label {
+  font-size: 16px;
+  color: #7C7C7C;
+  font-weight: 500;
+}
+.charts-page .delay-time {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2C868B;
+  line-height: 1.2;
+}
+.charts-page .focus-cards-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  margin-bottom: 25px;
+  width: 100%;
+}
+.charts-page .focus-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.charts-page .focus-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #38A3A5, #57CC99, #80ED99);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.charts-page .focus-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.12);
+}
+.charts-page .focus-card:hover::before {
+  opacity: 1;
+}
+.charts-page .focus-card:hover .focus-donut-chart circle:last-of-type {
+  filter: brightness(1.1);
+}
+.charts-page .focus-card__header {
+  text-align: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+.charts-page .focus-card__title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2C868B;
+  margin: 0 0 8px 0;
+}
+.charts-page .focus-card__subtitle {
+  font-size: 13px;
+  color: #7C7C7C;
+  margin: 0;
+}
+.charts-page .focus-card__chart {
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+.charts-page .focus-card__chart .focus-donut-chart {
+  width: 100%;
+  height: 100%;
+}
+.charts-page .focus-card__chart .focus-donut-chart circle {
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.charts-page .focus-card__chart .focus-donut-chart text {
+  transition: all 0.3s ease;
+}
+@media (max-width: 1400px) {
+  .charts-page .focus-cards-container {
+    gap: 20px;
+  }
+  .charts-page .focus-card {
+    padding: 20px;
+  }
+  .charts-page .focus-card__chart {
+    width: 140px;
+    height: 140px;
+  }
+  .charts-page .focus-card__title {
+    font-size: 18px;
+  }
+}
+@media (max-width: 1024px) {
+  .charts-page .main-content {
+    margin-right: 0;
+    width: 100%;
+    padding: 30px 40px;
+  }
+  .charts-page .delay-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .charts-page .delay-item {
+    width: 100%;
+  }
+  .charts-page .focus-cards-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .charts-page .focus-card__chart {
+    width: 130px;
+    height: 130px;
+  }
+  .charts-page .focus-card__title {
+    font-size: 17px;
+  }
+  .charts-page .focus-card__subtitle {
+    font-size: 12px;
+  }
+}
+@media (max-width: 768px) {
+  .charts-page .main-content {
+    padding: 20px;
+  }
+  .charts-page .charts-title {
+    font-size: 24px;
+  }
+  .charts-page .performance-card {
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+  .charts-page .performance-card.weekly-chart {
+    padding: 20px;
+  }
+  .charts-page .performance-card.monthly-chart {
+    padding: 20px;
+  }
+  .charts-page .performance-card.delay-card {
+    padding: 20px;
+  }
+  .charts-page .performance-card__content {
+    flex-direction: column;
+    text-align: center;
+    gap: 25px;
+  }
+  .charts-page .performance-card__text {
+    text-align: center;
+  }
+  .charts-page .performance-card__title {
+    font-size: 22px;
+  }
+  .charts-page .performance-card__description {
+    font-size: 14px;
+  }
+  .charts-page .performance-card__chart {
+    width: 160px;
+    height: 160px;
+  }
+  .charts-page .performance-card__bar-chart {
+    min-height: 250px;
+  }
+  .charts-page .performance-card .stat-item {
+    justify-content: center;
+  }
+  .charts-page .performance-card .stat-value {
+    font-size: 14px;
+  }
+  .charts-page .performance-card .stat-label {
+    font-size: 14px;
+  }
+  .charts-page .performance-card .performance-stats {
+    align-items: center;
+  }
+  .charts-page .performance-card .stat-item-inline {
+    justify-content: center;
+  }
+  .charts-page .delay-time {
+    font-size: 18px;
+  }
+  .charts-page .delay-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .charts-page .delay-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  .charts-page .focus-cards-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .charts-page .focus-card {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 20px;
+  }
+  .charts-page .focus-card__header {
+    text-align: right;
+    margin-bottom: 0;
+  }
+  .charts-page .focus-card__title {
+    font-size: 18px;
+  }
+  .charts-page .focus-card__subtitle {
+    font-size: 12px;
+  }
+  .charts-page .focus-card__chart {
+    width: 120px;
+    height: 120px;
+  }
+}
+@media (max-width: 480px) {
+  .charts-page .focus-card {
+    flex-direction: column;
+    align-items: center;
+  }
+  .charts-page .focus-card__header {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .charts-page .focus-card__chart {
+    width: 140px;
+    height: 140px;
+  }
+}
+
+/*# sourceMappingURL=ChartsPage.css.map */

@@ -4,6 +4,7 @@ import TaskPreviewCard from "../components/TaskPreviewCard";
 import UtilitySidebar from "../components/UtilitySidebar";
 import SidebarMenu from "../components/SidebarMenu";
 import Calendar from "../components/Calendar";
+import MobileTimerBar from "../components/MobileTimer\Bar";
 import { TaskContext } from "../components/TaskContext";
 import { LanguageContext } from "../context/LanguageContext";
 import { tasksAPI } from "../api/apiService";
@@ -243,6 +244,7 @@ function DashboardPage() {
                 </div>
             </main>
             <SidebarMenu />
+            <MobileTimerBar selectedTask={selectedTask} />
             <style>{`
                 @keyframes spin {
                     0% { transform: rotate(0deg); }

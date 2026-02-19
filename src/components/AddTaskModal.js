@@ -69,7 +69,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             // تبدیل تاریخ deadline به فرمت میلادی
             if (initialTask.deadline_date) {
                 console.log('deadline_date دریافتی:', initialTask.deadline_date);
-                // تاریخ از سرور همیشه میلادی است (YYYY-MM-DD)
                 setDueDate(initialTask.deadline_date);
             } else {
                 setDueDate('');
@@ -90,14 +89,16 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                 setSelectedDays([]);
             }
 
-            // ساب‌تسک‌ها
+            // ساب‌تسک‌ها - فقط آن‌هایی که ID دارند (از سرور آمده‌اند)
             const serverSubtasks = (initialTask.subtasks || [])
                 .filter(sub => sub.id && Number.isInteger(sub.id))
                 .map(sub => ({
                     id: sub.id,
                     title: sub.title || '',
+                    isExisting: true, // علامت‌گذاری به عنوان ساب‌تسک موجود
                 }));
 
+            console.log('ساب‌تسک‌های موجود:', serverSubtasks);
             setSubtasks(serverSubtasks);
             setSubtaskCount(serverSubtasks.length);
 
@@ -163,14 +164,19 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         setSubtaskCount(c => c + 1);
         setSubtasks(prev => [
             ...prev,
-            { id: null, title: '' }
+            { id: null, title: '', isExisting: false } // علامت‌گذاری به عنوان ساب‌تسک جدید
         ]);
+        console.log('ساب‌تسک جدید اضافه شد');
     };
 
     const decreaseCount = () => {
         if (subtaskCount > 0) {
             setSubtaskCount(c => c - 1);
-            setSubtasks(prev => prev.slice(0, -1));
+            setSubtasks(prev => {
+                const removed = prev[prev.length - 1];
+                console.log('ساب‌تسک حذف شد:', removed);
+                return prev.slice(0, -1);
+            });
         }
     };
 
@@ -225,8 +231,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         const newErrors = { name: '', dueDate: '', doneDate: '', form: '' };
 
         if (!name.trim()) newErrors.name = 'این فیلد الزامی است';
-        // تاریخ انقضا دیگر الزامی نیست
-        // if (!dueDate) newErrors.dueDate = 'این فیلد الزامی است';
 
         // اگر "قبلاً انجام دادی" تیک خورده، تاریخ انجام الزامی است
         if (isDoneAlready && !doneDate) {
@@ -260,6 +264,23 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             }
         }
 
+        const processedSubtasks = subtasks
+            .filter(s => s.title && s.title.trim() !== '')
+            .filter(s => {
+                // اگر در حالت ویرایش هستیم، فقط ساب‌تسک‌های جدید را ارسال کن
+                if (initialTask) {
+                    return !s.isExisting; // فقط ساب‌تسک‌های جدید
+                }
+                return true; // در حالت افزودن، همه را ارسال کن
+            })
+            .map(s => ({
+                title: s.title.trim(),
+            }));
+
+        console.log('ساب‌تسک‌های پردازش‌شده برای ارسال:', processedSubtasks);
+        console.log('تعداد ساب‌تسک‌های موجود:', subtasks.filter(s => s.isExisting).length);
+        console.log('تعداد ساب‌تسک‌های جدید:', processedSubtasks.length);
+
         const taskData = {
             id: initialTask?.id,
             title: name.trim(),
@@ -268,13 +289,8 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             deadline_time: time || '23:59:00',
             flag_tuNobat: isInNobat,
             is_routine_active: isRoutine,
-            repeat_days: repeatDaysNumbers, // حالا همیشه آرایه است (خالی یا پر)
-            subtasks: subtasks
-                .filter(s => s.title.trim() !== '')
-                .map(s => ({
-                    id: typeof s.id === 'number' ? s.id : null,
-                    title: s.title.trim(),
-                })),
+            repeat_days: repeatDaysNumbers,
+            subtasks: processedSubtasks,
             categories: selectedCategories,
             done_date: finalDoneDate,
             done_time: isDoneAlready && time ? time : null,

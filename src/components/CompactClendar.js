@@ -26,7 +26,11 @@ const CompactCalendar = ({ selectedDate, onDateSelect, onClose }) => {
         daysArray.push(i);
     }
 
-    const changeMonth = (direction) => {
+    const changeMonth = (direction, e) => {
+        // جلوگیری از submit شدن فرم
+        e.preventDefault();
+        e.stopPropagation();
+
         setCurrentDate(
             direction === 'next'
                 ? currentDate.clone().add(1, 'jMonth')
@@ -34,12 +38,26 @@ const CompactCalendar = ({ selectedDate, onDateSelect, onClose }) => {
         );
     };
 
-    const selectDate = (day) => {
+    const selectDate = (day, e) => {
         if (day) {
+            // جلوگیری از submit شدن فرم
+            e.preventDefault();
+            e.stopPropagation();
+
             const newSelectedDate = moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('fa');
             setInternalSelected(newSelectedDate);
             const formattedDate = newSelectedDate.locale('en').format('YYYY-MM-DD');
             onDateSelect(formattedDate);
+        }
+    };
+
+    const handleClose = (e) => {
+        // جلوگیری از submit شدن فرم
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (onClose) {
+            onClose();
         }
     };
 
@@ -49,11 +67,19 @@ const CompactCalendar = ({ selectedDate, onDateSelect, onClose }) => {
     return (
         <div className="compact-calendar">
             <div className="compact-calendar-header">
-                <button className="compact-nav-button" onClick={() => changeMonth('prev')}>
+                <button
+                    type="button"
+                    className="compact-nav-button"
+                    onClick={(e) => changeMonth('prev', e)}
+                >
                     ←
                 </button>
                 <div className="compact-calendar-title">{`${monthName} ${year}`}</div>
-                <button className="compact-nav-button" onClick={() => changeMonth('next')}>
+                <button
+                    type="button"
+                    className="compact-nav-button"
+                    onClick={(e) => changeMonth('next', e)}
+                >
                     →
                 </button>
             </div>
@@ -75,14 +101,18 @@ const CompactCalendar = ({ selectedDate, onDateSelect, onClose }) => {
                                 ? 'selected'
                                 : ''
                         } ${!day ? 'empty' : ''}`}
-                        onClick={() => selectDate(day)}
+                        onClick={(e) => selectDate(day, e)}
                     >
                         {day || ''}
                     </div>
                 ))}
             </div>
             {onClose && (
-                <button className="compact-calendar-close" onClick={onClose}>
+                <button
+                    type="button"
+                    className="compact-calendar-close"
+                    onClick={handleClose}
+                >
                     بستن
                 </button>
             )}

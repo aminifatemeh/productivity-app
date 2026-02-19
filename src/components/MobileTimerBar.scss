@@ -1,0 +1,147 @@
+.mobile-timer-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #2C868B 0%, #38A3A5 100%);
+  box-shadow: 0 -4px 20px rgba(44, 134, 139, 0.3);
+  z-index: 1000;
+  padding: 12px 20px;
+  backdrop-filter: blur(10px);
+
+  &__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__task-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__time {
+    font-size: 18px;
+    font-weight: 700;
+    color: #E1F396;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+  }
+
+  &__placeholder {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+  }
+
+  &__controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  &__button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+
+    &--play {
+      background: linear-gradient(135deg, #57CC99 0%, #6DE2AF 100%);
+      box-shadow: 0 4px 12px rgba(87, 204, 153, 0.3);
+
+      &:hover:not(:disabled) {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(87, 204, 153, 0.4);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.95);
+      }
+    }
+
+    &--reset {
+      background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+
+      &:hover:not(:disabled) {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.95);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    svg {
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+  }
+}
+
+// نمایش نوار موبایل در صفحات کوچک
+@media (max-width: 992px) {
+  .mobile-timer-bar {
+    display: block;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobile-timer-bar {
+    padding: 10px 15px;
+
+    &__task-name {
+      font-size: 14px;
+    }
+
+    &__time {
+      font-size: 16px;
+    }
+
+    &__placeholder {
+      font-size: 13px;
+    }
+
+    &__controls {
+      gap: 10px;
+    }
+
+    &__button {
+      width: 44px;
+      height: 44px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}

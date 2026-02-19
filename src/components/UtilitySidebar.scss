@@ -1,7 +1,7 @@
 .utility-sidebar {
   width: 321px;
   top: 0;
-  inset-inline-end: 0; /* در فارسی به چپ، در انگلیسی به راست */
+  inset-inline-end: 0;
   height: 100vh;
   padding: 2rem;
   position: fixed;
@@ -10,6 +10,7 @@
   background-position: center;
   background-repeat: no-repeat;
   z-index: 1000;
+  transition: transform 0.3s ease;
 
   &__gradient {
     position: absolute;
@@ -47,6 +48,14 @@
     align-items: center;
     z-index: 1;
     margin: auto auto 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #d4e884;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
     .circle {
       height: 40px;
@@ -58,6 +67,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      transition: transform 0.3s ease;
 
       img {
         width: 10px;
@@ -65,9 +75,14 @@
       }
     }
 
+    &:hover .circle {
+      transform: rotate(90deg);
+    }
+
     span {
       flex-grow: 1;
       text-align: center;
+      font-weight: 600;
     }
   }
 
@@ -113,5 +128,12 @@
     z-index: 2000;
     padding: 40px;
     overflow: auto;
+  }
+}
+
+// مخفی کردن Utility Sidebar در موبایل و تبلت
+@media (max-width: 992px) {
+  .utility-sidebar {
+    display: none;
   }
 }

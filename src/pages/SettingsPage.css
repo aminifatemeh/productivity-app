@@ -1,0 +1,157 @@
+@charset "UTF-8";
+.settings-page {
+  min-height: 100vh;
+  direction: inherit;
+}
+
+.main-content {
+  margin-inline-start: 321px; /* فاصله از SidebarMenu (راست در فارسی، چپ در انگلیسی) */
+  flex-grow: 1;
+  display: flex;
+  justify-content: center; /* وسط‌چین افقی */
+  align-items: center; /* وسط‌چین عمودی */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.settings-container {
+  position: relative;
+  max-width: 100%; /* همخوانی با settings-section */
+  width: 100%;
+  max-height: 90vh; /* کمی کوچکتر از 100vh برای جلوگیری از سرریز */
+  margin: 30px 0; /* حذف margin auto برای کنترل توسط main-content */
+  background-color: #f6f6f1;
+  border-radius: 17px;
+  padding: 2rem;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settings-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settings-container::-webkit-scrollbar-track {
+  background: #f6f6f1;
+  border-radius: 10px;
+}
+
+.settings-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.settings-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.settings-container {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f6f6f1;
+}
+
+.settings-title {
+  background-color: #f6f6f1;
+  position: absolute;
+  width: 120px;
+  text-align: center;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  font-size: 16px;
+  font-weight: bold;
+  color: #01575c;
+}
+
+.settings-section {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #01575c;
+  margin-bottom: 1rem;
+  text-align: start;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+.form-group label .required-star {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-inline-start: 5px;
+}
+.form-group .form-control {
+  width: 100%;
+  padding: 8px;
+  background-color: #d9d9d9;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  color: #01575c;
+}
+.form-group .form-control::placeholder {
+  color: #7f7474;
+}
+.form-group .error-message {
+  display: block;
+  font-size: 10px;
+  color: #d32f2f;
+  margin-top: 5px;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 6px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  width: 60px;
+}
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-primary {
+  background-color: #c8e6c9;
+  color: #01575c;
+  width: 90px;
+}
+.btn-primary:hover {
+  background-color: #a5d6a7;
+}
+.btn-primary:disabled {
+  background-color: #e0e0e0;
+  color: #757575;
+  cursor: not-allowed;
+}
+
+/*# sourceMappingURL=SettingsPage.css.map */

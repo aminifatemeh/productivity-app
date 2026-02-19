@@ -1,0 +1,289 @@
+.dashboard-page {
+  min-height: 100vh;
+  direction: inherit;
+  background: linear-gradient(135deg, #f6f6f1 0%, #e8ebe4 100%);
+  position: relative;
+  padding-bottom: 0;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+  overflow-x: hidden;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 40px 50px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+}
+.main-content .task-cards-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  width: 100%;
+  margin-top: 20px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0;
+}
+.main-content .section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2C868B;
+  margin: 40px 0 30px;
+  text-align: center;
+  position: relative;
+}
+.main-content .section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #38A3A5 0%, #57CC99 100%);
+  border-radius: 2px;
+}
+.main-content .bottom-section {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  width: 100%;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: start;
+}
+.main-content .chart-wrapper {
+  width: 100%;
+}
+.main-content .chart-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  box-shadow: 0px 4px 20px rgba(44, 134, 139, 0.08);
+  padding: 30px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(44, 134, 139, 0.1);
+  height: 100%;
+}
+.main-content .chart-card:hover {
+  box-shadow: 0px 8px 30px rgba(44, 134, 139, 0.15);
+  transform: translateY(-2px);
+}
+.main-content .chart-card .chart-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2C868B;
+  margin: 0 0 25px 0;
+  text-align: start;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #E8EBE4;
+}
+.main-content .chart-card .loading-message,
+.main-content .chart-card .error-message {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 16px;
+  color: #7C7C7C;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+.main-content .chart-card .error-message {
+  color: #D32F2F;
+  background: #fef2f2;
+}
+.main-content .calendar-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+}
+.main-content .calendar-wrapper .calendar-container-wrapper {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  box-shadow: 0px 4px 20px rgba(44, 134, 139, 0.08);
+  padding: 30px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(44, 134, 139, 0.1);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.main-content .calendar-wrapper .calendar-container-wrapper:hover {
+  box-shadow: 0px 8px 30px rgba(44, 134, 139, 0.15);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 1600px) {
+  .main-content {
+    margin-inline-start: 321px;
+    margin-inline-end: 321px;
+    padding: 35px 40px;
+  }
+  .main-content .task-cards-container {
+    gap: 20px;
+  }
+}
+@media (max-width: 1400px) {
+  .main-content {
+    margin-inline-start: 280px;
+    margin-inline-end: 280px;
+    padding: 30px 35px;
+  }
+  .main-content .task-cards-container {
+    gap: 18px;
+  }
+  .main-content .bottom-section {
+    gap: 25px;
+  }
+}
+@media (max-width: 1200px) {
+  .main-content {
+    margin-inline-start: 0;
+    margin-inline-end: 321px;
+    padding: 25px 30px;
+  }
+  .main-content .task-cards-container {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 20px;
+  }
+  .main-content .task-cards-container .task-preview__card {
+    width: 100%;
+  }
+  .main-content .bottom-section {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .main-content .chart-wrapper,
+  .main-content .calendar-wrapper {
+    width: 100%;
+  }
+}
+@media (max-width: 992px) {
+  .dashboard-page {
+    padding-bottom: 80px;
+  }
+  .main-content {
+    margin-inline-end: 0;
+    padding: 20px 15px;
+  }
+  .main-content .task-cards-container {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .main-content .section-title {
+    font-size: 24px;
+    margin: 30px 0 25px;
+  }
+  .main-content .section-title::after {
+    width: 60px;
+    height: 2.5px;
+  }
+  .main-content .chart-card {
+    padding: 25px;
+  }
+  .main-content .chart-card .chart-title {
+    font-size: 20px;
+  }
+  .main-content .bottom-section {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .main-content {
+    padding: 15px 10px;
+  }
+  .main-content .task-cards-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 0;
+  }
+  .main-content .task-cards-container .task-preview__card {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+  .main-content .task-cards-container .task-preview__card:last-child {
+    grid-column: auto;
+  }
+  .main-content .section-title {
+    font-size: 22px;
+    margin: 25px 0 20px;
+  }
+  .main-content .bottom-section {
+    gap: 20px;
+  }
+  .main-content .chart-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+  .main-content .chart-card .chart-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  .main-content .calendar-wrapper .calendar-container-wrapper {
+    padding: 20px;
+    border-radius: 16px;
+  }
+}
+@media (max-width: 576px) {
+  .main-content {
+    padding: 12px 8px;
+  }
+  .main-content .section-title {
+    font-size: 20px;
+    margin: 20px 0 15px;
+  }
+  .main-content .section-title::after {
+    width: 50px;
+    bottom: -8px;
+  }
+  .main-content .chart-card {
+    padding: 15px;
+  }
+  .main-content .chart-card .chart-title {
+    font-size: 17px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+  }
+  .main-content .chart-card .loading-message,
+  .main-content .chart-card .error-message {
+    padding: 40px 15px;
+    font-size: 14px;
+  }
+  .main-content .calendar-wrapper .calendar-container-wrapper {
+    padding: 15px;
+  }
+}
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px 5px;
+  }
+  .main-content .task-cards-container {
+    gap: 12px;
+  }
+  .main-content .section-title {
+    font-size: 18px;
+    margin: 15px 0 12px;
+  }
+  .main-content .bottom-section {
+    gap: 15px;
+  }
+  .main-content .chart-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+  .main-content .chart-card .chart-title {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  .main-content .calendar-wrapper .calendar-container-wrapper {
+    padding: 12px;
+    border-radius: 12px;
+  }
+}
+
+/*# sourceMappingURL=DashboardPage.css.map */
