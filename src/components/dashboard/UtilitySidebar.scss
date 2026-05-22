@@ -5,7 +5,7 @@
   height: 100vh;
   padding: 2rem;
   position: fixed;
-  background-image: url("/assets/images/utility-bg.png");
+  background-image: url("../../assets/images/utility-bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -53,7 +53,6 @@
 
     &:hover {
       background-color: #d4e884;
-      transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
@@ -75,9 +74,6 @@
       }
     }
 
-    &:hover .circle {
-      transform: rotate(90deg);
-    }
 
     span {
       flex-grow: 1;

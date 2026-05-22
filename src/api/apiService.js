@@ -1,7 +1,7 @@
 // api/apiService.js
 import axios from 'axios';
 
-const API_BASE = 'http://5.198.179.167:8000';
+const API_BASE = 'https://yarplanner.ir/api';
 
 const apiClient = axios.create({
     baseURL: API_BASE,

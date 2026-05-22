@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "./UtilitySidebar.scss";
-import PomodoroClock from "./PomodoroClock";
-import AddTaskModal from "./AddTaskModal";
-import { TaskContext } from "./TaskContext";
-import { LanguageContext } from "../context/LanguageContext";
+import PomodoroClock from "../PomodoroClock";
+import AddTaskModal from "../taskmanagement/AddTaskModal";
+import { TaskContext } from "../taskmanagement/TaskContext";
+import { LanguageContext } from "../../context/LanguageContext";
 import moment from "jalali-moment";
 
 function UtilitySidebar({ selectedTask, selectedDate }) {

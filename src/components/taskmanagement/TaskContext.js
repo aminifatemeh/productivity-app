@@ -1,6 +1,6 @@
 // components/TaskContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { tasksAPI } from "../api/apiService";
+import { tasksAPI } from "../../api/apiService";
 import axios from 'axios';
 
 const API_BASE = 'http://5.202.57.77:8000';

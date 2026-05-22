@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./TaskCard.scss";
-import SubtaskBar from "./SubtaskBar";
-import ProgressBar from "./ProgressBar";
-import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import SubtaskBar from "../SubtaskBar";
+import ProgressBar from "../ProgressBar";
+import ConfirmDeleteModal from "../ConfirmDeleteModal";
 import moment from 'jalali-moment';
 
 function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, originalIndex }) {

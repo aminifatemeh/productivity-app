@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./TaskPreviewCard.scss";
-import { TaskContext } from "../components/TaskContext";
-import { LanguageContext } from "../context/LanguageContext";
-import { tasksAPI } from "../api/apiService";
+import { TaskContext } from "../taskmanagement/TaskContext";
+import { LanguageContext } from "../../context/LanguageContext";
+import { tasksAPI } from "../../api/apiService";
 
 const cardConfigs = {
   active: {

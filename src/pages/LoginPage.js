@@ -1,4 +1,3 @@
-// pages/LoginPage.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../api/apiService';
@@ -18,24 +17,16 @@ function LoginForm() {
 
         try {
             const { access, refresh, user_id } = await authAPI.login(username, password);
+
             localStorage.setItem('accessToken', access);
             localStorage.setItem('refreshToken', refresh);
             localStorage.setItem('userId', user_id);
             localStorage.setItem('username', username);
-            console.log('Login successful:', { access, refresh, user_id });
+
             navigate('/');
         } catch (err) {
             console.error('Login error:', err.response?.data || err.message);
-            if (username === 'admin' && password === '123') {
-                localStorage.setItem('accessToken', 'offline_access_token');
-                localStorage.setItem('refreshToken', 'offline_refresh_token');
-                localStorage.setItem('username', username);
-                localStorage.setItem('userId', 'offline_user');
-                console.log('Offline login used for admin');
-                navigate('/');
-            } else {
-                setError(err.response?.data?.detail || 'نام کاربری یا رمز عبور اشتباه است');
-            }
+            setError(err.response?.data?.detail || 'نام کاربری یا رمز عبور اشتباه است');
         } finally {
             setIsLoading(false);
         }
@@ -45,7 +36,9 @@ function LoginForm() {
         <div className="login-container">
             <div className="login-card">
                 <h2 className="login-title">ورود به سیستم</h2>
+
                 {error && <div className="error-message">{error}</div>}
+
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="username" className="form-label">
@@ -62,6 +55,7 @@ function LoginForm() {
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <label htmlFor="password" className="form-label">
                             رمز عبور
@@ -77,6 +71,7 @@ function LoginForm() {
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <button
                             type="submit"
@@ -86,6 +81,7 @@ function LoginForm() {
                             {isLoading ? 'در حال ورود...' : 'ورود'}
                         </button>
                     </div>
+
                     <div className="form-group register-link">
                         <span>حساب ندارید؟ </span>
                         <button

@@ -1,11 +1,12 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import TaskPreviewCard from "../components/TaskPreviewCard";
-import UtilitySidebar from "../components/UtilitySidebar";
 import SidebarMenu from "../components/SidebarMenu";
-import Calendar from "../components/Calendar";
-import MobileTimerBar from "../components/MobileTimer\Bar";
-import { TaskContext } from "../components/TaskContext";
+import TaskPreviewCard from "../components/dashboard/TaskPreviewCard";
+import UtilitySidebar from "../components/dashboard/UtilitySidebar";
+import Calendar from "../components/dashboard/Calendar";
+import MobileTimerBar from "../components/dashboard/MobileTimerBar";
+
+import { TaskContext } from "../components/taskmanagement/TaskContext";
 import { LanguageContext } from "../context/LanguageContext";
 import { tasksAPI } from "../api/apiService";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';

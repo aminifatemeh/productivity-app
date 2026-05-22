@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { TaskContext } from "./TaskContext";
+import { TaskContext } from "../taskmanagement/TaskContext";
 import "./MobileTimerBar.scss";
 
 const MobileTimerBar = ({ selectedTask }) => {

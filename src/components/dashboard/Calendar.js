@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'jalali-moment';
-import { LanguageContext } from '../context/LanguageContext';
+import { LanguageContext } from '../../context/LanguageContext';
 import './Calendar.css';
 
 const Calendar = ({ onDateSelect }) => {

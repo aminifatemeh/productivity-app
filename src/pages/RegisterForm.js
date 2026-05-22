@@ -1,4 +1,3 @@
-// pages/RegisterForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../api/apiService';
@@ -24,16 +23,19 @@ function RegisterForm() {
         }
 
         try {
-            const { access, refresh, user_id } = await authAPI.register(username, phoneNumber, password);
+            const { access, refresh, user_id } =
+                await authAPI.register(username, phoneNumber, password);
+
             localStorage.setItem('accessToken', access);
             localStorage.setItem('refreshToken', refresh);
             localStorage.setItem('userId', user_id);
             localStorage.setItem('username', username);
-            console.log('Registration successful:', { access, refresh, user_id });
+
             navigate('/');
         } catch (err) {
             console.error('Registration error:', err.response?.data || err.message);
             setError(err.response?.data?.detail || 'خطایی در ثبت‌نام رخ داد');
+        } finally {
             setIsLoading(false);
         }
     };
@@ -42,7 +44,9 @@ function RegisterForm() {
         <div className="register-container">
             <div className="register-card">
                 <h2 className="register-title">ثبت‌نام در سیستم</h2>
+
                 {error && <div className="error-message">{error}</div>}
+
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="username" className="form-label">
@@ -59,6 +63,7 @@ function RegisterForm() {
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <label htmlFor="phoneNumber" className="form-label">
                             شماره تلفن
@@ -67,7 +72,9 @@ function RegisterForm() {
                             id="phoneNumber"
                             type="tel"
                             value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                            onChange={(e) =>
+                                setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))
+                            }
                             className="form-input"
                             placeholder="09123456789"
                             maxLength={11}
@@ -75,6 +82,7 @@ function RegisterForm() {
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <label htmlFor="password" className="form-label">
                             رمز عبور
@@ -90,6 +98,7 @@ function RegisterForm() {
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <button
                             type="submit"
@@ -99,6 +108,7 @@ function RegisterForm() {
                             {isLoading ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
                         </button>
                     </div>
+
                     <div className="form-group">
                         <button
                             type="button"

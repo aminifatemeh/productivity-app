@@ -36,10 +36,9 @@
   justify-content: center;
   transition: background-color 0.2s;
   font-weight: bold;
-
-  &:hover {
-    background-color: #90E5C3;
-  }
+}
+.compact-nav-button:hover {
+  background-color: #90E5C3;
 }
 
 .compact-calendar-grid {
@@ -67,32 +66,18 @@
   background-color: #F6F6F1;
   border-radius: 4px;
   transition: background-color 0.2s;
-  position: relative;
-
-  &:hover:not(.empty) {
-    background-color: #e8e8e3;
-  }
-
-  &.selected {
-    background-color: #90E5C3;
-    color: #01575C;
-    font-weight: bold;
-  }
-
-// استایل امروز - متمایز با border
-&.today {
-  border: 2px solid #01575C;
-  font-weight: bold;
-
-  &:not(.selected) {
-    background-color: #BFE8D8;
-  }
 }
-
-  &.empty {
-    cursor: default;
-    background-color: transparent;
-  }
+.compact-calendar-date:hover:not(.empty) {
+  background-color: #e8e8e3;
+}
+.compact-calendar-date.selected {
+  background-color: #90E5C3;
+  color: #01575C;
+  font-weight: bold;
+}
+.compact-calendar-date.empty {
+  cursor: default;
+  background-color: transparent;
 }
 
 .compact-calendar-close {
@@ -107,8 +92,9 @@
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #90E5C3;
-  }
 }
+.compact-calendar-close:hover {
+  background-color: #90E5C3;
+}
+
+/*# sourceMappingURL=CompactCalendar.css.map */

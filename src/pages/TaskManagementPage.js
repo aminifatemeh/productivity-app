@@ -3,9 +3,10 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import './TaskManagementPage.scss';
 import SidebarMenu from "../components/SidebarMenu";
-import TaskCard from "../components/TaskCard";
-import AddTaskModal from "../components/AddTaskModal";
-import { TaskContext } from "../components/TaskContext";
+import TaskCard from "../components/taskmanagement/TaskCard";
+import AddTaskModal from "../components/taskmanagement/AddTaskModal";
+import { TaskContext } from "../components/taskmanagement/TaskContext";
+
 import moment from 'jalali-moment';
 
 function TaskManagementPage() {
