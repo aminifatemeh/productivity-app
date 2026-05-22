@@ -1,24 +1,24 @@
 .settings-page {
   min-height: 100vh;
   direction: inherit;
-}
 
-.main-content {
-  margin-inline-start: 321px; /* فاصله از SidebarMenu (راست در فارسی، چپ در انگلیسی) */
-  flex-grow: 1;
-  display: flex;
-  justify-content: center; /* وسط‌چین افقی */
-  align-items: center; /* وسط‌چین عمودی */
-  padding: 20px;
-  box-sizing: border-box;
+  // ✅ حالا فقط روی settings اعمال میشه
+  .main-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
 }
 
 .settings-container {
   position: relative;
-  max-width: 100%; /* همخوانی با settings-section */
+  max-width: 100%;
   width: 100%;
-  max-height: 90vh; /* کمی کوچکتر از 100vh برای جلوگیری از سرریز */
-  margin: 30px 0; /* حذف margin auto برای کنترل توسط main-content */
+  max-height: 90vh;
+  margin: 30px 0;
   background-color: #f6f6f1;
   border-radius: 17px;
   padding: 2rem;

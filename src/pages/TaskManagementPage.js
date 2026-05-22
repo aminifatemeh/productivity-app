@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import './TaskManagementPage.scss';
-import SidebarMenu from "../components/SidebarMenu";
 import TaskCard from "../components/taskmanagement/TaskCard";
 import AddTaskModal from "../components/taskmanagement/AddTaskModal";
 import { TaskContext } from "../components/taskmanagement/TaskContext";
@@ -156,7 +155,6 @@ function TaskManagementPage() {
 
     return (
         <div className="d-flex task-management-page" dir="rtl">
-            <SidebarMenu />
             <div className="main-content d-flex flex-column flex-grow-1">
                 <div className="header-placeholder"></div>
 

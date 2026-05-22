@@ -1,4 +1,3 @@
-@charset "UTF-8";
 .vision-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
@@ -11,7 +10,6 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 0;
   max-width: 100%;
   overflow-x: hidden;
 }
@@ -267,9 +265,6 @@
   to {
     transform: rotate(360deg);
   }
-}
-.vision-page {
-  /* ریسپانسیو */
 }
 @media (max-width: 1400px) {
   .vision-page .main-content {

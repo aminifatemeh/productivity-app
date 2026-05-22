@@ -7,22 +7,14 @@
   flex-grow: 1;
   max-width: 100%;
   width: 100%;
-  margin-inline-start: 260px;
-  margin-inline-end: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   transition: margin 0.3s ease;
 }
-@media (max-width: 1200px) {
-  .task-management-page .main-content {
-    margin-inline-start: 240px;
-  }
-}
 @media (max-width: 992px) {
   .task-management-page .main-content {
-    margin-inline-start: 0;
     padding: 0 15px;
   }
 }

@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import SidebarMenu from "../components/SidebarMenu";
 import { LanguageContext } from "../context/LanguageContext";
 import "./SettingsPage.scss";
 
@@ -164,7 +163,6 @@ function SettingsPage() {
                     </div>
                 </div>
             </div>
-            <SidebarMenu />
         </div>
     );
 }

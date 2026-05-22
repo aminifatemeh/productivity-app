@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './VisionPage.scss';
-import SidebarMenu from '../components/SidebarMenu';
 import { tasksAPI } from '../api/apiService';
 import moment from 'jalali-moment';
 
@@ -187,7 +186,6 @@ function VisionPage() {
 
     return (
         <div className="d-flex vision-page" dir="rtl">
-            <SidebarMenu />
             <div className="main-content">
                 <div className="vision-header">
                     <h1 className="vision-title">چشم‌انداز ماهانه</h1>

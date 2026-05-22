@@ -4,13 +4,10 @@
   direction: rtl;
 }
 .charts-page .main-content {
-  margin-right: 321px;
-  margin-left: 0;
   justify-content: flex-start;
   padding: 30px 40px;
   overflow-y: auto;
   flex: 1;
-  width: calc(100% - 321px);
   max-width: 100%;
 }
 .charts-page .charts-header {
@@ -260,8 +257,6 @@
 }
 @media (max-width: 1024px) {
   .charts-page .main-content {
-    margin-right: 0;
-    width: 100%;
     padding: 30px 40px;
   }
   .charts-page .delay-content {

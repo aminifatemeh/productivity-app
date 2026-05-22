@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import SidebarMenu from "../components/SidebarMenu";
 import TaskPreviewCard from "../components/dashboard/TaskPreviewCard";
 import UtilitySidebar from "../components/dashboard/UtilitySidebar";
 import Calendar from "../components/dashboard/Calendar";
@@ -244,7 +243,6 @@ function DashboardPage() {
                     </div>
                 </div>
             </main>
-            <SidebarMenu />
             <MobileTimerBar selectedTask={selectedTask} />
             <style>{`
                 @keyframes spin {

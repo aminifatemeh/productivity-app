@@ -352,20 +352,4 @@ body {
   padding: 0;
 }
 
-@media (min-width: 993px) {
-  .main-content {
-    margin-inline-end: 280px;
-  }
-}
-@media (min-width: 993px) and (max-width: 1200px) {
-  .main-content {
-    margin-inline-end: 240px;
-  }
-}
-@media (max-width: 992px) {
-  .main-content {
-    margin-inline-end: 0;
-  }
-}
-
 /*# sourceMappingURL=SidebarMenu.css.map */
