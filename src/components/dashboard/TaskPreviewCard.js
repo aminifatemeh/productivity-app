@@ -4,24 +4,50 @@ import { TaskContext } from "../taskmanagement/TaskContext";
 import { LanguageContext } from "../../context/LanguageContext";
 import { tasksAPI } from "../../api/apiService";
 
+// ✅ ایکون‌های SVG سفارشی
+const ActiveIcon = () => (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="4 4"/>
+      <circle cx="18" cy="18" r="9" fill="white"/>
+      <circle cx="18" cy="18" r="5" fill="rgba(255,255,255,0.6)"/>
+    </svg>
+);
+
+const UpNextIcon = () => (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 6L18 30" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M18 6L25 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18 6L11 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="18" cy="28" r="3" fill="white"/>
+    </svg>
+);
+
+const ArchivedIcon = () => (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="6" y="8" width="24" height="4" rx="1.5" fill="white"/>
+      <path d="M8 12L8 26C8 27.1046 8.89543 28 10 28L26 28C27.1046 28 28 27.1046 28 26L28 12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M14 18L22 18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+);
+
 const cardConfigs = {
   active: {
     color: "#38A3A5",
-    icon: "/assets/icons/active.svg",
+    icon: <ActiveIcon />,
     labelKey: "taskPreviewCard.active",
     gradient: "linear-gradient(135deg, #38A3A5 0%, #4AB8BB 100%)",
     endpoint: "rumiz"
   },
   upNext: {
     color: "#57CC99",
-    icon: "/assets/icons/up-next.svg",
+    icon: <UpNextIcon />,
     labelKey: "taskPreviewCard.upNext",
     gradient: "linear-gradient(135deg, #57CC99 0%, #6DE2AF 100%)",
     endpoint: "nobatesh_mishe"
   },
   archived: {
     color: "#80ED99",
-    icon: "/assets/icons/archived.svg",
+    icon: <ArchivedIcon />,
     labelKey: "taskPreviewCard.archived",
     gradient: "linear-gradient(135deg, #80ED99 0%, #96F5AF 100%)",
     endpoint: "khak_khorde"
@@ -150,7 +176,7 @@ function TaskPreviewCard({ cardName, setSelectedTask }) {
         <div className="task-preview__card" style={{ background: config.gradient }}>
           <div className="task-preview__card-header">
             <div className="header-content">
-              <img src={config.icon} alt="" className="header-icon" />
+              <div className="header-icon">{config.icon}</div>
               <span className="header-title">{t(config.labelKey)}</span>
             </div>
             <div className="task-count-badge">...</div>
@@ -168,7 +194,7 @@ function TaskPreviewCard({ cardName, setSelectedTask }) {
       <div className="task-preview__card" style={{ background: config.gradient }}>
         <div className="task-preview__card-header">
           <div className="header-content">
-            <img src={config.icon} alt="" className="header-icon" />
+            <div className="header-icon">{config.icon}</div>
             <span className="header-title">{t(config.labelKey)}</span>
           </div>
           <div className="task-count-badge">{tasks.length}</div>
