@@ -143,16 +143,19 @@ function DashboardPage() {
                     <TaskPreviewCard
                         cardName="archived"
                         setSelectedTask={setSelectedTask}
+                        selectedTask={selectedTask}
                         timerDuration={timerDuration}
                     />
                     <TaskPreviewCard
                         cardName="upNext"
                         setSelectedTask={setSelectedTask}
+                        selectedTask={selectedTask}
                         timerDuration={timerDuration}
                     />
                     <TaskPreviewCard
                         cardName="active"
                         setSelectedTask={setSelectedTask}
+                        selectedTask={selectedTask}
                         timerDuration={timerDuration}
                     />
                 </div>

@@ -54,7 +54,7 @@ const cardConfigs = {
   },
 };
 
-function TaskPreviewCard({ cardName, setSelectedTask }) {
+function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
   const { timers, startTimer, stopTimer, setTimers } = useContext(TaskContext);
   const { t } = useContext(LanguageContext);
   const [tasks, setTasks] = useState([]);
@@ -158,16 +158,29 @@ function TaskPreviewCard({ cardName, setSelectedTask }) {
       }));
     }
 
+    if (setSelectedTask) {
+      setSelectedTask(task);
+    }
+  };
+
+  const handlePlayPause = (e, task) => {
+    e.stopPropagation();
+
+    if (!task || !task.id) return;
+
+    if (!timers[task.id]) {
+      setTimers(prev => ({
+        ...prev,
+        [task.id]: { elapsed: 0, isRunning: false }
+      }));
+    }
+
     const timer = timers[task.id] || { elapsed: 0, isRunning: false };
 
     if (timer.isRunning) {
       stopTimer(task.id);
     } else {
       startTimer(task.id);
-    }
-
-    if (setSelectedTask) {
-      setSelectedTask(task);
     }
   };
 
@@ -213,13 +226,14 @@ function TaskPreviewCard({ cardName, setSelectedTask }) {
                 const totalTime = (task.totalDuration || 0) + timer.elapsed;
                 const maxDuration = 3600;
                 const progress = Math.min((totalTime / maxDuration) * 100, 100);
+                const isSelected = selectedTask && selectedTask.id === task.id;
 
                 return (
                     <div
                         key={task.id}
-                        className={`task-preview__card-task ${timer.isRunning ? 'is-running' : ''}`}
+                        className={`task-preview__card-task ${timer.isRunning ? 'is-running' : ''} ${isSelected ? 'is-selected' : ''}`}
                         style={{ "--progress": `${progress}%` }}
-                        onClick={() => setSelectedTask && setSelectedTask(task)}
+                        onClick={() => handleTaskClick(task)}
                     >
                       <div className="task-content">
                         <div className="task-indicator"></div>
@@ -236,10 +250,7 @@ function TaskPreviewCard({ cardName, setSelectedTask }) {
                       </div>
                       <button
                           className={`task-action-btn ${timer.isRunning ? 'is-active' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTaskClick(task);
-                          }}
+                          onClick={(e) => handlePlayPause(e, task)}
                           aria-label={timer.isRunning ? "Pause" : "Play"}
                       >
                         {timer.isRunning ? (

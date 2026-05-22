@@ -22,7 +22,6 @@
   z-index: 0;
 }
 .task-preview__card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
 }
 .task-preview__card-header {
@@ -144,6 +143,19 @@
   background: #f1f5f9;
   border-color: rgba(56, 163, 165, 0.2);
 }
+.task-preview__card-task.is-selected {
+  background: linear-gradient(135deg, rgba(56, 163, 165, 0.08) 0%, rgba(74, 184, 187, 0.08) 100%);
+  border-color: rgba(56, 163, 165, 0.3);
+  box-shadow: 0 2px 8px rgba(56, 163, 165, 0.15);
+}
+.task-preview__card-task.is-selected .task-indicator {
+  background-color: #e1f396;
+  box-shadow: 0 0 8px rgba(225, 243, 150, 0.6);
+}
+.task-preview__card-task.is-selected .task-content .task-info .task-title {
+  color: #01575c;
+  font-weight: 700;
+}
 .task-preview__card-task.is-running {
   background: linear-gradient(135deg, rgba(56, 163, 165, 0.08) 0%, rgba(74, 184, 187, 0.08) 100%);
   border-color: rgba(56, 163, 165, 0.3);
@@ -152,6 +164,7 @@
 .task-preview__card-task.is-running .task-indicator {
   background-color: #ef4444 !important;
   animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
 }
 .task-preview__card-task.is-running .task-action-btn {
   background: #38A3A5;
@@ -159,6 +172,15 @@
 }
 .task-preview__card-task.is-running .task-action-btn:hover {
   background: #2d8284;
+}
+.task-preview__card-task.is-running.is-selected {
+  background: linear-gradient(135deg, rgba(225, 243, 150, 0.15) 0%, rgba(56, 163, 165, 0.08) 100%);
+  box-shadow: 0 2px 12px rgba(225, 243, 150, 0.25), 0 2px 8px rgba(56, 163, 165, 0.15);
+}
+.task-preview__card-task.is-running.is-selected .task-indicator {
+  background-color: #ef4444 !important;
+  animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
 }
 .task-preview__card-task .task-content {
   flex: 1;
@@ -192,6 +214,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.4;
+  transition: all 0.2s ease;
 }
 .task-preview__card-task .task-content .task-info .task-time {
   font-size: 12px;

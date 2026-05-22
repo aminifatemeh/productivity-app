@@ -23,7 +23,6 @@
     }
 
     &:hover {
-        transform: translateY(-4px);
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
     }
 
@@ -160,6 +159,26 @@
             border-color: rgba(56, 163, 165, 0.2);
         }
 
+        // حالت انتخاب شده (کلیک روی تسک)
+        &.is-selected {
+            background: linear-gradient(135deg, rgba(56, 163, 165, 0.08) 0%, rgba(74, 184, 187, 0.08) 100%);
+            border-color: rgba(56, 163, 165, 0.3);
+            box-shadow: 0 2px 8px rgba(56, 163, 165, 0.15);
+
+            .task-indicator {
+                background-color: #e1f396;
+                box-shadow: 0 0 8px rgba(225, 243, 150, 0.6);
+            }
+
+            .task-content .task-info .task-title {
+                color: #01575c;
+                font-weight: 700;
+            }
+
+
+        }
+
+        // حالت در حال اجرا (تایمر روشن)
         &.is-running {
             background: linear-gradient(135deg, rgba(56, 163, 165, 0.08) 0%, rgba(74, 184, 187, 0.08) 100%);
             border-color: rgba(56, 163, 165, 0.3);
@@ -168,6 +187,7 @@
             .task-indicator {
                 background-color: #ef4444 !important;
                 animation: pulse 2s ease-in-out infinite;
+                box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
             }
 
             .task-action-btn {
@@ -178,6 +198,21 @@
                     background: #2d8284;
                 }
             }
+
+            // ترکیب: انتخاب شده + در حال اجرا
+            &.is-selected {
+                background: linear-gradient(135deg, rgba(225, 243, 150, 0.15) 0%, rgba(56, 163, 165, 0.08) 100%);
+
+                box-shadow: 0 2px 12px rgba(225, 243, 150, 0.25), 0 2px 8px rgba(56, 163, 165, 0.15);
+
+                .task-indicator {
+                    background-color: #ef4444 !important;
+                    animation: pulse 2s ease-in-out infinite;
+                    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+                }
+            }
+
+
         }
 
         .task-content {
@@ -213,6 +248,7 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     line-height: 1.4;
+                    transition: all 0.2s ease;
                 }
 
                 .task-time {

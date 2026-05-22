@@ -1,11 +1,10 @@
 import React, { useContext, useEffect } from "react";
 import "./PomodoroClock.scss";
-import { TaskContext } from "./taskmanagement/TaskContext";
+import { TaskContext } from "../taskmanagement/TaskContext";
 
 const PomodoroClock = ({ selectedTask }) => {
     const { timers, startTimer, stopTimer, resetTimerForTask, setTimers, tasks } = useContext(TaskContext);
 
-    // Initialize timer for selected task if it doesn't exist
     useEffect(() => {
         if (selectedTask && !timers[selectedTask.id]) {
             setTimers(prev => ({
@@ -22,13 +21,11 @@ const PomodoroClock = ({ selectedTask }) => {
     const time = currentTimer.elapsed;
     const isActive = currentTimer.isRunning;
 
-    // محاسبه زمان کل (زمان قبلی + زمان جاری)
     const currentTask = tasks.find(t => t.id === selectedTask?.id);
     const totalTime = (currentTask?.totalDuration || 0) + time;
 
     const toggleTimer = () => {
         if (!selectedTask) return;
-
         if (isActive) {
             stopTimer(selectedTask.id);
         } else {
@@ -52,50 +49,60 @@ const PomodoroClock = ({ selectedTask }) => {
         return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     };
 
-    // Progress برای نمایش - چون کرنومتره، فقط وقتی active هست progress داره
-    const progressPercentage = isActive ? 75 : 0; // یا می‌تونی براساس زمان یه فرمول دیگه بنویسی
+    const progressPercentage = isActive ? Math.min((time % 1500) / 1500 * 100, 100) : 0;
 
     return (
         <div className="pomodoro-clock">
-            <div className="pomodoro-clock__white-bg">
-                <div
-                    className="pomodoro-clock__timer-circle"
-                    style={{
-                        background: isActive
-                            ? `conic-gradient(#2C868B ${progressPercentage}%, #5ecea8 ${progressPercentage}% 100%)`
-                            : '#5ecea8',
-                    }}
-                >
-                    <div className="pomodoro-clock__time-container">
-                        <span className="pomodoro-clock__time">
-                            {formatTime(time)}
-                        </span>
-                        {totalTime > 0 && (
-                            <span className="pomodoro-clock__total-time">
-                                کل: {formatTime(totalTime)}
-                            </span>
-                        )}
+            <div className="pomodoro-clock__outer-ring">
+                <div className="pomodoro-clock__middle-ring">
+                    <div
+                        className="pomodoro-clock__timer-circle"
+                        style={{
+                            background: isActive
+                                ? `conic-gradient(#2C868B ${progressPercentage}%, #5ecea8 ${progressPercentage}% 100%)`
+                                : '#5ecea8',
+                        }}
+                    >
+                        <div className="pomodoro-clock__inner-circle">
+                            <div className="pomodoro-clock__time-container">
+                                <span className="pomodoro-clock__time">
+                                    {formatTime(time)}
+                                </span>
+                                {totalTime > 0 && (
+                                    <span className="pomodoro-clock__total-time">
+                                        کل: {formatTime(totalTime)}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div className="pomodoro-clock__controls">
                 <button
-                    className="pomodoro-clock__play-pause"
+                    className="pomodoro-clock__button pomodoro-clock__play-pause"
                     onClick={toggleTimer}
                     disabled={!selectedTask}
                 >
                     {isActive ? (
-                        <img src="/assets/icons/pause.svg" alt="Pause" />
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+                            <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+                        </svg>
                     ) : (
-                        <img src="/assets/icons/Polygon.svg" alt="Play" />
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M8 5.14v13.72L19 12L8 5.14z" fill="currentColor"/>
+                        </svg>
                     )}
                 </button>
                 <button
-                    className="pomodoro-clock__stop"
+                    className="pomodoro-clock__button pomodoro-clock__stop"
                     onClick={resetTimer}
                     disabled={!selectedTask}
                 >
-                    <img src="/assets/icons/stop.svg" alt="Stop" />
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/>
+                    </svg>
                 </button>
             </div>
         </div>
