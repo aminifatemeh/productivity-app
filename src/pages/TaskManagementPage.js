@@ -5,8 +5,48 @@ import './TaskManagementPage.scss';
 import TaskCard from "../components/taskmanagement/TaskCard";
 import AddTaskModal from "../components/taskmanagement/AddTaskModal";
 import { TaskContext } from "../api/TaskContext";
-
 import moment from 'jalali-moment';
+
+const KhakKhordeIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* مرکز */}
+        <circle cx="12" cy="12" r="1.2" fill="currentColor"/>
+        {/* خطوط شعاعی */}
+        <line x1="12" y1="12" x2="12" y2="3" stroke="currentColor" strokeWidth="1.2"/>
+        <line x1="12" y1="12" x2="19.5" y2="7.5" stroke="currentColor" strokeWidth="1.2"/>
+        <line x1="12" y1="12" x2="19.5" y2="16.5" stroke="currentColor" strokeWidth="1.2"/>
+        <line x1="12" y1="12" x2="12" y2="21" stroke="currentColor" strokeWidth="1.2"/>
+        <line x1="12" y1="12" x2="4.5" y2="16.5" stroke="currentColor" strokeWidth="1.2"/><line x1="12" y1="12" x2="4.5" y2="7.5" stroke="currentColor" strokeWidth="1.2"/>
+        {/* حلقه‌های تار */}
+        <path d="M12 6 Q15.5 9 15.5 12 Q15.5 15 12 18 Q8.5 15 8.5 12 Q8.5 9 12 6Z" stroke="currentColor" strokeWidth="1" fill="none"/>
+        <path d="M12 3.5 Q18 7.5 18 12 Q18 16.5 12 20.5 Q6 16.5 6 12 Q6 7.5 12 3.5Z" stroke="currentColor" strokeWidth="1" fill="none"/>
+    </svg>
+);
+
+const RumizIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* صفحه میز */}
+        <rect x="2" y="10" width="20" height="2.5" rx="1.2" stroke="currentColor" strokeWidth="1.5"/>
+        {/* پایه چپ */}
+        <line x1="6" y1="12.5" x2="5" y2="20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        {/* پایه راست */}
+        <line x1="18" y1="12.5" x2="19" y2="20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        {/* اتصال پایه‌ها */}
+        <line x1="5.3" y1="17" x2="18.7" y2="17" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.5"/>
+    </svg>
+);
+
+const NobateshMisheIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* خط بالا و پایین */}
+        <line x1="7" y1="3" x2="17" y2="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <line x1="7" y1="21" x2="17" y2="21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        {/* بدنه ساعت شنی */}
+        <path d="M8 3 C8 3 8 8 12 12 C16 16 16 21 16 21" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/><path d="M16 3 C16 3 16 8 12 12 C8 16 8 21 8 21" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+        {/* شن پایین */}
+        <path d="M9.5 19.5 Q12 17.5 14.5 19.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+);
+
 
 function TaskManagementPage() {
     const {
@@ -19,7 +59,7 @@ function TaskManagementPage() {
         fetchTasksByCategory
     } = useContext(TaskContext);
 
-    const [selectedCategory, setSelectedCategory] = useState('khak_khorde');
+    const [selectedCategory, setSelectedCategory] = useState('rumiz');
     const [selectedDate, setSelectedDate] = useState(null);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
@@ -28,15 +68,12 @@ function TaskManagementPage() {
     const tabsWrapperRef = useRef(null);
     const tabRefs = useRef({});
 
-    console.log('تمام تسک‌های موجود در کانتکست (TaskManagementPage):', tasks.map(t => ({
-        id: t.id,
-        title: t.title,
-        deadline_date: t.deadline_date,
-        isDone: t.isDone,
-        flag_tuNobat: t.flag_tuNobat
-    })));
+    const categories = [
+        { id: 'khak_khorde', label: 'خاک خورده', Icon: KhakKhordeIcon },
+        { id: 'rumiz',       label: 'رومیز',      Icon: RumizIcon },
+        { id: 'nobatesh_mishe', label: 'نوبتش میشه', Icon: NobateshMisheIcon },
+    ];
 
-    // Fetch tasks when category changes
     useEffect(() => {
         fetchTasksByCategory(selectedCategory);
     }, [selectedCategory]);
@@ -44,23 +81,17 @@ function TaskManagementPage() {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const date = params.get('date');
-        console.log('تاریخ انتخاب‌شده از URL:', date);
         setSelectedDate(date || null);
     }, [location.search]);
 
     useEffect(() => {
         if (location.state?.openEditModalFor) {
             const taskId = location.state.openEditModalFor;
-            console.log('درخواست ویرایش تسک با آیدی:', taskId);
             const taskToEdit = tasks.find(t => t.id === taskId);
             if (taskToEdit) {
-                console.log('تسک یافت شد برای ویرایش:', taskToEdit.title);
-                // ارسال تسک اصلی با تاریخ میلادی
                 setEditingTask(taskToEdit);
                 setIsAddTaskModalOpen(true);
                 navigate(location.pathname, { replace: true, state: {} });
-            } else {
-                console.log('تسک با این آیدی یافت نشد:', taskId);
             }
         }
     }, [location.state, tasks, navigate, location]);
@@ -74,19 +105,13 @@ function TaskManagementPage() {
     }, [selectedCategory]);
 
     const clearDateFilter = () => {
-        console.log('فیلتر تاریخ حذف شد');
         setSelectedDate(null);
         navigate('/task-management');
     };
 
     const handleAddTask = async (newTask) => {
-        console.log('تسک جدید اضافه شد:', newTask);
         const token = localStorage.getItem('accessToken');
-        if (token) {
-            // آنلاین — توسط AddTaskModal و addTask در کانتکست مدیریت میشه
-            // بعد از اضافه شدن، تسک‌ها از سرور دوباره fetch میشن
-        } else {
-            // حالت آفلاین
+        if (!token) {
             const userId = localStorage.getItem('userId') || 'offline_user';
             const newId = Date.now().toString(36) + '_' + Math.random().toString(36).substr(2);
             const taskToSave = { ...newTask, id: newId, isDone: false, originalIndex: tasks.length };
@@ -99,57 +124,33 @@ function TaskManagementPage() {
     };
 
     const handleEditTask = (task) => {
-        console.log('درخواست ویرایش تسک:', task.title);
-        console.log('تاریخ تسک برای ویرایش (میلادی):', task.deadline_date);
-
-        // Find original task from tasks array to ensure we have the correct date format
         const originalTask = tasks.find(t => t.id === task.id);
-
-        // Use original task data which has dates in Gregorian format
         setEditingTask(originalTask || task);
         setIsAddTaskModalOpen(true);
     };
 
     const handleTaskUpdated = async (updatedTask) => {
-        console.log('تسک آپدیت شد:', updatedTask);
         await editTask(updatedTask);
         setIsAddTaskModalOpen(false);
         setEditingTask(null);
     };
 
-    const categories = [
-        { id: 'khak_khorde', label: 'خاک خورده', icon: "/assets/icons/khak_khorde_icon.svg" },
-        { id: 'rumiz', label: 'رومیز', icon: "/assets/icons/rumiz_icon.svg" },
-        { id: 'nobatesh_mishe', label: 'نوبتش میشه', icon: "/assets/icons/nobatesh_mishe_icon.svg" },
-    ];
-
-    // Filter tasks by selected date only (category filtering is done by API now)
     const filteredTasks = selectedDate
         ? tasks.filter(task => {
             if (!task?.id) return false;
             const taskDate = task.deadline_date ? moment(task.deadline_date, 'YYYY-MM-DD') : null;
-            const match = taskDate?.format('YYYY-MM-DD') === selectedDate;
-            console.log(`فیلتر تاریخ برای تسک "${task.title}":`, match);
-            return match;
+            return taskDate?.format('YYYY-MM-DD') === selectedDate;
         })
         : tasks;
-
-    console.log('تسک‌های نهایی نمایش‌داده‌شده:', filteredTasks.map(t => t.title));
 
     const formatDateForDisplay = (date) => {
         if (!date) return '';
         const m = moment(date, 'YYYY-MM-DD', true);
-        if (!m.isValid()) {
-            console.log('تاریخ نامعتبر برای تبدیل:', date);
-            return '';
-        }
-        const formatted = m.locale('fa').format('jYYYY/jMM/jDD');
-        console.log('تبدیل تاریخ برای نمایش:', date, '→', formatted);
-        return formatted;
+        if (!m.isValid()) return '';
+        return m.locale('fa').format('jYYYY/jMM/jDD');
     };
 
     const handleCategoryChange = (categoryId) => {
-        console.log('تغییر تب به:', categoryId);
         setSelectedCategory(categoryId);
     };
 
@@ -160,19 +161,19 @@ function TaskManagementPage() {
 
                 <div className="tab-container">
                     <div className="tabs-wrapper" ref={tabsWrapperRef}>
-                        {categories.map((cat, i) => (
-                            <React.Fragment key={cat.id}>
-                                <button
-                                    type="button"
-                                    onClick={() => handleCategoryChange(cat.id)}
-                                    className={`tab-button ${selectedCategory === cat.id ? 'active' : ''}`}
-                                    ref={el => tabRefs.current[cat.id] = el}
-                                >
-                                    <img src={cat.icon} alt={cat.label} className="tab-icon" />
-                                    {cat.label}
-                                </button>
-                                {i < categories.length - 1 && <div className="tab-separator"></div>}
-                            </React.Fragment>
+                        {categories.map((cat) => (
+                            <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => handleCategoryChange(cat.id)}
+                                className={`tab-button ${selectedCategory === cat.id ? 'active' : ''}`}
+                                ref={el => tabRefs.current[cat.id] = el}
+                            >
+                                <span className="tab-icon-wrap">
+                                    <cat.Icon />
+                                </span>
+                                {cat.label}
+                            </button>
                         ))}
                     </div>
 
@@ -217,7 +218,6 @@ function TaskManagementPage() {
                     <button
                         type="button"
                         onClick={() => {
-                            console.log('باز شدن مودال افزودن تسک جدید');
                             setEditingTask(null);
                             setIsAddTaskModalOpen(true);
                         }}
@@ -233,7 +233,6 @@ function TaskManagementPage() {
                     <AddTaskModal
                         isOpen={isAddTaskModalOpen}
                         onClose={() => {
-                            console.log('بستن مودال تسک');
                             setIsAddTaskModalOpen(false);
                             setEditingTask(null);
                         }}

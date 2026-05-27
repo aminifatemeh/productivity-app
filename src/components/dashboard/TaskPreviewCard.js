@@ -4,55 +4,62 @@ import { TaskContext } from "../../api/TaskContext";
 import { LanguageContext } from "../../context/LanguageContext";
 import { tasksAPI } from "../../api/apiService";
 
-// ✅ ایکون‌های SVG سفارشی
-const ActiveIcon = () => (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="18" cy="18" r="14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="4 4"/>
-      <circle cx="18" cy="18" r="9" fill="white"/>
-      <circle cx="18" cy="18" r="5" fill="rgba(255,255,255,0.6)"/>
+const KhakKhordeIcon = () => (
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="1.2" fill="white"/>
+      <line x1="12" y1="12" x2="12" y2="3" stroke="white" strokeWidth="1.2"/>
+      <line x1="12" y1="12" x2="19.5" y2="7.5" stroke="white" strokeWidth="1.2"/>
+      <line x1="12" y1="12" x2="19.5" y2="16.5" stroke="white" strokeWidth="1.2"/>
+      <line x1="12" y1="12" x2="12" y2="21" stroke="white" strokeWidth="1.2"/>
+      <line x1="12" y1="12" x2="4.5" y2="16.5" stroke="white" strokeWidth="1.2"/>
+      <line x1="12" y1="12" x2="4.5" y2="7.5" stroke="white" strokeWidth="1.2"/>
+      <path d="M12 6 Q15.5 9 15.5 12 Q15.5 15 12 18 Q8.5 15 8.5 12 Q8.5 9 12 6Z" stroke="white" strokeWidth="1" fill="none"/>
+      <path d="M12 3.5 Q18 7.5 18 12 Q18 16.5 12 20.5 Q6 16.5 6 12 Q6 7.5 12 3.5Z" stroke="white" strokeWidth="1" fill="none"/>
     </svg>
 );
 
-const UpNextIcon = () => (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M18 6L18 30" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M18 6L25 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M18 6L11 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx="18" cy="28" r="3" fill="white"/>
+const NobateshMisheIcon = () => (
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="10" width="20" height="2.5" rx="1.2" stroke="white" strokeWidth="1.5"/>
+      <line x1="6" y1="12.5" x2="5" y2="20" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="18" y1="12.5" x2="19" y2="20" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="5.3" y1="17" x2="18.7" y2="17" stroke="white" strokeWidth="1.2" strokeLinecap="round" opacity="0.5"/>
     </svg>
 );
 
-const ArchivedIcon = () => (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="6" y="8" width="24" height="4" rx="1.5" fill="white"/>
-      <path d="M8 12L8 26C8 27.1046 8.89543 28 10 28L26 28C27.1046 28 28 27.1046 28 26L28 12" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M14 18L22 18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-    </svg>
+const RumizIcon = () => (
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="7" y1="3" x2="17" y2="3" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="7" y1="21" x2="17" y2="21" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M8 3 C8 3 8 8 12 12 C16 16 16 21 16 21" stroke="white" strokeWidth="1.4" strokeLinecap="round"/>
+      <path d="M16 3 C16 3 16 8 12 12 C8 16 8 21 8 21" stroke="white" strokeWidth="1.4" strokeLinecap="round"/>
+      <path d="M9.5 19.5 Q12 17.5 14.5 19.5" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg>
 );
 
 const cardConfigs = {
   active: {
     color: "#38A3A5",
-    icon: <ActiveIcon />,
+    icon: <RumizIcon />,
     labelKey: "taskPreviewCard.active",
     gradient: "linear-gradient(135deg, #38A3A5 0%, #4AB8BB 100%)",
     endpoint: "rumiz"
   },
   upNext: {
     color: "#57CC99",
-    icon: <UpNextIcon />,
+    icon: <NobateshMisheIcon />,
     labelKey: "taskPreviewCard.upNext",
     gradient: "linear-gradient(135deg, #57CC99 0%, #6DE2AF 100%)",
     endpoint: "nobatesh_mishe"
   },
   archived: {
     color: "#80ED99",
-    icon: <ArchivedIcon />,
+    icon: <KhakKhordeIcon />,
     labelKey: "taskPreviewCard.archived",
     gradient: "linear-gradient(135deg, #80ED99 0%, #96F5AF 100%)",
     endpoint: "khak_khorde"
   },
 };
+
 
 function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
   const { timers, startTimer, stopTimer, setTimers } = useContext(TaskContext);
