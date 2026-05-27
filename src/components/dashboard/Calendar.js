@@ -17,7 +17,12 @@ const Calendar = ({ onDateSelect }) => {
     const month = isJalali ? currentDate.jMonth() : currentDate.month();
     const daysInMonth = isJalali ? currentDate.jDaysInMonth() : currentDate.daysInMonth();
     const firstDayOfMonthMoment = currentDate.clone().startOf(isJalali ? 'jMonth' : 'month');
-    const firstDayOfMonth = isJalali ? (firstDayOfMonthMoment.day() + 1) % 7 : firstDayOfMonthMoment.day(); // حذف آفست اضافی و اصلاح محاسبه روز اول
+    const firstDayOfMonth = isJalali ? (firstDayOfMonthMoment.day() + 1) % 7 : firstDayOfMonthMoment.day();
+
+    const today = isJalali ? moment().locale('fa') : moment();
+    const todayDay = isJalali ? today.jDate() : today.date();
+    const todayMonth = isJalali ? today.jMonth() : today.month();
+    const todayYear = isJalali ? today.jYear() : today.year();
 
     const daysArray = [];
     for (let i = 0; i < firstDayOfMonth; i++) {
@@ -36,68 +41,92 @@ const Calendar = ({ onDateSelect }) => {
     };
 
     const selectDate = (day) => {
-        if (day) {
-            const newSelectedDate = isJalali
-                ? moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('fa')
-                : moment(`${year}/${month + 1}/${day}`, 'YYYY/MM/DD');
-            setSelectedDate(newSelectedDate);
-            // تبدیل تاریخ جلالی به میلادی با فرمت YYYY-MM-DD
-            const formattedDate = isJalali
-                ? moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('en').format('YYYY-MM-DD')
-                : newSelectedDate.format('YYYY-MM-DD');
-            console.log('Selected Date:', formattedDate); // برای دیباگ
-            if (onDateSelect) {
-                onDateSelect(formattedDate);
-            }
-            navigate(`/task-management?date=${formattedDate}`);
-        }
+        if (!day) return;
+        const newSelectedDate = isJalali
+            ? moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('fa')
+            : moment(`${year}/${month + 1}/${day}`, 'YYYY/MM/DD');
+        setSelectedDate(newSelectedDate);
+        const formattedDate = isJalali
+            ? moment(`${year}/${month + 1}/${day}`, 'jYYYY/jMM/jDD').locale('en').format('YYYY-MM-DD')
+            : newSelectedDate.format('YYYY-MM-DD');
+        if (onDateSelect) onDateSelect(formattedDate);
+        navigate(`/task-management?date=${formattedDate}`);
     };
 
-    const monthName = isJalali
-        ? currentDate.format('jMMMM')
-        : currentDate.format('MMMM');
+    const isSelected = (day) =>
+        day &&
+        selectedDate &&
+        (isJalali ? selectedDate.jDate() : selectedDate.date()) === day &&
+        (isJalali ? selectedDate.jMonth() : selectedDate.month()) === month &&
+        (isJalali ? selectedDate.jYear() : selectedDate.year()) === year;
+
+    const isToday = (day) =>
+        day &&
+        todayDay === day &&
+        todayMonth === month &&
+        todayYear === year;
+
+    const monthName = isJalali ? currentDate.format('jMMMM') : currentDate.format('MMMM');
 
     return (
         <div className="calendar-container">
             <div className="calendar-header">
-                <div className="calendar-title">{`${monthName} ${year}`}</div>
-                <div className="calendar-nav">
-                    <button className="nav-button prev" onClick={() => changeMonth('prev')}>
-                        {t('calendar.prev')}
-                    </button>
-                    <button className="nav-button next" onClick={() => changeMonth('next')}>
-                        {t('calendar.next')}
-                    </button>
+                <button
+                    className="nav-button"
+                    onClick={() => changeMonth('prev')}
+                    aria-label="ماه قبل"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points={isJalali ? "9 18 15 12 9 6" : "15 18 9 12 15 6"} />
+                    </svg>
+                </button>
+
+                <div className="calendar-title">
+                    <span className="month-name">{monthName}</span>
+                    <span className="year-name">{year}</span>
                 </div>
+
+                <button
+                    className="nav-button"
+                    onClick={() => changeMonth('next')}
+                    aria-label="ماه بعد"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points={isJalali ? "15 18 9 12 15 6" : "9 18 15 12 9 6"} />
+                    </svg>
+                </button>
             </div>
+
             <div className="calendar-grid">
                 {t('calendar.days').map((day, index) => (
-                    <div key={index} className="calendar-day">
+                    <div key={index} className="calendar-day-header">
                         {day}
                     </div>
                 ))}
                 {daysArray.map((day, index) => (
                     <div
                         key={index}
-                        className={`calendar-date ${
-                            day &&
-                            selectedDate &&
-                            (isJalali ? selectedDate.jDate() : selectedDate.date()) === day &&
-                            (isJalali ? selectedDate.jMonth() : selectedDate.month()) === month &&
-                            (isJalali ? selectedDate.jYear() : selectedDate.year()) === year
-                                ? 'selected'
-                                : ''
-                        } ${!day ? 'empty' : ''}`}
+                        className={`calendar-date${isSelected(day) ? ' selected' : ''}${isToday(day) ? ' today' : ''}${!day ? ' empty' : ''}`}
                         onClick={() => selectDate(day)}
+                        role={day ? 'button' : undefined}
+                        aria-label={day ? `${day} ${monthName}` : undefined}
+                        aria-pressed={isSelected(day) ? true : undefined}
+                        tabIndex={day ? 0 : undefined}
+                        onKeyDown={(e) => e.key === 'Enter' && selectDate(day)}
                     >
-                        {day || ''}
+                        {day && <span className="date-number">{day}</span>}
+                        {isToday(day) && !isSelected(day) && <span className="today-dot" aria-hidden="true" />}
                     </div>
                 ))}
             </div>
+
             {selectedDate && (
-                <p className="selected-date">
-                    {t('calendar.selectedDate')}: {selectedDate.format(isJalali ? 'jYYYY/jMM/jDD' : 'YYYY/MM/DD')}
-                </p>
+                <div className="selected-date-bar">
+                    <span className="selected-date-label">{t('calendar.selectedDate')}</span>
+                    <span className="selected-date-value">
+                        {selectedDate.format(isJalali ? 'jYYYY/jMM/jDD' : 'YYYY/MM/DD')}
+                    </span>
+                </div>
             )}
         </div>
     );

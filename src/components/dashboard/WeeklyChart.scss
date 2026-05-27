@@ -1,0 +1,111 @@
+.weekly-chart {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  border: 1px solid rgba(44, 134, 139, 0.1);
+  box-shadow: 0 4px 24px rgba(44, 134, 139, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  height: 100%;
+
+  &:hover {
+    box-shadow: 0 8px 32px rgba(44, 134, 139, 0.15);
+    transform: translateY(-2px);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F0F2EE;
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2C868B;
+    margin: 0;
+  }
+
+  &__badge {
+    font-size: 12px;
+    color: #57CC99;
+    background: rgba(87, 204, 153, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  &__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #7C7C7C;
+    font-size: 15px;
+    gap: 12px;
+
+    &--error {
+      color: #D32F2F;
+      background: #fef2f2;border-radius: 12px;
+    }
+  }
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #E0E0E0;
+  border-top-color: #57CC99;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.chart-tooltip {
+  background: #fff;
+  padding: 12px 16px;
+  border: 1px solid #E8EBE4;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  min-width: 150px;
+
+  &__day {
+    margin: 0 0 10px;
+    font-weight: 700;
+    color: #2C868B;
+    font-size: 14px;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #444;
+  }
+
+  &__total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #F0F2EE;
+    font-size: 13px;
+    color: #666;
+  }
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--done { background: #57CC99; }
+  &--undone { background: #FF6B6B; }
+}

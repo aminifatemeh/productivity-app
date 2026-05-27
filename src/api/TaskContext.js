@@ -1,9 +1,6 @@
 // components/TaskContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { tasksAPI } from "../../api/apiService";
-import axios from 'axios';
-
-const API_BASE = 'http://5.202.57.77:8000';
+import { tasksAPI } from "./apiService";
 
 export const TaskContext = createContext();
 
@@ -13,20 +10,26 @@ export const TaskProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [currentCategory, setCurrentCategory] = useState('khak_khorde');
 
-    const generateUniqueId = () => Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+    const generateUniqueId = () =>
+        Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
 
-    // Helper function to normalize task data from API response
+    const parseDuration = (durationStr) => {
+        if (!durationStr) return 0;
+        const parts = durationStr.split(':');
+        const hours = parseInt(parts[0] || 0);
+        const mins = parseInt(parts[1] || 0);
+        const secs = parseInt(parts[2] || 0);
+        return hours * 3600 + mins * 60 + secs;
+    };
+
+    const formatDurationForAPI = (seconds) => {
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
     const normalizeTask = (task, index) => {
-        console.log('Normalizing task:', {
-            id: task.id,
-            title: task.title,
-            done_date: task.done_date,
-            categories: task.categories,
-            deadline_time: task.deadline_time,
-            duration: task.duration,
-            deadline_date: task.deadline_date
-        });
-
         return {
             id: task.id.toString(),
             title: task.title || 'بدون عنوان',
@@ -34,14 +37,16 @@ export const TaskProvider = ({ children }) => {
             flag_tuNobat: task.flag_tuNobat || false,
             isDone: !!task.done_date,
             done_date: task.done_date || null,
-            subtasks: Array.isArray(task.subtasks) ? task.subtasks.map(sub => ({
-                id: sub.id,
-                title: sub.title || '',
-                isDone: !!sub.done_date,
-                done_date: sub.done_date || null,
-            })) : [],
+            subtasks: Array.isArray(task.subtasks)
+                ? task.subtasks.map(sub => ({
+                    id: sub.id,
+                    title: sub.title || '',
+                    isDone: !!sub.done_date,
+                    done_date: sub.done_date || null,
+                }))
+                : [],
             tags: Array.isArray(task.categories) ? task.categories : [],
-            deadline_date: task.deadline_date || null, // نگه‌داری تاریخ میلادی
+            deadline_date: task.deadline_date || null,
             deadline_time: task.deadline_time || '',
             hour: task.deadline_time || '',
             selectedDays: Array.isArray(task.repeat_days) ? task.repeat_days : [],
@@ -55,17 +60,6 @@ export const TaskProvider = ({ children }) => {
         };
     };
 
-    // Parse duration string "HH:MM:SS" to seconds
-    const parseDuration = (durationStr) => {
-        if (!durationStr) return 0;
-        const parts = durationStr.split(':');
-        const hours = parseInt(parts[0] || 0);
-        const mins = parseInt(parts[1] || 0);
-        const secs = parseInt(parts[2] || 0);
-        return hours * 3600 + mins * 60 + secs;
-    };
-
-    // Fetch tasks by category
     const fetchTasksByCategory = async (category) => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
@@ -76,8 +70,6 @@ export const TaskProvider = ({ children }) => {
         try {
             setIsLoading(true);
             let data;
-
-            console.log(`Fetching tasks for category: ${category}`);
 
             switch (category) {
                 case 'khak_khorde':
@@ -93,45 +85,34 @@ export const TaskProvider = ({ children }) => {
                     data = [];
             }
 
-            console.log(`Raw API response for ${category}:`, data);
-
-            // Handle different response formats
             let tasksArray = [];
             if (Array.isArray(data)) {
-                // Direct array response
                 tasksArray = data;
             } else if (data && typeof data === 'object') {
-                // Object with completed_tasks and not_completed_tasks
                 if (category === 'rumiz') {
                     tasksArray = [
                         ...(data.completed_tasks || []),
                         ...(data.not_completed_tasks || [])
                     ];
                 } else {
-                    // For other categories, try to find tasks in common keys
                     tasksArray = data.tasks || data.not_completed_tasks || data.completed_tasks || [];
                 }
             }
-
-            console.log(`Tasks array for ${category}:`, tasksArray);
-            console.log(`Is array: ${Array.isArray(tasksArray)}, Length: ${tasksArray?.length}`);
 
             const fetchedTasks = Array.isArray(tasksArray)
                 ? tasksArray.map((task, index) => normalizeTask(task, index))
                 : [];
 
-            console.log(`Normalized tasks for ${category}:`, fetchedTasks);
-
             setTasks(fetchedTasks);
             setCurrentCategory(category);
-            setIsLoading(false);
         } catch (err) {
             console.error('Error fetching tasks:', err.response?.data || err.message);
+        } finally {
             setIsLoading(false);
         }
     };
 
-    // Fetch all tasks (kept for compatibility)
+    // Kept for compatibility
     const fetchAllTasks = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
@@ -150,14 +131,13 @@ export const TaskProvider = ({ children }) => {
                 : [];
 
             setTasks(fetchedTasks);
-            setIsLoading(false);
         } catch (err) {
             console.error('Error fetching tasks:', err.response?.data || err.message);
+        } finally {
             setIsLoading(false);
         }
     };
 
-    // بجای fetchAllTasks، fetchTasksByCategory را اجرا کن
     useEffect(() => {
         fetchTasksByCategory(currentCategory);
     }, []);
@@ -171,7 +151,6 @@ export const TaskProvider = ({ children }) => {
                     done_date: null
                 }));
 
-            // اطمینان از اینکه repeat_days آرایه است
             const repeatDays = Array.isArray(taskData.repeat_days) ? taskData.repeat_days : [];
 
             const response = await tasksAPI.addTask({
@@ -181,7 +160,7 @@ export const TaskProvider = ({ children }) => {
                 deadline_time: taskData.deadline_time || '23:59:00',
                 flag_tuNobat: taskData.flag_tuNobat || false,
                 is_routine_active: taskData.is_routine_active || false,
-                repeat_days: repeatDays, // همیشه آرایه
+                repeat_days: repeatDays,
                 subtasks: validSubtasks,
                 categories: taskData.categories || [],
                 done_date: taskData.done_date || null,
@@ -192,8 +171,6 @@ export const TaskProvider = ({ children }) => {
 
             const newTask = normalizeTask(response, tasks.length);
             setTasks(prev => [...prev, newTask]);
-
-            // Refresh current category to get updated list
             await fetchTasksByCategory(currentCategory);
 
             return { success: true, task: newTask };
@@ -216,7 +193,6 @@ export const TaskProvider = ({ children }) => {
                     done_date: sub.done_date || null
                 }));
 
-            // اطمینان از اینکه repeat_days آرایه است
             const repeatDays = Array.isArray(updatedTask.repeat_days) ? updatedTask.repeat_days : [];
 
             const response = await tasksAPI.updateTask(updatedTask.id, {
@@ -226,7 +202,7 @@ export const TaskProvider = ({ children }) => {
                 deadline_time: updatedTask.deadline_time || '23:59:00',
                 flag_tuNobat: updatedTask.flag_tuNobat || false,
                 is_routine_active: updatedTask.is_routine_active || false,
-                repeat_days: repeatDays, // همیشه آرایه
+                repeat_days: repeatDays,
                 subtasks: validSubtasks,
                 categories: updatedTask.categories || [],
                 done_date: updatedTask.done_date || null,
@@ -237,8 +213,6 @@ export const TaskProvider = ({ children }) => {
 
             const editedTask = normalizeTask(response, updatedTask.originalIndex || 0);
             setTasks(prev => prev.map(t => t.id === editedTask.id ? editedTask : t));
-
-            // Refresh current category to get updated list
             await fetchTasksByCategory(currentCategory);
 
             return { success: true, task: editedTask };
@@ -259,8 +233,6 @@ export const TaskProvider = ({ children }) => {
                 const { [taskId]: _, ...rest } = prev;
                 return rest;
             });
-
-            // Refresh current category to get updated list
             await fetchTasksByCategory(currentCategory);
 
             return { success: true };
@@ -274,11 +246,6 @@ export const TaskProvider = ({ children }) => {
     };
 
     const toggleTask = async (taskId) => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            return { success: false, error: 'لطفاً ابتدا وارد سیستم شوید' };
-        }
-
         const currentTask = tasks.find((t) => t.id === taskId);
         if (!currentTask) {
             return { success: false, error: 'تسک یافت نشد' };
@@ -293,31 +260,11 @@ export const TaskProvider = ({ children }) => {
             setTasks((prevTasks) =>
                 prevTasks.map((t) => (t.id === taskId ? { ...t, isDone } : t))
             );
-
-            // Refresh current category to get updated list
             await fetchTasksByCategory(currentCategory);
 
             return { success: true, task: { ...currentTask, isDone } };
         } catch (err) {
             console.error('Error toggling task:', err.response?.data || err.message);
-
-            if (err.response?.status === 401) {
-                const refresh = localStorage.getItem('refreshToken');
-                if (refresh) {
-                    try {
-                        const refreshResponse = await axios.post(`${API_BASE}/token/refresh/`, { refresh });
-                        localStorage.setItem('accessToken', refreshResponse.data.access);
-                        return await toggleTask(taskId);
-                    } catch (refreshErr) {
-                        localStorage.removeItem('accessToken');
-                        localStorage.removeItem('refreshToken');
-                        localStorage.removeItem('username');
-                        localStorage.removeItem('userId');
-                        return { success: false, error: 'لطفاً دوباره وارد سیستم شوید' };
-                    }
-                }
-            }
-
             return {
                 success: false,
                 error: err.response?.data?.error || err.response?.data?.detail || 'خطایی در تغییر وضعیت تسک رخ داد'
@@ -333,14 +280,6 @@ export const TaskProvider = ({ children }) => {
                 isRunning: true
             }
         }));
-    };
-
-    const formatDurationForAPI = (seconds) => {
-        const hours = Math.floor(seconds / 3600);
-        const mins = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-
-        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
     const stopTimer = async (taskId) => {
@@ -363,12 +302,10 @@ export const TaskProvider = ({ children }) => {
             setTasks(prev => prev.map(t =>
                 t.id === taskId ? { ...t, totalDuration: newTotalDuration } : t
             ));
-
             setTimers(prev => ({
                 ...prev,
                 [taskId]: { elapsed: 0, isRunning: false }
             }));
-
         } catch (err) {
             console.error('Error sending duration:', err.message);
         }

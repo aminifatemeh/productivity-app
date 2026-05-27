@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import "./PomodoroClock.scss";
-import { TaskContext } from "../taskmanagement/TaskContext";
+import { TaskContext } from "../../api/TaskContext";
 
 const PomodoroClock = ({ selectedTask }) => {
     const { timers, startTimer, stopTimer, resetTimerForTask, setTimers, tasks } = useContext(TaskContext);

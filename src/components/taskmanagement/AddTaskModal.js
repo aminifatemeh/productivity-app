@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import './AddTaskModal.scss';
 import moment from 'jalali-moment';
-import { TaskContext } from './TaskContext';
+import { TaskContext } from '../../api/TaskContext';
 import CompactCalendar from '../CompactClendar';
 
 const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate }) => {

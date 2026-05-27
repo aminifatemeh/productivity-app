@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import './TaskManagementPage.scss';
 import TaskCard from "../components/taskmanagement/TaskCard";
 import AddTaskModal from "../components/taskmanagement/AddTaskModal";
-import { TaskContext } from "../components/taskmanagement/TaskContext";
+import { TaskContext } from "../api/TaskContext";
 
 import moment from 'jalali-moment';
 

@@ -57,44 +57,6 @@
   margin: 0 auto;
   align-items: start;
 }
-.dashboard-page .main-content .chart-wrapper {
-  width: 100%;
-}
-.dashboard-page .main-content .chart-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 20px;
-  box-shadow: 0px 4px 20px rgba(44, 134, 139, 0.08);
-  padding: 30px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(44, 134, 139, 0.1);
-  height: 100%;
-}
-.dashboard-page .main-content .chart-card:hover {
-  box-shadow: 0px 8px 30px rgba(44, 134, 139, 0.15);
-  transform: translateY(-2px);
-}
-.dashboard-page .main-content .chart-card .chart-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #2C868B;
-  margin: 0 0 25px 0;
-  text-align: start;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #E8EBE4;
-}
-.dashboard-page .main-content .chart-card .loading-message,
-.dashboard-page .main-content .chart-card .error-message {
-  text-align: center;
-  padding: 60px 20px;
-  font-size: 16px;
-  color: #7C7C7C;
-  background: #f9fafb;
-  border-radius: 12px;
-}
-.dashboard-page .main-content .chart-card .error-message {
-  color: #D32F2F;
-  background: #fef2f2;
-}
 .dashboard-page .main-content .calendar-wrapper {
   width: 100%;
   display: flex;
