@@ -53,12 +53,17 @@ export const authAPI = {
         const response = await axios.post(`${API_BASE}/login/`, { username, password });
         return response.data;
     },
-    register: async (username, phoneNumber, password) => {
-        const response = await axios.post(`${API_BASE}/register/`, {
+    register: async (username, phoneNumber, password, gender) => {
+        const body = {
             username,
             phone_number: phoneNumber,
             password,
-        });
+        };
+        // Only include gender if the user actually selected one
+        if (gender !== undefined) {
+            body.gender = gender;
+        }
+        const response = await axios.post(`${API_BASE}/register/`, body);
         return response.data;
     },
 };
@@ -68,7 +73,6 @@ export const tasksAPI = {
         const response = await apiClient.get('/tasks/all_tasks/');
         return response.data;
     },
-    // New category-specific endpoints
     getKhakKhordeTasks: async () => {
         const response = await apiClient.get('/tasks/khak_khorde/');
         return response.data;
@@ -93,9 +97,7 @@ export const tasksAPI = {
         await apiClient.delete(`/tasks/${taskId}/delete_task/`);
     },
     toggleTask: async (taskId, done) => {
-        const response = await apiClient.post(`/tasks/${taskId}/toggle/`, {
-            done: done
-        });
+        const response = await apiClient.post(`/tasks/${taskId}/toggle/`, { done });
         return response.data;
     },
     getTodayPerformance: async () => {
@@ -132,7 +134,7 @@ export const tasksAPI = {
     },
     setTaskDuration: async (taskId, durationFormatted) => {
         const response = await apiClient.post(`/tasks/${taskId}/set_duration/`, {
-            duration: durationFormatted
+            duration: durationFormatted,
         });
         return response.data;
     },

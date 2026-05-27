@@ -1,3 +1,5 @@
+// RegisterPage.scss
+
 .register-container {
   display: flex;
   justify-content: center;
@@ -45,17 +47,27 @@
   color: #333;
   background-color: #fafafa;
   transition: border-color 0.3s ease;
-}
+  box-sizing: border-box;
 
-.form-input:focus {
-  outline: none;
-  border-color: #2c868b;
-  background-color: #fff;
-}
+  &:focus {
+    outline: none;
+    border-color: #2c868b;
+    background-color: #fff;
+  }
 
-.form-input:disabled {
-  background-color: #e9ecef;
-  cursor: not-allowed;
+  &:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+  }
+
+  &.input-error {
+    border-color: #d32f2f;
+    background-color: #fff8f8;
+
+    &:focus {
+      border-color: #d32f2f;
+    }
+  }
 }
 
 .error-message {
@@ -63,7 +75,70 @@
   font-size: 14px;
   text-align: center;
   margin-bottom: 16px;
+  padding: 10px;
+  background-color: #fff8f8;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
 }
+
+.field-error {
+  display: block;
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.field-warning {
+  display: block;
+  color: #e65100;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.optional-label {
+  font-size: 12px;
+  color: #999;
+  font-weight: 400;
+}
+
+// ─── Password strength ────────────────────────────────────────────────────────
+
+.password-strength {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 6px;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 4px;
+  background-color: #e0e0e0;
+  transition: background-color 0.3s ease;
+
+  &--weak   { background-color: #d32f2f; }
+  &--fair   { background-color: #f57c00; }
+  &--good   { background-color: #fbc02d; }
+  &--strong { background-color: #388e3c; }
+}
+
+.strength-label {
+  font-size: 12px;
+  font-weight: 500;
+
+  &--weak   { color: #d32f2f; }
+  &--fair   { color: #f57c00; }
+  &--good   { color: #fbc02d; }
+  &--strong { color: #388e3c; }
+}
+
+// ─── Buttons ──────────────────────────────────────────────────────────────────
 
 .submit-button {
   width: 100%;
@@ -76,22 +151,22 @@
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s ease;
-}
 
-.submit-button:hover:not(:disabled) {
-  background-color: #256d72;
-}
+  &:hover:not(:disabled) {
+    background-color: #256d72;
+  }
 
-.submit-button:disabled {
-  background-color: #a0a0a0;
-  cursor: not-allowed;
-}
+  &:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+  }
 
-.submit-button.secondary {
-  background-color: #6c757d;
-  margin-top: 12px;
-}
+  &.secondary {
+    background-color: #6c757d;
+    margin-top: 12px;
 
-.submit-button.secondary:hover:not(:disabled) {
-  background-color: #5a6268;
+    &:hover:not(:disabled) {
+      background-color: #5a6268;
+    }
+  }
 }
