@@ -128,7 +128,6 @@
     }
 
     &-task {
-        background: #f8fafc;
         border-radius: 12px;
         padding: 14px 16px;
         display: flex;
@@ -139,7 +138,8 @@
         transition: all 0.2s ease;
         position: relative;
         overflow: hidden;
-        border: 1.5px solid transparent;
+        border: 1.5px solid rgba(56, 163, 165, 0.2);
+        background-color: rgb(243, 249, 250);
         flex-shrink: 0;
 
         &::before {

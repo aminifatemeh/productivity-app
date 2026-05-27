@@ -60,14 +60,14 @@ export default function WeeklyChart() {
     }, []);
 
     return (
-        <div className="weekly-chart">
-            <div className="weekly-chart__header">
-                <h3 className="weekly-chart__title">نمودار پیشرفت هفتگی</h3>
-                <span className="weekly-chart__badge">۷ روز اخیر</span>
+        <div className="dashboard-weekly-chart">
+            <div className="dashboard-weekly-chart__header">
+                <h3 className="dashboard-weekly-chart__title">نمودار پیشرفت هفتگی</h3>
+                <span className="dashboard-weekly-chart__badge">۷ روز اخیر</span>
             </div>
 
             {loading ? (
-                <div className="weekly-chart__state">
+                <div className="dashboard-weekly-chart__state">
                     <div className="spinner" />
                     <p>در حال بارگذاری...</p>
                 </div>
@@ -99,7 +99,7 @@ export default function WeeklyChart() {
                     </BarChart>
                 </ResponsiveContainer>
             ) : (
-                <div className="weekly-chart__state weekly-chart__state--error">خطا در بارگذاری نمودار</div>
+                <div className="dashboard-weekly-chart__state dashboard-weekly-chart__state--error">خطا در بارگذاری نمودار</div>
             )}
         </div>
     );
