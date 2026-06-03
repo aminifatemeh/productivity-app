@@ -10,6 +10,7 @@ import TaskManagementPage from "./pages/TaskManagementPage";
 import SettingsPage from "./pages/SettingsPage";
 import VisionPage from "./pages/VisionPage";
 import ChartsPage from "./pages/ChartsPage";
+import LandingPage from "./pages/LandingPage";  // ← اضافه شد
 
 function App() {
     return (
@@ -18,13 +19,11 @@ function App() {
                 <Router>
                     <MainLayout>
                         <Routes>
+                            <Route path="/" element={<LandingPage />} />          {/* ← لندینگ */}
                             <Route path="/login" element={<LoginForm />} />
                             <Route path="/register" element={<RegisterForm />} />
-                            <Route path="/" element={<DashboardPage />} />
-                            <Route
-                                path="/task-management"
-                                element={<TaskManagementPage useApi={true} />}
-                            />
+                            <Route path="/dashboard" element={<DashboardPage />} /> {/* ← مسیر جدید */}
+                            <Route path="/task-management" element={<TaskManagementPage useApi={true} />} />
                             <Route path="/vision" element={<VisionPage />} />
                             <Route path="/charts" element={<ChartsPage />} />
                             <Route path="/settings" element={<SettingsPage />} />

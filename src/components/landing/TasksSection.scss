@@ -1,0 +1,90 @@
+$green-dark:   #22577A;
+$teal:         #38A3A5;
+$teal-light:   #57CC99;
+$green-light:  #80ED99;
+$green-pale:   #C7F9CC;
+$white:        #ffffff;
+$bg:           #f0faf4;
+$text-dark:    #1a2e25;
+$text-mid:     #3d5a47;
+$text-soft:    #6b8f76;
+$radius-lg:    20px;
+$radius-md:    14px;
+$radius-sm:    8px;
+$shadow-soft:  0 4px 24px rgba(56, 163, 165, 0.12);
+$shadow-card:  0 8px 32px rgba(56, 163, 165, 0.18);
+$transition:   0.25s ease;
+
+
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.task-section-card {
+  border-radius: $radius-lg;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: $shadow-soft;
+  transition: transform $transition;
+
+  &:hover { transform: translateY(-4px); }
+
+  &--desk {
+    background: linear-gradient(160deg, rgba(#22577A, 0.07), rgba(#38A3A5, 0.07));
+    border: 1.5px solid rgba(#38A3A5, 0.2);
+  }
+  &--queue {
+    background: linear-gradient(160deg, rgba(#57CC99, 0.07), rgba(#80ED99, 0.07));
+    border: 1.5px solid rgba(#57CC99, 0.2);
+  }
+  &--dust {
+    background: linear-gradient(160deg, rgba(#C7F9CC, 0.3), rgba(#80ED99, 0.1));
+    border: 1.5px solid rgba(#80ED99, 0.3);
+  }
+
+  &__icon {
+    width: 56px; height: 56px;
+    border-radius: $radius-md;
+    background: rgba($white, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $teal;
+  }
+
+  &__content {
+    h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 6px;
+    }
+    p {
+      font-size: 0.88rem;
+      color: $text-soft;
+      line-height: 1.7;
+      margin: 0;
+    }
+  }
+
+  &__label {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $teal;
+    background: rgba($teal, 0.1);
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 4px;
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────
+@media (max-width: 768px) {
+  .tasks-grid { grid-template-columns: 1fr; }
+}

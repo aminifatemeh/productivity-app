@@ -8,7 +8,7 @@ function MainLayout({ children }) {
     const location = useLocation();
 
     // صفحاتی که sidebar ندارن
-    const noSidebarRoutes = ['/login', '/register'];
+    const noSidebarRoutes = ['/login', '/register', '/'];
     const showSidebar = !noSidebarRoutes.includes(location.pathname);
 
     return (
