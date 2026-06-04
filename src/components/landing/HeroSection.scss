@@ -44,11 +44,10 @@ $transition:   0.25s ease;
 .hero-body {
   flex: 1;
   display: flex;
-  align-items: center;
-  gap: 60px;
+  align-items: start;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 60px 24px;
+  padding: 100px 24px 20px;
   width: 100%;
 }
 
@@ -117,23 +116,35 @@ $transition:   0.25s ease;
   gap: 14px;
   flex-wrap: wrap;
   margin-top: 8px;
+
+  .btn--hero {
+    padding: 16px 36px;
+    font-size: 1.05rem;
+    border-radius: $radius-md;
+    letter-spacing: 0.01em;
+
+    &.btn--primary {
+      box-shadow: 0 8px 28px rgba($teal, 0.4);
+
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 36px rgba($teal, 0.5);
+      }
+    }
+
+    &.btn--secondary {
+      &:hover { transform: translateY(-3px); }
+    }
+  }
 }
 
 .hero-visual {
   flex: 1;
-  min-height: 320px;
+  min-height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  .section-placeholder {
-    width: 100%;
-    min-height: 280px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0;
-  }
+  overflow: visible;
 }
 
 // ── Responsive ────────────────────────────────────────────

@@ -1,0 +1,229 @@
+$teal:       #38A3A5;
+$teal-dark:  #2C868B;
+$white:      #ffffff;
+$text-dark:  #2C868B;
+$text-soft:  #7C7C7C;
+$radius-lg:  16px;
+$radius-md:  12px;
+$shadow:     0px 4px 12px rgba(0, 0, 0, 0.08);
+$transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+.mini-charts {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: mcFadeUp 0.5s ease both;
+}
+
+@keyframes mcFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Focus Cards Row ───────────────────────────────────────
+.mc-focus-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.mc-focus-card {
+  background: linear-gradient(135deg, $white 0%, #f8f9fa 100%);
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: transform $transition, box-shadow $transition;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #38A3A5, #57CC99, #80ED99);
+    opacity: 0;
+    transition: opacity $transition;
+  }
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0px 8px 20px rgba(0,0,0,0.12);
+
+    &::before { opacity: 1; }
+  }
+
+  &__header {
+    text-align: center;
+    width: 100%;
+  }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0 0 3px;
+  }
+
+  &__sub {
+    font-size: 11px;
+    color: $text-soft;
+    margin: 0;
+  }
+
+  &__chart {
+    width: 110px;
+    height: 110px;
+    flex-shrink: 0;
+  }
+}
+
+.mc-donut {
+  width: 100%;
+  height: 100%;
+
+  circle {
+    transition: stroke-dashoffset 0.6s ease;
+  }
+}
+
+// ── Bar Chart ─────────────────────────────────────────────
+.mc-bar-chart {
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+  padding: 16px 16px 12px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  &__title {
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  &__legend {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10.5px;
+    color: $text-soft;
+  }
+
+  &__bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 110px;
+    padding-bottom: 24px; // فضا برای label
+    position: relative;
+
+    // خط‌های grid افقی
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 24px 0;
+      background: repeating-linear-gradient(
+                      to bottom,
+                      rgba(0,0,0,0.04) 0px,
+                      rgba(0,0,0,0.04) 1px,
+                      transparent 1px,
+                      transparent 25%
+      );
+      pointer-events: none;
+    }
+  }
+}
+
+.mc-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+
+  &--done   { background: #57CC99; }
+  &--undone { background: #FF6B6B; }
+}
+
+// ── Bar Column ────────────────────────────────────────────
+.mc-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+
+  &.is-today {
+    .mc-bar-stack {
+      outline: 2px solid $teal-dark;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .mc-bar-label {
+      color: $teal-dark;
+      font-weight: 700;
+    }
+  }
+}
+
+.mc-bar-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column-reverse; // done پایین، undone بالا
+  align-items: stretch;
+  gap: 1px;
+  flex: 1;
+  justify-content: flex-end;
+  max-height: calc(100% - 20px);
+}
+
+.mc-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  transition: height $transition;
+  min-height: 3px;
+
+  &--done   {
+    background: #57CC99;
+    border-radius: 3px 3px 0 0;
+  }
+
+  &--undone {
+    background: #FF6B6B;
+    border-radius: 0;
+
+    // اگه done نباشه، گرد بالاش باشه
+    &:last-child { border-radius: 3px 3px 0 0; }
+  }
+}
+
+.mc-bar-label {
+  font-size: 9px;
+  color: $text-soft;
+  text-align: center;
+  white-space: nowrap;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+// label position fix
+.mc-bar-col {
+  position: relative;
+}

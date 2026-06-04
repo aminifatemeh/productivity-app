@@ -1,5 +1,5 @@
 import React from "react";
-import SectionPlaceholder from "./SectionPlaceholder";
+import MiniCharts from "./MiniCharts";
 import './ChartsSection.scss';
 
 const ChartBarIcon = () => (
@@ -15,10 +15,7 @@ function ChartsSection() {
         <section className="section section--charts" id="charts">
             <div className="section-container section-container--split section-container--reverse">
                 <div className="split-visual">
-                    <SectionPlaceholder
-                        name="CHARTS_VISUAL"
-                        hint="المان از ChartsPage / WeeklyChart اینجا قرار می‌گیره"
-                    />
+                    <MiniCharts />
                 </div>
                 <div className="split-text">
                     <div className="section-tag">

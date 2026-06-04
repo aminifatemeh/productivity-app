@@ -1,0 +1,308 @@
+$teal:        #38A3A5;
+$teal-light:  #57CC99;
+$teal-dark:   #2C868B;
+$white:       #ffffff;
+$text-dark:   #1a2e25;
+$text-soft:   #6b8f76;
+$radius-lg:   20px;
+$radius-md:   14px;
+$radius-sm:   8px;
+
+// ── Wrapper ───────────────────────────────────────────────
+.hero-visual-wrap {
+  position: relative;
+  width: 100%;
+  height: 400px;
+
+  > * { animation: hvFadeUp 0.55s ease both; }
+}
+
+@keyframes hvFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Glow ─────────────────────────────────────────────────
+.hv-glow {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba($teal, 0.15), transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+// ── Slots ─────────────────────────────────────────────────
+// Layout: pomodoro anchored center-left, two cards stacked right
+.hv-slot {
+  position: absolute;
+
+  // پومودورو — وسط عمودی، کمی سمت چپ مرکز
+  &--pomodoro {
+    top: 30%;
+    left: 10%;
+    transform: translate(-62%, -52%);
+    animation-delay: 0.1s;
+    z-index: 3;
+  }
+
+  // کارت رومیز — راست بالا
+  &--active {
+    top: 24px;
+    right: 5%;
+    width: 52%;
+    animation-delay: 0.2s;
+    z-index: 2;
+  }
+
+  // کارت نوبتش میشه — راست پایین
+  &--upnext {
+    bottom: 24px;
+    right: 0;
+    width: 46%;
+    animation-delay: 0.3s;
+    z-index: 2;
+  }
+}
+
+// ── Floating Pills ────────────────────────────────────────
+// این دو تا واقعاً float هستن با keyframe جداگانه
+.hv-pill {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: $white;
+  border-radius: 100px;
+  padding: 7px 13px;
+  box-shadow: 0 4px 16px rgba($teal, 0.2), 0 1px 4px rgba(0,0,0,0.07);
+  z-index: 5;
+  white-space: nowrap;
+
+  &__emoji { font-size: 13px; line-height: 1; }
+  &__text  { font-size: 11px; font-weight: 700; color: $text-dark; }
+
+  // 🔥 streak — زیر پومودورو، سمت چپ
+  &--streak {
+    bottom: 40px;
+    left: 0px;
+    animation: hvFloat 3.5s ease-in-out infinite, hvFadeUp 0.55s ease both;
+    animation-delay: 0s, 0.45s;
+  }
+
+  // ✅ done — بالای کارت رومیز، بیرون از کارت
+  &--done {
+    top: 8px;
+    left: 25%;
+    animation: hvFloat 4.2s ease-in-out infinite reverse, hvFadeUp 0.55s ease both;
+    animation-delay: 0s, 0.55s;
+  }
+}
+
+@keyframes hvFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-7px); }
+}
+
+// ── Mini Pomodoro ─────────────────────────────────────────
+.hv-pomodoro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  &__ring {
+    width: 148px;
+    height: 148px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 28px rgba($teal-dark, 0.3), 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.4s ease;
+  }
+
+  &__inner {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: $white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  &__time {
+    font-size: 26px;
+    font-weight: 800;
+    color: $teal-dark;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 10px;
+    font-weight: 600;
+    color: $text-soft;
+    letter-spacing: 0.04em;
+  }
+
+  &__controls {
+    display: flex;
+    gap: 10px;
+  }
+
+  &__btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: $teal-dark;
+    color: $white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    box-shadow: 0 4px 12px rgba($teal-dark, 0.32);
+
+    &--stop {
+      background: rgba($teal, 0.12);
+      color: $teal-dark;
+      box-shadow: none;
+    }
+  }
+}
+
+// ── Mini Task Card ────────────────────────────────────────
+.hv-taskcard {
+  border-radius: $radius-lg;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  &__header {
+    padding: 10px 13px 9px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 700;
+    color: $white;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  &__count {
+    min-width: 22px;
+    height: 22px;
+    background: rgba($white, 0.25);
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: $white;
+    padding: 0 7px;
+    backdrop-filter: blur(6px);
+  }
+
+  &__list {
+    background: $white;
+    border-radius: $radius-md $radius-md 0 0;
+    padding: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__item {
+    border-radius: 9px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f3f9fa;
+    border: 1.5px solid rgba($teal, 0.14);
+
+    &.is-running {
+      background: rgba($teal, 0.07);
+      border-color: rgba($teal, 0.28);
+
+      .hv-taskcard__dot {
+        background: #ef4444;
+        animation: hvPulse 2s ease-in-out infinite;
+        box-shadow: 0 0 5px rgba(239,68,68,0.45);
+      }
+
+      .hv-taskcard__play {
+        background: $teal;
+        color: $white;
+      }
+    }
+  }
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  &__time {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #64748b;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  &__play {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: none;
+    background: #e2e8f0;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: default;
+  }
+}
+
+@keyframes hvPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(1.2); }
+}
+
+// ── Responsive ────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .hero-visual-wrap   { height: 360px; }
+  .hv-slot--active    { width: 54%; }
+  .hv-slot--upnext    { width: 48%; }
+}

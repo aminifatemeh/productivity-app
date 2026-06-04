@@ -40,25 +40,6 @@ function CtaSection() {
                             قبلاً ثبت‌نام کردم
                         </button>
                     </div>
-                    <div className="cta-download">
-                        <p className="cta-download__label">یا دانلود کن:</p>
-                        <div className="cta-download__btns">
-                            <a href="#" className="download-btn">
-                                <AndroidIcon />
-                                <span>
-                                    <small>دانلود از</small>
-                                    اندروید
-                                </span>
-                            </a>
-                            <a href="#" className="download-btn">
-                                <TelegramIcon />
-                                <span>
-                                    <small>دانلود از</small>
-                                    تلگرام
-                                </span>
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>

@@ -1,5 +1,4 @@
 import React from "react";
-import SectionPlaceholder from "./SectionPlaceholder";
 import './TasksSection.scss';
 
 const DustIcon = () => (
@@ -25,6 +24,33 @@ const QueueIcon = () => (
     </svg>
 );
 
+const CARDS = [
+    {
+        label:    "رومیز",
+        icon:     <DeskIcon />,
+        gradient: "linear-gradient(135deg, #38A3A5 0%, #4AB8BB 100%)",
+        title:    "کارهای امروز",
+        desc:     "کارهای مربوط به امروز رو در بخش رومیز مدیریت کن. تمرکزت رو روی همین لحظه بذار.",
+        bullets:  ["اولویت‌بندی کارهای روز", "تمرکز روی همین لحظه", "پیگیری پیشرفت لحظه‌ای"],
+    },
+    {
+        label:    "نوبتش میشه",
+        icon:     <QueueIcon />,
+        gradient: "linear-gradient(135deg, #57CC99 0%, #6DE2AF 100%)",
+        title:    "کارهای آینده",
+        desc:     "کارهایی که قراره در آینده بهشون سر و سامون بدی. سر وقتشون یادت میاد.",
+        bullets:  ["زمان‌بندی دقیق برای آینده", "یادآوری خودکار سر وقت", "آماده‌سازی بدون استرس"],
+    },
+    {
+        label:    "خاک خورده",
+        icon:     <DustIcon />,
+        gradient: "linear-gradient(135deg, #80ED99 0%, #96F5AF 100%)",
+        title:    "کارهای از قبل مونده",
+        desc:     "کارهایی که عقب افتادن گم نمیشن! اینجا مدیریتشون کن و بالاخره انجامشون بده.",
+        bullets:  ["هیچ کاری فراموش نمیشه", "مرتب‌سازی بر اساس تاخیر", "انگیزه برای تموم کردن"],
+    },
+];
+
 function TasksSection() {
     return (
         <section className="section section--tasks" id="tasks">
@@ -33,50 +59,28 @@ function TasksSection() {
                 <p className="section-subtitle">سه بخش هوشمند برای هر نوع کاری که داری</p>
 
                 <div className="tasks-grid">
-                    <div className="task-section-card task-section-card--desk">
-                        <div className="task-section-card__icon">
-                            <DeskIcon />
-                        </div>
-                        <div className="task-section-card__content">
-                            <span className="task-section-card__label">رومیز</span>
-                            <h3>کارهای امروز</h3>
-                            <p>کارهای مربوط به امروز رو در بخش رومیز مدیریت کن. تمرکزت رو روی همین لحظه بذار.</p>
-                        </div>
-                        <SectionPlaceholder
-                            name="TASK_CARD_ACTIVE"
-                            hint="TaskPreviewCard با variant='active' اینجا"
-                        />
-                    </div>
+                    {CARDS.map(({ label, icon, gradient, title, desc, bullets }) => (
+                        <div key={label} className="tsc" style={{ "--card-gradient": gradient }}>
+                            {/* Header — شبیه TaskPreviewCard */}
+                            <div className="tsc__header">
+                                <div className="tsc__header-left">
+                                    <div className="tsc__icon">{icon}</div>
+                                    <span className="tsc__label">{label}</span>
+                                </div>
+                            </div>
 
-                    <div className="task-section-card task-section-card--queue">
-                        <div className="task-section-card__icon">
-                            <QueueIcon />
+                            {/* Body */}
+                            <div className="tsc__body">
+                                <h3 className="tsc__title">{title}</h3>
+                                <p className="tsc__desc">{desc}</p>
+                                <ul className="tsc__bullets">
+                                    {bullets.map((b) => (
+                                        <li key={b}>{b}</li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
-                        <div className="task-section-card__content">
-                            <span className="task-section-card__label">نوبتش میشه</span>
-                            <h3>کارهای آینده</h3>
-                            <p>کارهایی که قراره در آینده بهشون سر و سامون بدی. سر وقتشون یادت میاد.</p>
-                        </div>
-                        <SectionPlaceholder
-                            name="TASK_CARD_UPNEXT"
-                            hint="TaskPreviewCard با variant='upNext' اینجا"
-                        />
-                    </div>
-
-                    <div className="task-section-card task-section-card--dust">
-                        <div className="task-section-card__icon">
-                            <DustIcon />
-                        </div>
-                        <div className="task-section-card__content">
-                            <span className="task-section-card__label">خاک خورده</span>
-                            <h3>کارهای از قبل مونده</h3>
-                            <p>کارهایی که عقب افتادن گم نمیشن! اینجا مدیریتشون کن و بالاخره انجامشون بده.</p>
-                        </div>
-                        <SectionPlaceholder
-                            name="TASK_CARD_ARCHIVED"
-                            hint="TaskPreviewCard با variant='archived' اینجا"
-                        />
-                    </div>
+                    ))}
                 </div>
             </div>
         </section>

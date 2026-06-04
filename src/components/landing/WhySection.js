@@ -71,12 +71,6 @@ function WhySection() {
                     </div>
                 </div>
 
-                <div className="why-visual">
-                    <SectionPlaceholder
-                        name="WHY_VISUAL"
-                        hint="المان‌هایی از صفحات دیگه (Calendar، Charts، ...) اینجا قرار می‌گیرند"
-                    />
-                </div>
             </div>
         </section>
     );

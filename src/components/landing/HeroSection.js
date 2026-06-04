@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import LogoPlaceholder from "./LogoPlaceholder";
-import SectionPlaceholder from "./SectionPlaceholder";
-import './HeroSection.scss';
+import HeroVisual from "./HeroVisual";
+import './HeroSection.scss'
 
 function HeroSection() {
     const navigate = useNavigate();
@@ -42,20 +42,17 @@ function HeroSection() {
                     </p>
 
                     <div className="hero-actions">
-                        <button className="btn btn--primary btn--lg" onClick={() => navigate("/register")}>
-                            ثبت‌نام
+                        <button className="btn btn--primary btn--hero" onClick={() => navigate("/register")}>
+                            شروع رایگان
                         </button>
-                        <button className="btn btn--secondary btn--lg" onClick={() => navigate("/register")}>
-                            دریافت رایگان
+                        <button className="btn btn--secondary btn--hero" onClick={() => navigate("/login")}>
+                            قبلاً ثبت‌نام کردم
                         </button>
                     </div>
                 </div>
 
                 <div className="hero-visual">
-                    <SectionPlaceholder
-                        name="HERO_VISUAL"
-                        hint="المان‌های بصری از DashboardPage یا TaskPreviewCard اینجا قرار می‌گیرند"
-                    />
+                    <HeroVisual />
                 </div>
             </div>
         </section>

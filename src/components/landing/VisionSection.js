@@ -1,5 +1,5 @@
 import React from "react";
-import SectionPlaceholder from "./SectionPlaceholder";
+import MiniVision from "./MiniVision";
 import './VisionSection.scss';
 
 const VisionIcon = () => (
@@ -31,10 +31,7 @@ function VisionSection() {
                     </ul>
                 </div>
                 <div className="split-visual">
-                    <SectionPlaceholder
-                        name="VISION_VISUAL"
-                        hint="المان از VisionPage اینجا قرار می‌گیره"
-                    />
+                    <MiniVision />
                 </div>
             </div>
         </section>

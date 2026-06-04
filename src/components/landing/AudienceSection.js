@@ -30,7 +30,7 @@ function AudienceSection() {
     return (
         <section className="section section--audience" id="audience">
             <div className="section-container">
-                <h2 className="section-title">این اپ مناسب چه کسایی‌ه؟</h2>
+                <h2 className="section-title">این اپ مناسب چه کساییه؟</h2>
                 <p className="section-subtitle">یار پلنر برای هر کسی که می‌خواد زندگیش رو منظم‌تر کنه طراحی شده</p>
 
                 <div className="audience-grid">
@@ -46,7 +46,7 @@ function AudienceSection() {
                         </ul>
                     </div>
 
-                    <div className="audience-card audience-card--featured">
+                    <div className="audience-card">
                         <div className="audience-card__icon">
                             <UniversityIcon />
                         </div>
