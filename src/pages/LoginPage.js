@@ -23,7 +23,7 @@ function LoginForm() {
             localStorage.setItem('userId', user_id);
             localStorage.setItem('username', username);
 
-            navigate('/');
+            navigate('/dashboard');
         } catch (err) {
             console.error('Login error:', err.response?.data || err.message);
             setError(err.response?.data?.detail || 'نام کاربری یا رمز عبور اشتباه است');

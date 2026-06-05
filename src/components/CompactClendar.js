@@ -72,7 +72,7 @@ const CompactCalendar = ({ selectedDate, onDateSelect, onClose }) => {
                     className="compact-nav-button"
                     onClick={(e) => changeMonth('prev', e)}
                 >
-                    ←
+                    →
                 </button>
                 <div className="compact-calendar-title">{`${monthName} ${year}`}</div>
                 <button
@@ -80,7 +80,7 @@ const CompactCalendar = ({ selectedDate, onDateSelect, onClose }) => {
                     className="compact-nav-button"
                     onClick={(e) => changeMonth('next', e)}
                 >
-                    →
+                    ←
                 </button>
             </div>
             <div className="compact-calendar-grid">

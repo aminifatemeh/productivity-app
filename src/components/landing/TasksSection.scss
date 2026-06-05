@@ -10,7 +10,7 @@ $shadow-soft: 0 4px 24px rgba(56, 163, 165, 0.12);
 $shadow-card: 0 8px 32px rgba(56, 163, 165, 0.18);
 $transition:  0.25s ease;
 
-.tasks-grid {
+.lp-tasks-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
@@ -18,7 +18,7 @@ $transition:  0.25s ease;
 }
 
 // ── Card ──────────────────────────────────────────────────
-.tsc {
+.lp-tsc {
   border-radius: $radius-lg;
   overflow: hidden;
   box-shadow: $shadow-soft;
@@ -132,5 +132,5 @@ $transition:  0.25s ease;
 
 // ── Responsive ────────────────────────────────────────────
 @media (max-width: 768px) {
-  .tasks-grid { grid-template-columns: 1fr; }
+  .lp-tasks-grid { grid-template-columns: 1fr; }
 }

@@ -1,4 +1,4 @@
-// RegisterForm.jsx
+// RegisterPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../api/apiService';
@@ -132,7 +132,7 @@ function PasswordStrengthBar({ value }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-function RegisterForm() {
+function RegisterPage() {
     const [fields, setFields] = useState({
         username:    '',
         phoneNumber: '',
@@ -193,7 +193,7 @@ function RegisterForm() {
             localStorage.setItem('userId', user_id);
             localStorage.setItem('username', fields.username);
 
-            navigate('/');
+            navigate('/dashboard');
         } catch (err) {
             console.error('[Register] error status:', err.response?.status);
             console.error('[Register] error data:', err.response?.data);
@@ -342,4 +342,4 @@ function RegisterForm() {
     );
 }
 
-export default RegisterForm;
+export default RegisterPage;

@@ -53,30 +53,25 @@ const CARDS = [
 
 function TasksSection() {
     return (
-        <section className="section section--tasks" id="tasks">
-            <div className="section-container">
-                <h2 className="section-title">کارهاتو دسته‌بندی کن</h2>
-                <p className="section-subtitle">سه بخش هوشمند برای هر نوع کاری که داری</p>
+        <section className="section lp-section--tasks" id="tasks">
+            <div className="lp-section-container">
+                <h2 className="lp-section-title">کارهاتو دسته‌بندی کن</h2>
+                <p className="lp-section-subtitle">سه بخش هوشمند برای هر نوع کاری که داری</p>
 
-                <div className="tasks-grid">
-                    {CARDS.map(({ label, icon, gradient, title, desc, bullets }) => (
-                        <div key={label} className="tsc" style={{ "--card-gradient": gradient }}>
-                            {/* Header — شبیه TaskPreviewCard */}
-                            <div className="tsc__header">
-                                <div className="tsc__header-left">
-                                    <div className="tsc__icon">{icon}</div>
-                                    <span className="tsc__label">{label}</span>
+                <div className="lp-tasks-grid">
+                    {CARDS.map(({label, icon, gradient, title, desc, bullets}) => (
+                        <div key={label} className="lp-tsc" style={{"--card-gradient": gradient}}>
+                            <div className="lp-tsc__header">
+                                <div className="lp-tsc__header-left">
+                                    <div className="lp-tsc__icon">{icon}</div>
+                                    <span className="lp-tsc__label">{label}</span>
                                 </div>
                             </div>
-
-                            {/* Body */}
-                            <div className="tsc__body">
-                                <h3 className="tsc__title">{title}</h3>
-                                <p className="tsc__desc">{desc}</p>
-                                <ul className="tsc__bullets">
-                                    {bullets.map((b) => (
-                                        <li key={b}>{b}</li>
-                                    ))}
+                            <div className="lp-tsc__body">
+                                <h3 className="lp-tsc__title">{title}</h3>
+                                <p className="lp-tsc__desc">{desc}</p>
+                                <ul className="lp-tsc__bullets">
+                                    {bullets.map((b) => <li key={b}>{b}</li>)}
                                 </ul>
                             </div>
                         </div>
@@ -84,6 +79,7 @@ function TasksSection() {
                 </div>
             </div>
         </section>
+
     );
 }
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoPlaceholder from "./LogoPlaceholder";
 import HeroVisual from "./HeroVisual";
@@ -6,18 +6,29 @@ import './HeroSection.scss'
 
 function HeroSection() {
     const navigate = useNavigate();
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("accessToken"));
+
+    useEffect(() => {
+        const handleStorage = () => setIsLoggedIn(!!localStorage.getItem("accessToken"));
+        window.addEventListener("storage", handleStorage);
+        return () => window.removeEventListener("storage", handleStorage);
+    }, []);
 
     return (
         <section className="section section--hero" id="hero">
             <nav className="hero-nav">
                 <LogoPlaceholder />
                 <div className="hero-nav__actions">
-                    <button className="btn btn--ghost" onClick={() => navigate("/login")}>
-                        ورود
-                    </button>
-                    <button className="btn btn--primary" onClick={() => navigate("/register")}>
-                        ثبت‌نام
-                    </button>
+                    {isLoggedIn ? (
+                        <button className="btn btn--primary" onClick={() => navigate("/dashboard")}>
+                            پنل کاربری
+                        </button>
+                    ) : (
+                        <>
+                            <button className="btn btn--ghost" onClick={() => navigate("/login")}>ورود</button>
+                            <button className="btn btn--primary" onClick={() => navigate("/register")}>ثبت‌نام</button>
+                        </>
+                    )}
                 </div>
             </nav>
 
@@ -33,21 +44,24 @@ function HeroSection() {
                         <span className="hero-title__accent"> برنامه‌ریزی کن!</span>
                     </h1>
 
-                    <p className="hero-tagline">
-                        غول‌های بزرگ رو به کارهای کوچک شدنی تبدیل کن!
-                    </p>
-
-                    <p className="hero-sub">
-                        بیا با هم پیش بریم!
-                    </p>
+                    <p className="hero-tagline">غول‌های بزرگ رو به کارهای کوچک شدنی تبدیل کن!</p>
+                    <p className="hero-sub">بیا با هم پیش بریم!</p>
 
                     <div className="hero-actions">
-                        <button className="btn btn--primary btn--hero" onClick={() => navigate("/register")}>
-                            شروع رایگان
-                        </button>
-                        <button className="btn btn--secondary btn--hero" onClick={() => navigate("/login")}>
-                            قبلاً ثبت‌نام کردم
-                        </button>
+                        {isLoggedIn ? (
+                            <button className="btn btn--primary btn--hero" onClick={() => navigate("/dashboard")}>
+                                رفتن به داشبورد
+                            </button>
+                        ) : (
+                            <>
+                                <button className="btn btn--primary btn--hero" onClick={() => navigate("/register")}>
+                                    شروع رایگان
+                                </button>
+                                <button className="btn btn--secondary btn--hero" onClick={() => navigate("/login")}>
+                                    قبلاً ثبت‌نام کردم
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 

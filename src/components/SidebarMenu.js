@@ -101,7 +101,7 @@ function SidebarMenu() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("username");
-    navigate("/login");
+    navigate("/");
   };
 
   const handleNavigation = (e, path) => {
@@ -111,7 +111,7 @@ function SidebarMenu() {
   };
 
   const menuItems = [
-    { icon: <IconDashboard />,      text: t("sidebarMenu.dashboard"),      path: "/",                alt: "dashboard" },
+    { icon: <IconDashboard />,      text: t("sidebarMenu.dashboard"),      path: "/dashboard",                alt: "dashboard" },
     { icon: <IconTaskManagement />, text: t("sidebarMenu.taskManagement"), path: "/task-management", alt: "task-management" },
     { icon: <IconVision />,         text: t("sidebarMenu.vision"),         path: "/vision",          alt: "vision" },
     { icon: <IconPerformance />,    text: t("sidebarMenu.charts"),         path: "/charts",          alt: "charts" },

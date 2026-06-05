@@ -185,78 +185,105 @@ function VisionPage() {
     };
 
     return (
-        <div className="d-flex vision-page" dir="rtl">
-            <div className="main-content">
-                <div className="vision-header">
-                    <h1 className="vision-title">چشم‌انداز ماهانه</h1>
-                    <div className="month-selector">
-                        <button className="nav-button" onClick={handlePreviousMonth}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M15 18L9 12L15 6" />
-                            </svg>
-                        </button>
-                        <div className="current-month">
-                            <span className="month-name">{currentMonthLabel}</span>
-                            <span className="year">{selectedYear}</span>
-                        </div>
-                        <button className="nav-button" onClick={handleNextMonth}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M9 18L15 12L9 6" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                {loading ? (
-                    <div className="empty-message-full">
-                        <div className="loading-spinner"></div>
-                        <p>در حال بارگذاری تسک‌ها...</p>
-                    </div>
-                ) : (
-                    <div className="calendar-grid">
-                        {Array.from({ length: daysInMonth }, (_, i) => {
-                            const day = i + 1;
-                            const dateKey = `${selectedYear}-${selectedMonth}-${day}`;
-                            const dayTasks = tasksByDate[dateKey] || [];
-                            const dayName = getDayName(day);
-                            const gradient = getCardGradient(i, daysInMonth);
-
-                            return (
-                                <div key={day} className="day-card" style={{ '--card-gradient': gradient }}>
-                                    <div className="day-header" style={{ background: gradient }}>
-                                        <div className="day-info">
-                                            <span className="day-number">{day}</span>
-                                            <span className="day-name">{dayName}</span>
-                                        </div>
-                                        <span className="month-label">{currentMonthLabel}</span>
-                                    </div>
-                                    <div className="tasks-list">
-                                        {dayTasks.length > 0 ? (
-                                            dayTasks.map((task) => (
-                                                <div
-                                                    key={task.id}
-                                                    className="task-item"
-                                                    onClick={() => handleTaskClick(task.id)}
-                                                >
-                                                    <span className="task-title">{task.title || 'بدون عنوان'}</span>
-                                                    {task.hour && (
-                                                        <span className="task-time">⏰ {task.hour}</span>
-                                                    )}
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="empty-day">
-                                                {getRandomFunnyMessage()}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
+      <div className="d-flex vision-page" dir="rtl">
+        <div className="main-content">
+          <div className="vision-header">
+            <h1 className="vision-title">چشم‌انداز ماهانه</h1>
+            <div className="month-selector">
+              <button className="nav-button" onClick={handlePreviousMonth}>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 18L15 12L9 6" />
+                </svg>
+              </button>
+              <div className="current-month">
+                <span className="month-name">{currentMonthLabel}</span>
+                <span className="year">{selectedYear}</span>
+              </div>
+              <button className="nav-button" onClick={handleNextMonth}>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 18L9 12L15 6" />
+                </svg>
+              </button>
             </div>
+          </div>
+
+          {loading ? (
+            <div className="empty-message-full">
+              <div className="loading-spinner"></div>
+              <p>در حال بارگذاری تسک‌ها...</p>
+            </div>
+          ) : (
+            <div className="calendar-grid">
+              {Array.from({ length: daysInMonth }, (_, i) => {
+                const day = i + 1;
+                const dateKey = `${selectedYear}-${selectedMonth}-${day}`;
+                const dayTasks = tasksByDate[dateKey] || [];
+                const dayName = getDayName(day);
+                const gradient = getCardGradient(i, daysInMonth);
+
+                return (
+                  <div
+                    key={day}
+                    className="day-card"
+                    style={{ "--card-gradient": gradient }}
+                  >
+                    <div
+                      className="day-header"
+                      style={{ background: gradient }}
+                    >
+                      <div className="day-info">
+                        <span className="day-number">{day}</span>
+                        <span className="day-name">{dayName}</span>
+                      </div>
+                      <span className="month-label">{currentMonthLabel}</span>
+                    </div>
+                    <div className="tasks-list">
+                      {dayTasks.length > 0 ? (
+                        dayTasks.map((task) => (
+                          <div
+                            key={task.id}
+                            className="task-item"
+                            onClick={() => handleTaskClick(task.id)}
+                          >
+                            <span className="task-title">
+                              {task.title || "بدون عنوان"}
+                            </span>
+                            {task.hour && (
+                              <span className="task-time">⏰ {task.hour}</span>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="empty-day">
+                          {getRandomFunnyMessage()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
+      </div>
     );
 }
 
