@@ -6,46 +6,10 @@ import TaskCard from "../components/taskmanagement/TaskCard";
 import AddTaskModal from "../components/taskmanagement/AddTaskModal";
 import { TaskContext } from "../api/TaskContext";
 import moment from 'jalali-moment';
+import { KhakKhordeIcon, RumizIcon, NobateshMisheIcon } from "../components/Icons"; // <-- Import Icons
 
-const KhakKhordeIcon = () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* مرکز */}
-        <circle cx="12" cy="12" r="1.2" fill="currentColor"/>
-        {/* خطوط شعاعی */}
-        <line x1="12" y1="12" x2="12" y2="3" stroke="currentColor" strokeWidth="1.2"/>
-        <line x1="12" y1="12" x2="19.5" y2="7.5" stroke="currentColor" strokeWidth="1.2"/>
-        <line x1="12" y1="12" x2="19.5" y2="16.5" stroke="currentColor" strokeWidth="1.2"/>
-        <line x1="12" y1="12" x2="12" y2="21" stroke="currentColor" strokeWidth="1.2"/>
-        <line x1="12" y1="12" x2="4.5" y2="16.5" stroke="currentColor" strokeWidth="1.2"/><line x1="12" y1="12" x2="4.5" y2="7.5" stroke="currentColor" strokeWidth="1.2"/>
-        {/* حلقه‌های تار */}
-        <path d="M12 6 Q15.5 9 15.5 12 Q15.5 15 12 18 Q8.5 15 8.5 12 Q8.5 9 12 6Z" stroke="currentColor" strokeWidth="1" fill="none"/>
-        <path d="M12 3.5 Q18 7.5 18 12 Q18 16.5 12 20.5 Q6 16.5 6 12 Q6 7.5 12 3.5Z" stroke="currentColor" strokeWidth="1" fill="none"/>
-    </svg>
-);
 
-const RumizIcon = () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* صفحه میز */}
-        <rect x="2" y="10" width="20" height="2.5" rx="1.2" stroke="currentColor" strokeWidth="1.5"/>
-        {/* پایه چپ */}
-        <line x1="6" y1="12.5" x2="5" y2="20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        {/* پایه راست */}
-        <line x1="18" y1="12.5" x2="19" y2="20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        {/* اتصال پایه‌ها */}
-        <line x1="5.3" y1="17" x2="18.7" y2="17" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.5"/>
-    </svg>
-);
 
-const NobateshMisheIcon = () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* خط بالا و پایین */}
-        <line x1="7" y1="3" x2="17" y2="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <line x1="7" y1="21" x2="17" y2="21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        {/* بدنه ساعت شنی */}
-        <path d="M8 3 C8 3 8 8 12 12 C16 16 16 21 16 21" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/><path d="M16 3 C16 3 16 8 12 12 C8 16 8 21 8 21" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-        {/* شن پایین */}
-        <path d="M9.5 19.5 Q12 17.5 14.5 19.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
-);
 
 
 function TaskManagementPage() {

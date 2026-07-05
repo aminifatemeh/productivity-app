@@ -1,6 +1,8 @@
 import React, { useContext, useEffect } from "react";
 import "./PomodoroClock.scss";
 import { TaskContext } from "../../api/TaskContext";
+import { PomodoroPauseIcon, PomodoroPlayIcon, PomodoroStopIcon } from "../Icons"; // adjust path if needed
+
 
 const PomodoroClock = ({ selectedTask }) => {
     const { timers, startTimer, stopTimer, resetTimerForTask, setTimers, tasks } = useContext(TaskContext);
@@ -84,25 +86,15 @@ const PomodoroClock = ({ selectedTask }) => {
                     onClick={toggleTimer}
                     disabled={!selectedTask}
                 >
-                    {isActive ? (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
-                            <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
-                        </svg>
-                    ) : (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path d="M8 5.14v13.72L19 12L8 5.14z" fill="currentColor"/>
-                        </svg>
-                    )}
+                    {isActive ? <PomodoroPauseIcon /> : <PomodoroPlayIcon />}
+
                 </button>
                 <button
                     className="pomodoro-clock__button pomodoro-clock__stop"
                     onClick={resetTimer}
                     disabled={!selectedTask}
                 >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/>
-                    </svg>
+                    <PomodoroStopIcon />
                 </button>
             </div>
         </div>
