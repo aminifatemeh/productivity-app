@@ -159,10 +159,12 @@ function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
 
     const tasks = tasksByCategory[categoryKey] || [];
     const loading = loadingByCategory[categoryKey];
+    const visibleTasks = tasks.filter(task => !task?.isDone);
 
 
 
-  const formatTime = (seconds) => {
+
+    const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
@@ -218,7 +220,8 @@ function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
           <div className="header-icon">{config.icon}</div>
           <span className="header-title">{t(config.labelKey)}</span>
         </div>
-        <div className="task-count-badge">{loading ? "..." : tasks.length}</div>
+        <div className="task-count-badge">{loading ? "..." : visibleTasks.length}
+        </div>
       </div>
 
       <div className="task-preview__card-tasks">
@@ -226,12 +229,12 @@ function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
           <div className="empty-state">
             <span>در حال بارگذاری...</span>
           </div>
-        ) : tasks.length === 0 ? (
+        ) : visibleTasks.length === 0 ? (
           <div className="empty-state">
             <span>{t("taskPreviewCard.noTasks")}</span>
           </div>
         ) : (
-          tasks.map((task) => {
+            visibleTasks.map((task) => {
             if (!task?.id) return null;
             const timer = timers[task.id] || { elapsed: 0, isRunning: false };
             const totalTime = (task.totalDuration || 0) + timer.elapsed;

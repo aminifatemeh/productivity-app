@@ -1,8 +1,7 @@
 // components/AddTaskModal.js
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './AddTaskModal.scss';
 import moment from 'jalali-moment';
-import { TaskContext } from '../../api/TaskContext';
 import CompactCalendar from '../CompactClendar';
 
 /* آیکون تقویم برای ورودی‌های تاریخ */
@@ -36,8 +35,9 @@ const CloseIcon = () => (
     </svg>
 );
 
-const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate }) => {
-    const { addTask, editTask } = useContext(TaskContext);
+const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) => {
+
+
 
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [subtaskCount, setSubtaskCount] = useState(0);
@@ -113,14 +113,22 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             setSubtasks(serverSubtasks);
             setSubtaskCount(serverSubtasks.length);
 
-            if (initialTask.categories && Array.isArray(initialTask.categories)) {
-                setCategories(prev => prev.map(cat => ({
+
+            const taskCategories = Array.isArray(initialTask.categories)
+                ? initialTask.categories
+                : [];
+
+            setCategories(prev =>
+                prev.map(cat => ({
                     ...cat,
-                    selected: initialTask.categories.some(c =>
-                        c.id === cat.id || c.name === cat.name
-                    )
-                })));
-            }
+                    selected: taskCategories.some(c =>
+                        c?.id === cat.id || c?.name === cat.name
+                    ),
+                }))
+            );
+
+
+
 
             if (initialTask.done_date) {
                 setIsDoneAlready(true);
@@ -135,19 +143,22 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             }
 
         } else if (selectedDate) {
+            resetFormFields();
+
             const date = moment(selectedDate, ['YYYY-MM-DD', 'jYYYY/jMM/jDD']);
             if (date.isValid()) {
                 setDueDate(date.format('YYYY-MM-DD'));
-            } else {
-                setDueDate('');
             }
-            resetFormFields();
-        } else {
-            resetFormFields();
         }
+
     }, [initialTask, selectedDate]);
 
     const resetFormFields = () => {
+        setName('');
+        setTime('');
+        setDueDate('');
+        setDescription('');
+        setDuration('');
         setSubtasks([]);
         setSubtaskCount(0);
         setIsRoutine(false);
@@ -155,8 +166,12 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         setSelectedDays([]);
         setIsDoneAlready(false);
         setDoneDate('');
-        setDuration('');
+        setCategories(prev => prev.map(c => ({ ...c, selected: false })));
+        setErrors({ name: '', dueDate: '', doneDate: '', form: '' });
+        setShowCalendar(false);
+        setShowDoneDateCalendar(false);
     };
+
 
     /* ------------------- ساب‌تسک‌ها ------------------- */
     const handleSubtaskChange = (index, value) => {
@@ -239,12 +254,18 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
         const selectedCategories = categories
             .filter(c => c.selected)
-            .map(c => ({ name: c.name }));
+            .map(c => ({
+                id: c.id,
+                name: c.name,
+                color: c.color,
+            }));
 
         let finalDoneDate = null;
+
         if (isDoneAlready && doneDate) {
             const doneDateMoment = moment(doneDate, 'YYYY-MM-DD');
             const today = moment().startOf('day');
+
             if (doneDateMoment.isSameOrBefore(today)) {
                 finalDoneDate = doneDateMoment.format('YYYY-MM-DD');
             }
@@ -252,14 +273,28 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
         const processedSubtasks = subtasks
             .filter(s => s.title && s.title.trim() !== '')
-            .filter(s => (initialTask ? !s.isExisting : true))
-            .map(s => ({ title: s.title.trim() }));
+            .map(s => {
+                if (s.id && Number.isInteger(s.id)) {
+                    return {
+                        id: s.id,
+                        title: s.title.trim(),
+                        description: s.description || null,
+                        done_date: s.done_date || null,
+                    };
+                }
+
+                return {
+                    title: s.title.trim(),
+                };
+            });
 
         const taskData = {
             id: initialTask?.id,
             title: name.trim(),
             description: description.trim(),
-            deadline_date: dueDate ? moment(dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD') : null,
+            deadline_date: dueDate
+                ? moment(dueDate, 'YYYY-MM-DD').format('YYYY-MM-DD')
+                : null,
             deadline_time: time || '23:59:00',
             flag_tuNobat: isInNobat,
             is_routine_active: isRoutine,
@@ -272,38 +307,20 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             routine_father: initialTask?.routine_father || null,
         };
 
-        const result = initialTask ? await editTask(taskData) : await addTask(taskData);
+        const result = await onSave(taskData);
 
-        if (result.success) {
-            onTaskAdded(result.task);
+        if (result?.success) {
             onClose();
-            resetForm();
+            resetFormFields();
         } else {
             setErrors(prev => ({
                 ...prev,
-                form: result.error?.detail || result.error || 'خطا در ذخیره تسک'
+                form: result?.error?.detail || result?.error || 'خطا در ذخیره تسک',
             }));
         }
     };
 
-    const resetForm = () => {
-        setName('');
-        setTime('');
-        setDueDate('');
-        setDescription('');
-        setDuration('');
-        setSubtasks([]);
-        setSubtaskCount(0);
-        setIsRoutine(false);
-        setIsInNobat(false);
-        setSelectedDays([]);
-        setIsDoneAlready(false);
-        setDoneDate('');
-        setCategories(prev => prev.map(c => ({ ...c, selected: false })));
-        setErrors({ name: '', dueDate: '', doneDate: '', form: '' });
-        setShowCalendar(false);
-        setShowDoneDateCalendar(false);
-    };
+
 
     /* ------------------- ارتفاع خط کنار مودال ------------------- */
     useEffect(() => {

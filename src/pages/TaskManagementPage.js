@@ -50,16 +50,20 @@ const NobateshMisheIcon = () => (
 
 function TaskManagementPage() {
     const {
-        tasks,
-        setTasks,
+        tasksByCategory,
+        loadingByCategory,
+        setTasksByCategory,
+        addTask,
         editTask,
         deleteTask,
         toggleTask,
-        isLoading,
         fetchTasksByCategory
     } = useContext(TaskContext);
 
+
     const [selectedCategory, setSelectedCategory] = useState('rumiz');
+    const tasks = tasksByCategory[selectedCategory] || [];
+    const isLoading = loadingByCategory[selectedCategory] || false;
     const [selectedDate, setSelectedDate] = useState(null);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
@@ -109,19 +113,67 @@ function TaskManagementPage() {
         navigate('/task-management');
     };
 
-    const handleAddTask = async (newTask) => {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            const userId = localStorage.getItem('userId') || 'offline_user';
-            const newId = Date.now().toString(36) + '_' + Math.random().toString(36).substr(2);
-            const taskToSave = { ...newTask, id: newId, isDone: false, originalIndex: tasks.length };
-            const updated = [...tasks, taskToSave];
-            localStorage.setItem(`tasks_${userId}`, JSON.stringify(updated));
-            setTasks(updated);
+
+
+    const handleSaveTask = async (taskData) => {
+        try {
+// Map categories to an array of objects containing ONLY the ID
+            const categoryPayload = Array.isArray(taskData.categories)
+                ? taskData.categories.map(cat => {
+                    const id = typeof cat === 'object' ? cat.id : cat;
+                    return { id: id }; // Yields [{"id": 4}] instead of [4] or full objects
+                })
+                : [];
+
+            const payload = {
+                ...taskData,
+                categories: categoryPayload,
+            };
+
+
+            console.log("FINAL PAYLOAD TO BACKEND:", JSON.stringify(payload, null, 2));
+
+            const result = editingTask
+                ? await editTask(payload)
+                : await addTask(payload);
+
+            if (result?.success) {
+                await fetchTasksByCategory(taskData);
+                setIsAddTaskModalOpen(false);
+                setEditingTask(null);
+            }
+
+            return result;
+        } catch (error) {
+            let errorMsg = 'خطا در ذخیره تسک';
+
+            if (error?.response?.data) {
+                const data = error.response.data;
+                if (typeof data === 'string') {
+                    errorMsg = data;
+                } else if (data.detail) {
+                    errorMsg = data.detail;
+                } else if (typeof data === 'object') {
+                    errorMsg = Object.entries(data)
+                        .map(([key, val]) => `${key}: ${Array.isArray(val) ? JSON.stringify(val) : val}`)
+                        .join(' | ');
+                }
+            } else if (error?.message) {
+                errorMsg = error.message;
+            }
+
+            return {
+                success: false,
+                error: errorMsg,
+            };
         }
-        setIsAddTaskModalOpen(false);
-        setEditingTask(null);
     };
+
+
+
+
+
+
 
     const handleEditTask = (task) => {
         const originalTask = tasks.find(t => t.id === task.id);
@@ -129,11 +181,8 @@ function TaskManagementPage() {
         setIsAddTaskModalOpen(true);
     };
 
-    const handleTaskUpdated = async (updatedTask) => {
-        await editTask(updatedTask);
-        setIsAddTaskModalOpen(false);
-        setEditingTask(null);
-    };
+
+
 
     const filteredTasks = selectedDate
         ? tasks.filter(task => {
@@ -236,7 +285,7 @@ function TaskManagementPage() {
                             setIsAddTaskModalOpen(false);
                             setEditingTask(null);
                         }}
-                        onTaskAdded={editingTask ? handleTaskUpdated : handleAddTask}
+                        onSave={handleSaveTask}
                         initialTask={editingTask}
                         selectedDate={selectedDate}
                     />
