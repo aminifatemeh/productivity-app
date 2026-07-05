@@ -1,0 +1,87 @@
+.subtaskbar {
+  width: 100%;
+  min-height: 34px;
+  background: rgba(56, 163, 165, 0.08);
+  border: 1px solid rgba(56, 163, 165, 0.18);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.subtaskbar:hover {
+  background: rgba(56, 163, 165, 0.14);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.subtaskbar__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.subtaskbar__check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid #bbb;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.subtaskbar__check:hover {
+  border-color: #34AA7B;
+}
+.subtaskbar__title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #01575c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.subtaskbar__delete {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #FF6B6B;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.subtaskbar__delete:hover {
+  background: rgba(255, 107, 107, 0.12);
+}
+.subtaskbar.done {
+  background: rgba(52, 170, 123, 0.1);
+  border-color: rgba(52, 170, 123, 0.28);
+}
+.subtaskbar.done .subtaskbar__check {
+  background: linear-gradient(135deg, #34AA7B, #57CC99);
+  border-color: #34AA7B;
+}
+.subtaskbar.done .subtaskbar__title {
+  text-decoration: line-through;
+  color: #7C7C7C;
+}
+.subtaskbar.not-done {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/*# sourceMappingURL=SubtaskBar.css.map */

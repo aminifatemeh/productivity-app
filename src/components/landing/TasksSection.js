@@ -53,10 +53,10 @@ const CARDS = [
 
 function TasksSection() {
     return (
-        <section className="section lp-section--tasks" id="tasks">
-            <div className="lp-section-container">
-                <h2 className="lp-section-title">کارهاتو دسته‌بندی کن</h2>
-                <p className="lp-section-subtitle">سه بخش هوشمند برای هر نوع کاری که داری</p>
+        <section className="section section--tasks" id="tasks">
+            <div className="section-container">
+                <h2 className="section-title">کارهاتو دسته‌بندی کن</h2>
+                <p className="section-subtitle">سه بخش هوشمند برای هر نوع کاری که داری</p>
 
                 <div className="lp-tasks-grid">
                     {CARDS.map(({label, icon, gradient, title, desc, bullets}) => (

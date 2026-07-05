@@ -1,162 +1,180 @@
-.settings-page {
+$teal:        #38A3A5;
+$teal-dark:   #2C868B;
+$teal-deeper: #01575C;
+$teal-light:  #57CC99;
+$green-light: #80ED99;
+$green-pale:  #C7F9CC;
+$bg:          #f0faf4;
+$white:       #ffffff;
+$text-dark:   #1a2e25;
+$text-mid:    #3d5a47;
+$text-soft:   #6b8f76;
+$radius-lg:   20px;
+$radius-md:   14px;
+$radius-sm:   8px;
+$shadow-soft: 0 4px 24px rgba(56, 163, 165, 0.12);
+$shadow-card: 0 8px 32px rgba(56, 163, 165, 0.18);
+$transition:  0.25s ease;
+
+// ── Page shell ────────────────────────────────────────────
+.sp-page {
   min-height: 100vh;
-  direction: inherit;
-
-  // ✅ حالا فقط روی settings اعمال میشه
-  .main-content {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-}
-
-.settings-container {
-  position: relative;
-  max-width: 100%;
-  width: 100%;
-  max-height: 90vh;
-  margin: 30px 0;
-  background-color: #f6f6f1;
-  border-radius: 17px;
-  padding: 2rem;
-  overflow-y: auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.settings-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.settings-container::-webkit-scrollbar-track {
-  background: #f6f6f1;
-  border-radius: 10px;
-}
-
-.settings-container::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
-}
-
-.settings-container::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-.settings-container {
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f6f6f1;
-}
-
-.settings-title {
-  background-color: #f6f6f1;
-  position: absolute;
-  width: 120px;
-  text-align: center;
-  top: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1;
-  font-size: 16px;
-  font-weight: bold;
-  color: #01575c;
-}
-
-.settings-section {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto 2rem;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #01575c;
-  margin-bottom: 1rem;
-  text-align: start;
-}
-
-.form-group {
-  margin-bottom: 15px;
-
-  label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-
-    .required-star {
-      color: #d32f2f;
-      font-size: 12px;
-      margin-inline-start: 5px;
-    }
-  }
-
-  .form-control {
-    width: 100%;
-    padding: 8px;
-    background-color: #d9d9d9;
-    border-radius: 5px;
-    border: none;
-    outline: none;
-    color: #01575c;
-
-    &::placeholder {
-      color: #7f7474;
-    }
-  }
-
-  .error-message {
-    display: block;
-    font-size: 10px;
-    color: #d32f2f;
-    margin-top: 5px;
-  }
-}
-
-.settings-actions {
+  background: #edefe9;
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 32px 60px;
+  position: relative;
+  overflow-x: hidden;
+  direction: rtl;
 }
 
-.btn {
-  padding: 6px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 12px;
-  transition: background-color 0.3s;
+// ── Background blobs ──────────────────────────────────────
+.sp-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sp-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+
+  &--1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, $teal, transparent);
+    top: -180px; right: -120px;
+    animation: spFloat 14s ease-in-out infinite;
+  }
+  &--2 {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, $teal-light, transparent);
+    bottom: 5%; left: -80px;
+    animation: spFloat 18s ease-in-out infinite reverse;
+  }
+}
+
+@keyframes spFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(24px, -32px) scale(1.04); }
+}
+
+// ── Content shell ─────────────────────────────────────────
+.sp-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: spFadeUp 0.5s ease both;
+}
+
+@keyframes spFadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Header ────────────────────────────────────────────────
+.sp-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.sp-header__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: $text-dark;
+
+  svg { color: $teal; }
+}
+
+// ── Card ──────────────────────────────────────────────────
+.sp-card {
+  background: $white;
+  border-radius: $radius-lg;
+  padding: 24px 28px;
+  box-shadow: $shadow-soft;
+  border: 1px solid rgba($teal, 0.08);
+  transition: box-shadow $transition;
+
+  &:hover { box-shadow: $shadow-card; }
+}
+
+.sp-card__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $teal;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba($teal, 0.1);
+}
+
+.sp-card__label-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba($teal, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
+  color: $teal;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-  width: 60px;
+// ── Readonly user info ────────────────────────────────────
+.sp-readonly-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
 
-  &:hover {
-    background-color: #5a6268;
+.sp-readonly-item {
+  background: rgba($bg, 0.8);
+  border-radius: $radius-sm;
+  padding: 12px 14px;
+  border: 1px solid rgba($teal, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  &__key {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $text-soft;
+  }
+
+  &__val {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $teal-deeper;
+
+    &--mono {
+      font-family: monospace;
+      letter-spacing: 0.05em;
+      font-size: 0.88rem;
+    }
   }
 }
 
-.btn-primary {
-  background-color: #c8e6c9;
-  color: #01575c;
-  width: 90px;
 
-  &:hover {
-    background-color: #a5d6a7;
-  }
 
-  &:disabled {
-    background-color: #e0e0e0;
-    color: #757575;
-    cursor: not-allowed;
-  }
+// ── Responsive ────────────────────────────────────────────
+@media (max-width: 480px) {
+  .sp-page  { padding: 24px 16px 40px; }
+  .sp-card  { padding: 20px 18px; }
+  .sp-readonly-grid { grid-template-columns: 1fr; }
 }

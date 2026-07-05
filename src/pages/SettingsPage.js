@@ -1,167 +1,57 @@
-import React, { useState, useContext } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import { LanguageContext } from "../context/LanguageContext";
 import "./SettingsPage.scss";
 
 function SettingsPage() {
     const navigate = useNavigate();
-    const { language, setLanguage, t } = useContext(LanguageContext);
-    const [userInfo, setUserInfo] = useState({
-        username: localStorage.getItem("username") || "",
-        email: "",
-        password: "",
-    });
-    const [appSettings, setAppSettings] = useState({
-        language: localStorage.getItem("language") || "fa",
-        theme: "light",
-        timerDuration: localStorage.getItem("timerDuration") || "5",
-    });
-    const [errors, setErrors] = useState({
-        username: "",
-        email: "",
-        password: "",
-        timerDuration: "",
-    });
 
-    const handleUserInfoChange = (e) => {
-        const { name, value } = e.target;
-        setUserInfo((prev) => ({ ...prev, [name]: value }));
-        setErrors((prev) => ({ ...prev, [name]: "" }));
-    };
-
-    const handleAppSettingsChange = (e) => {
-        const { name, value } = e.target;
-        setAppSettings((prev) => ({ ...prev, [name]: value }));
-        setErrors((prev) => ({ ...prev, [name]: "" }));
-    };
-
-    const handleSave = (e) => {
-        e.preventDefault();
-        const newErrors = { username: "", email: "", password: "", timerDuration: "" };
-
-        if (
-            appSettings.timerDuration &&
-            (isNaN(appSettings.timerDuration) || appSettings.timerDuration < 5 || appSettings.timerDuration > 120)
-        ) {
-            newErrors.timerDuration = t("settings.timerError");
-        }
-
-        if (Object.values(newErrors).some((error) => error)) {
-            setErrors(newErrors);
-        } else {
-            if (userInfo.username) localStorage.setItem("username", userInfo.username);
-            if (appSettings.timerDuration) localStorage.setItem("timerDuration", appSettings.timerDuration);
-            localStorage.setItem("language", appSettings.language);
-            setLanguage(appSettings.language); // اعمال زبان پس از ذخیره
-
-            Swal.fire({
-                title: t("settings.successTitle"),
-                text: t("settings.successMessage"),
-                icon: "success",
-                confirmButtonText: t("settings.confirmButton"),
-                timer: 2000,
-                timerProgressBar: true,
-            }).then(() => {
-                navigate("/", { state: { timerDuration: appSettings.timerDuration } });
-            });
-        }
-    };
-
-    const handleCancel = () => {
-        navigate("/");
-    };
+    const username = localStorage.getItem("username") || "—";
+    const userId   = localStorage.getItem("userId")   || "—";
 
     return (
-        <div className="settings-page d-flex">
-            <div className="main-content d-flex flex-column flex-grow-1">
-                <div className="settings-container">
-                    <span className="settings-title">{t("settings.title")}</span>
-                    <div className="settings-section">
-                        <h3 className="section-title">{t("settings.userInfo")}</h3>
-                        <div className="form-group">
-                            <label>{t("settings.username")}</label>
-                            <input
-                                type="text"
-                                name="username"
-                                value={userInfo.username}
-                                onChange={handleUserInfoChange}
-                                className="form-control"
-                            />
-                            {errors.username && <span className="error-message">{errors.username}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label>{t("settings.email")}</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={userInfo.email}
-                                onChange={handleUserInfoChange}
-                                className="form-control"
-                            />
-                            {errors.email && <span className="error-message">{errors.email}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label>{t("settings.password")}</label>
-                            <input
-                                type="password"
-                                name="password"
-                                value={userInfo.password}
-                                onChange={handleUserInfoChange}
-                                className="form-control"
-                            />
-                            {errors.password && <span className="error-message">{errors.password}</span>}
-                        </div>
-                    </div>
-                    <div className="settings-section">
-                        <h3 className="section-title">{t("settings.appSettings")}</h3>
-                        <div className="form-group">
-                            <label>{t("settings.language")}</label>
-                            <select
-                                name="language"
-                                value={appSettings.language}
-                                onChange={handleAppSettingsChange}
-                                className="form-control"
-                            >
-                                <option value="fa">{t("settings.language.fa")}</option>
-                                <option value="en">{t("settings.language.en")}</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>{t("settings.theme")}</label>
-                            <select
-                                name="theme"
-                                value={appSettings.theme}
-                                onChange={handleAppSettingsChange}
-                                className="form-control"
-                            >
-                                <option value="light">{t("settings.theme.light")}</option>
-                                <option value="dark">{t("settings.theme.dark")}</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>{t("settings.timerDuration")}</label>
-                            <input
-                                type="number"
-                                name="timerDuration"
-                                value={appSettings.timerDuration}
-                                onChange={handleAppSettingsChange}
-                                className="form-control"
-                                min="5"
-                                max="120"
-                            />
-                            {errors.timerDuration && <span className="error-message">{errors.timerDuration}</span>}
-                        </div>
-                    </div>
-                    <div className="settings-actions">
-                        <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-                            {t("settings.cancel")}
-                        </button>
-                        <button type="button" className="btn btn-primary" onClick={handleSave}>
-                            {t("settings.save")}
-                        </button>
+        <div className="sp-page" dir="rtl">
+            <div className="sp-bg" aria-hidden="true">
+                <div className="sp-blob sp-blob--1" />
+                <div className="sp-blob sp-blob--2" />
+            </div>
+
+            <div className="sp-shell">
+
+                <div className="sp-header">
+                    <div className="sp-header__title">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                                  stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                        تنظیمات
                     </div>
                 </div>
+
+                <div className="sp-card">
+                    <div className="sp-card__label">
+                        <div className="sp-card__label-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                        </div>
+                        اطلاعات کاربری
+                    </div>
+
+                    <div className="sp-readonly-grid">
+                        <div className="sp-readonly-item">
+                            <span className="sp-readonly-item__key">نام کاربری</span>
+                            <span className="sp-readonly-item__val">{username}</span>
+                        </div>
+                        {/*<div className="sp-readonly-item">*/}
+                        {/*    <span className="sp-readonly-item__key">شناسه کاربر</span>*/}
+                        {/*    <span className="sp-readonly-item__val sp-readonly-item__val--mono">#{userId}</span>*/}
+                        {/*</div>*/}
+                    </div>
+
+                </div>
+
             </div>
         </div>
     );

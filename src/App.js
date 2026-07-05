@@ -21,15 +21,15 @@ function App() {
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/login" element={<LoginForm />} />
                     <Route path="/register" element={<RegisterPage />} /><Route element={<ProtectedRoute />}>
-                    <Route path="/*" element={
+                    <Route path="*" element={
                         <TaskProvider>
                             <MainLayout>
                                 <Routes>
-                                    <Route path="/dashboard" element={<DashboardPage />} />
-                                    <Route path="/task-management" element={<TaskManagementPage useApi={true} />} />
-                                    <Route path="/vision" element={<VisionPage />} />
-                                    <Route path="/charts" element={<ChartsPage />} />
-                                    <Route path="/settings" element={<SettingsPage />} />
+                                    <Route path="dashboard" element={<DashboardPage />} />
+                                    <Route path="task-management" element={<TaskManagementPage useApi={true} />} />
+                                    <Route path="vision" element={<VisionPage />} />
+                                    <Route path="charts" element={<ChartsPage />} />
+                                    <Route path="settings" element={<SettingsPage />} />
                                 </Routes>
                             </MainLayout>
                         </TaskProvider>

@@ -5,10 +5,21 @@ import { tasksAPI } from "./apiService";
 export const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
-    const [tasks, setTasks] = useState([]);
+    const [tasksByCategory, setTasksByCategory] = useState({
+        khak_khorde: [],
+        rumiz: [],
+        nobatesh_mishe: [],
+    });
+
+    const [loadingByCategory, setLoadingByCategory] = useState({
+        khak_khorde: true,
+        rumiz: true,
+        nobatesh_mishe: true,
+    });
+
     const [timers, setTimers] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
     const [currentCategory, setCurrentCategory] = useState('khak_khorde');
+
 
     const generateUniqueId = () =>
         Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
@@ -63,12 +74,12 @@ export const TaskProvider = ({ children }) => {
     const fetchTasksByCategory = async (category) => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            setIsLoading(false);
+            setLoadingByCategory(prev => ({ ...prev, [category]: false }));
             return;
         }
 
         try {
-            setIsLoading(true);
+            setLoadingByCategory(prev => ({ ...prev, [category]: true }));
             let data;
 
             switch (category) {
@@ -103,25 +114,39 @@ export const TaskProvider = ({ children }) => {
                 ? tasksArray.map((task, index) => normalizeTask(task, index))
                 : [];
 
-            setTasks(fetchedTasks);
+            setTasksByCategory(prev => ({
+                ...prev,
+                [category]: fetchedTasks
+            }));
+
             setCurrentCategory(category);
         } catch (err) {
-            console.error('Error fetching tasks:', err.response?.data || err.message);
+            console.error(`Error fetching tasks for ${category}:`, err.response?.data || err.message);
         } finally {
-            setIsLoading(false);
+            setLoadingByCategory(prev => ({ ...prev, [category]: false }));
         }
     };
+
+    const refreshAllCategories = async () => {
+        await Promise.all([
+            fetchTasksByCategory('khak_khorde'),
+            fetchTasksByCategory('rumiz'),
+            fetchTasksByCategory('nobatesh_mishe')
+        ]);
+    };
+
+
 
     // Kept for compatibility
     const fetchAllTasks = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            setIsLoading(false);
+            setLoadingByCategory(prev => ({ ...prev, [currentCategory]: false }));
             return;
         }
 
         try {
-            setIsLoading(true);
+            setLoadingByCategory(prev => ({ ...prev, [currentCategory]: true }));
             const data = await tasksAPI.getAllTasks();
 
             const fetchedTasks = Array.isArray(data)
@@ -130,17 +155,22 @@ export const TaskProvider = ({ children }) => {
                     .map((task, index) => normalizeTask(task, index))
                 : [];
 
-            setTasks(fetchedTasks);
+            setTasksByCategory(prev => ({
+                ...prev,
+                [currentCategory]: fetchedTasks
+            }));
         } catch (err) {
             console.error('Error fetching tasks:', err.response?.data || err.message);
         } finally {
-            setIsLoading(false);
+            setLoadingByCategory(prev => ({ ...prev, [currentCategory]: false }));
         }
     };
 
+
     useEffect(() => {
-        fetchTasksByCategory(currentCategory);
+        refreshAllCategories();
     }, []);
+
 
     const addTask = async (taskData) => {
         try {
@@ -169,11 +199,11 @@ export const TaskProvider = ({ children }) => {
                 routine_father: taskData.routine_father || null,
             });
 
-            const newTask = normalizeTask(response, tasks.length);
-            setTasks(prev => [...prev, newTask]);
-            await fetchTasksByCategory(currentCategory);
+            const newTask = normalizeTask(response, 0);
+            await refreshAllCategories();
 
             return { success: true, task: newTask };
+
         } catch (err) {
             console.error('Error adding task:', err.response?.data || err.message);
             return {
@@ -212,10 +242,10 @@ export const TaskProvider = ({ children }) => {
             });
 
             const editedTask = normalizeTask(response, updatedTask.originalIndex || 0);
-            setTasks(prev => prev.map(t => t.id === editedTask.id ? editedTask : t));
-            await fetchTasksByCategory(currentCategory);
+            await refreshAllCategories();
 
             return { success: true, task: editedTask };
+
         } catch (err) {
             console.error('Error updating task:', err.response?.data || err.message);
             return {
@@ -228,14 +258,14 @@ export const TaskProvider = ({ children }) => {
     const deleteTask = async (taskId) => {
         try {
             await tasksAPI.deleteTask(taskId);
-            setTasks(prev => prev.filter(t => t.id !== taskId));
             setTimers(prev => {
                 const { [taskId]: _, ...rest } = prev;
                 return rest;
             });
-            await fetchTasksByCategory(currentCategory);
+            await refreshAllCategories();
 
             return { success: true };
+
         } catch (err) {
             console.error('Error deleting task:', err.response?.data || err.message);
             return {
@@ -246,7 +276,11 @@ export const TaskProvider = ({ children }) => {
     };
 
     const toggleTask = async (taskId) => {
-        const currentTask = tasks.find((t) => t.id === taskId);
+        const currentTask =
+            tasksByCategory.khak_khorde.find(t => t.id === taskId) ||
+            tasksByCategory.rumiz.find(t => t.id === taskId) ||
+            tasksByCategory.nobatesh_mishe.find(t => t.id === taskId);
+
         if (!currentTask) {
             return { success: false, error: 'تسک یافت نشد' };
         }
@@ -257,10 +291,7 @@ export const TaskProvider = ({ children }) => {
             const response = await tasksAPI.toggleTask(taskId, done);
             const isDone = response.done !== undefined ? response.done : done;
 
-            setTasks((prevTasks) =>
-                prevTasks.map((t) => (t.id === taskId ? { ...t, isDone } : t))
-            );
-            await fetchTasksByCategory(currentCategory);
+            await refreshAllCategories();
 
             return { success: true, task: { ...currentTask, isDone } };
         } catch (err) {
@@ -271,6 +302,7 @@ export const TaskProvider = ({ children }) => {
             };
         }
     };
+
 
     const startTimer = (taskId) => {
         setTimers(prev => ({
@@ -284,32 +316,61 @@ export const TaskProvider = ({ children }) => {
 
     const stopTimer = async (taskId) => {
         const currentTimer = timers[taskId];
-        if (!currentTimer) return;
-
-        setTimers(prev => ({
-            ...prev,
-            [taskId]: { ...prev[taskId], isRunning: false }
-        }));
+        if (!currentTimer || !currentTimer.isRunning) {
+            return { success: false };
+        }
 
         try {
-            const currentTask = tasks.find(t => t.id === taskId);
+            const currentTask =
+                tasksByCategory.khak_khorde.find(t => t.id === taskId) ||
+                tasksByCategory.rumiz.find(t => t.id === taskId) ||
+                tasksByCategory.nobatesh_mishe.find(t => t.id === taskId);
+
             const previousDuration = currentTask?.totalDuration || 0;
             const newTotalDuration = previousDuration + currentTimer.elapsed;
 
             const formattedDuration = formatDurationForAPI(newTotalDuration);
             await tasksAPI.setTaskDuration(taskId, formattedDuration);
 
-            setTasks(prev => prev.map(t =>
-                t.id === taskId ? { ...t, totalDuration: newTotalDuration } : t
-            ));
+            setTasksByCategory(prev => {
+                const updateList = (list) =>
+                    list.map(t =>
+                        t.id === taskId
+                            ? {
+                                ...t,
+                                totalDuration: newTotalDuration,
+                                duration: formattedDuration
+                            }
+                            : t
+                    );
+
+                return {
+                    khak_khorde: updateList(prev.khak_khorde),
+                    rumiz: updateList(prev.rumiz),
+                    nobatesh_mishe: updateList(prev.nobatesh_mishe),
+                };
+            });
+
             setTimers(prev => ({
                 ...prev,
                 [taskId]: { elapsed: 0, isRunning: false }
             }));
+
+            return {
+                success: true,
+                totalDuration: newTotalDuration,
+                duration: formattedDuration
+            };
         } catch (err) {
             console.error('Error sending duration:', err.message);
+            return {
+                success: false,
+                error: err.message
+            };
         }
     };
+
+
 
     const resetTimerForTask = async (taskId) => {
         const currentTimer = timers[taskId];
@@ -347,14 +408,39 @@ export const TaskProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, []);
 
+    const tasks = tasksByCategory[currentCategory] || [];
+    const isLoading = loadingByCategory[currentCategory] || false;
+    const setTasks = (updater) => {
+        setTasksByCategory(prev => {
+            const currentList = prev[currentCategory] || [];
+            const nextList =
+                typeof updater === "function" ? updater(currentList) : updater;
+
+            return {
+                ...prev,
+                [currentCategory]: nextList
+            };
+        });
+    };
+
+    const getTasksByCategory = (category) => {
+        return tasksByCategory[category] || [];
+    };
+
+
+
+
     return (
         <TaskContext.Provider value={{
-            tasks,
-            setTasks,
+            tasks, // backward compatible
+            setTasks, // compatibility wrapper if needed
+            isLoading, // backward compatible
+            tasksByCategory,
+            loadingByCategory,
             timers,
             setTimers,
-            isLoading,
             currentCategory,
+            setCurrentCategory,
             addTask,
             editTask,
             deleteTask,
@@ -365,7 +451,10 @@ export const TaskProvider = ({ children }) => {
             generateUniqueId,
             fetchAllTasks,
             fetchTasksByCategory,
+            refreshAllCategories,
+            getTasksByCategory,
         }}>
+
             {children}
         </TaskContext.Provider>
     );

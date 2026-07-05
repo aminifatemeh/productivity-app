@@ -32,12 +32,26 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.mobile-timer-bar__times {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
 .mobile-timer-bar__time {
   font-size: 18px;
   font-weight: 700;
   color: #E1F396;
   font-family: "Courier New", monospace;
   letter-spacing: 1px;
+  line-height: 1.1;
+}
+.mobile-timer-bar__total-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: "Courier New", monospace;
+  line-height: 1.1;
 }
 .mobile-timer-bar__placeholder {
   font-size: 14px;
@@ -104,8 +118,14 @@
   .mobile-timer-bar__task-name {
     font-size: 14px;
   }
+  .mobile-timer-bar__times {
+    gap: 1px;
+  }
   .mobile-timer-bar__time {
     font-size: 16px;
+  }
+  .mobile-timer-bar__total-time {
+    font-size: 11px;
   }
   .mobile-timer-bar__placeholder {
     font-size: 13px;

@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from "react";
 import "./TaskCard.scss";
-import SubtaskBar from "../SubtaskBar";
+import SubtaskBar from "./SubtaskBar";
 import ProgressBar from "../ProgressBar";
 import ConfirmDeleteModal from "../ConfirmDeleteModal";
 import moment from 'jalali-moment';
+
+// رنگ دسته‌بندی‌ها مطابق با AddTaskModal
+const CATEGORY_COLORS = {
+  'درس': '#4690E4',
+  'کار': '#DA348D',
+  'کلاس': '#FFA500',
+  'ورزش': '#34AA7B',
+  'سلامتی': '#FF6B6B',
+};
+
+const DEFAULT_TAG_COLOR = '#38A3A5';
+const MAX_VISIBLE_TAGS = 3;
+
+const getTagColor = (tag) => tag.color || CATEGORY_COLORS[tag.name] || DEFAULT_TAG_COLOR;
 
 function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, originalIndex }) {
   const [expanded, setExpanded] = useState(false);
@@ -17,7 +31,6 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
           : []
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [draggedIndex, setDraggedIndex] = useState(null);
 
   // تابع تبدیل تاریخ میلادی به شمسی برای نمایش
   const formatDateForDisplay = (dateStr) => {
@@ -42,25 +55,6 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
     }
   }, [task.isDone]);
 
-  const handleDragStart = (index) => {
-    setDraggedIndex(index);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (index) => {
-    if (draggedIndex === index || draggedIndex === null) return;
-    const newSubTasks = [...subtasks];
-    const draggedItem = newSubTasks[draggedIndex];
-    newSubTasks.splice(draggedIndex, 1);
-    newSubTasks.splice(index, 0, draggedItem);
-    setSubtasks(newSubTasks);
-    setDraggedIndex(null);
-    onUpdateTask({ ...task, subtasks: newSubTasks });
-  };
-
   const toggleSubtaskDone = (index) => {
     const updated = [...subtasks];
     updated[index].isDone = !updated[index].isDone;
@@ -83,7 +77,6 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
   };
 
   const handleEdit = () => {
-    // ارسال تسک اصلی با تاریخ میلادی به مودال ویرایش
     onEditTask(task);
   };
 
@@ -112,16 +105,21 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
     const result = await onToggleTask(task.id);
     if (!result.success) {
       console.error('Error toggling task:', result.error);
-      setSubtasks((prev) => prev.map((subtask) => ({
-        ...subtask,
-        isDone: !isBecomingDone,
-      })));
+      setSubtasks((prev) =>
+          prev.map((subtask) => ({
+            ...subtask,
+            isDone: !isBecomingDone,
+          }))
+      );
       alert(result.error || 'خطایی در تغییر وضعیت تسک رخ داد');
     }
   };
 
   const doneCount = subtasks.filter((t) => t.isDone).length;
   const progressPercent = task.isDone ? 100 : subtasks.length === 0 ? 0 : Math.round((doneCount / subtasks.length) * 100);
+
+  const visibleTags = task.tags ? task.tags.slice(0, MAX_VISIBLE_TAGS) : [];
+  const hiddenTagsCount = task.tags ? task.tags.length - MAX_VISIBLE_TAGS : 0;
 
   return (
       <>
@@ -136,59 +134,61 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
             </div>
             <div className="TaskCard__description-labels">
               <div className="task-icons">
-                <img
-                    src="/assets/icons/edit.svg"
-                    alt="ویرایش"
+                <button
+                    type="button"
+                    className="task-icon task-icon--edit"
+                    aria-label="ویرایش"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEdit();
                     }}
-                    style={{ cursor: "pointer", opacity: task.isDone ? 0.5 : 1 }}
-                />
-                <img
-                    src="/assets/icons/trash-bin.svg"
-                    alt="حذف"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <button
+                    type="button"
+                    className="task-icon task-icon--delete"
+                    aria-label="حذف"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDelete();
                     }}
-                    style={{ cursor: "pointer", opacity: task.isDone ? 0.5 : 1 }}
-                />
-                <img
-                    src="/assets/icons/green-tick.svg"
-                    alt="تکمیل"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+                <button
+                    type="button"
+                    className={`task-icon task-icon--done ${task.isDone ? "is-done" : ""}`}
+                    aria-label="تکمیل"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleDone();
                     }}
-                    style={{ cursor: "pointer" }}
-                />
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
               </div>
               <div className="task-label">
-                {task.tags && task.tags.length > 0 ? (
-                    task.tags.map((tag, index) => (
-                        <span
-                            key={index}
-                            className="task-tag"
-                            style={{
-                              backgroundColor: tag.color || "#D9D9D9",
-                              marginRight: "5px",
-                              padding: "2px 8px",
-                              borderRadius: "3px",
-                              color: "white",
-                              fontSize: "12px",
-                              display: "inline-block",
-                              width: "70px",
-                              height: "21px",
-                              textAlign: "center",
-                              opacity: task.isDone ? 0.5 : 1,
-                            }}
-                        >
-                            {tag.name}
-                        </span>
-                    ))
-                ) : (
-                    <></>
+                {visibleTags.map((tag, index) => (
+                    <span
+                        key={index}
+                        className="task-tag"
+                        style={{ backgroundColor: getTagColor(tag) }}
+                    >
+                  {tag.name}
+                </span>
+                ))}
+                {hiddenTagsCount > 0 && (
+                    <span className="task-tag task-tag--more">+{hiddenTagsCount}</span>
                 )}
               </div>
             </div>
@@ -199,14 +199,7 @@ function TaskCard({ task, onUpdateTask, onDeleteTask, onEditTask, onToggleTask, 
               <div className="TaskCard__expanded-area">
                 <div className="task-label-spacer" />
                 {subtasks.map((subtask, index) => (
-                    <div
-                        key={subtask.id}
-                        draggable
-                        onDragStart={() => handleDragStart(index)}
-                        onDragOver={handleDragOver}
-                        onDrop={() => handleDrop(index)}
-                        className="w-100"
-                    >
+                    <div key={subtask.id} className="w-100">
                       <SubtaskBar
                           title={subtask.title}
                           isDone={subtask.isDone}

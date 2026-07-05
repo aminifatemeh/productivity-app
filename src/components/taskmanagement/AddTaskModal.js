@@ -5,6 +5,37 @@ import moment from 'jalali-moment';
 import { TaskContext } from '../../api/TaskContext';
 import CompactCalendar from '../CompactClendar';
 
+/* آیکون تقویم برای ورودی‌های تاریخ */
+const CalendarIcon = () => (
+    <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" strokeWidth="2"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+);
+
+/* آیکون تیک برای دسته‌های انتخاب‌شده */
+const CheckIcon = () => (
+    <svg className="tag-check" width="14" height="14" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" strokeWidth="3"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polyline points="20 6 9 17 4 12" />
+    </svg>
+);
+
+/* آیکون بستن */
+const CloseIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" strokeWidth="2.5"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+);
+
 const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate }) => {
     const { addTask, editTask } = useContext(TaskContext);
 
@@ -38,37 +69,22 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
     // Mapping روزهای فارسی به اعداد 1-7
     const dayMapping = {
-        'شنبه': 1,
-        'یکشنبه': 2,
-        'دوشنبه': 3,
-        'سه‌شنبه': 4,
-        'چهارشنبه': 5,
-        'پنج‌شنبه': 6,
-        'جمعه': 7
+        'شنبه': 1, 'یکشنبه': 2, 'دوشنبه': 3, 'سه‌شنبه': 4,
+        'چهارشنبه': 5, 'پنج‌شنبه': 6, 'جمعه': 7
     };
 
     const reverseDayMapping = {
-        1: 'شنبه',
-        2: 'یکشنبه',
-        3: 'دوشنبه',
-        4: 'سه‌شنبه',
-        5: 'چهارشنبه',
-        6: 'پنج‌شنبه',
-        7: 'جمعه'
+        1: 'شنبه', 2: 'یکشنبه', 3: 'دوشنبه', 4: 'سه‌شنبه',
+        5: 'چهارشنبه', 6: 'پنج‌شنبه', 7: 'جمعه'
     };
-
     /* ------------------- پر کردن فرم برای ویرایش ------------------- */
     useEffect(() => {
         if (initialTask) {
-            console.log('Initial task در مودال:', initialTask);
-
             setName(initialTask.title || '');
             setDescription(initialTask.description || '');
             setTime(initialTask.deadline_time || '');
 
-            // تبدیل تاریخ deadline به فرمت میلادی
             if (initialTask.deadline_date) {
-                console.log('deadline_date دریافتی:', initialTask.deadline_date);
                 setDueDate(initialTask.deadline_date);
             } else {
                 setDueDate('');
@@ -77,34 +93,27 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             setIsInNobat(!!initialTask.flag_tuNobat);
             setIsRoutine(!!initialTask.is_routine_active);
 
-            // تبدیل repeat_days از اعداد به نام فارسی روزها
             if (initialTask.repeat_days && Array.isArray(initialTask.repeat_days)) {
-                console.log('repeat_days:', initialTask.repeat_days);
                 const days = initialTask.repeat_days
                     .map(num => reverseDayMapping[num])
                     .filter(Boolean);
-                console.log('Selected days:', days);
                 setSelectedDays(days);
             } else {
                 setSelectedDays([]);
             }
 
-            // ساب‌تسک‌ها - فقط آن‌هایی که ID دارند (از سرور آمده‌اند)
             const serverSubtasks = (initialTask.subtasks || [])
                 .filter(sub => sub.id && Number.isInteger(sub.id))
                 .map(sub => ({
                     id: sub.id,
                     title: sub.title || '',
-                    isExisting: true, // علامت‌گذاری به عنوان ساب‌تسک موجود
+                    isExisting: true,
                 }));
 
-            console.log('ساب‌تسک‌های موجود:', serverSubtasks);
             setSubtasks(serverSubtasks);
             setSubtaskCount(serverSubtasks.length);
 
-            // دسته‌بندی‌ها - مارک کردن دسته‌های انتخاب‌شده
             if (initialTask.categories && Array.isArray(initialTask.categories)) {
-                console.log('categories:', initialTask.categories);
                 setCategories(prev => prev.map(cat => ({
                     ...cat,
                     selected: initialTask.categories.some(c =>
@@ -113,7 +122,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                 })));
             }
 
-            // اگر تسک قبلاً انجام شده
             if (initialTask.done_date) {
                 setIsDoneAlready(true);
                 const doneDateMoment = moment(initialTask.done_date, 'YYYY-MM-DD');
@@ -127,7 +135,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             }
 
         } else if (selectedDate) {
-            // حالت افزودن تسک جدید با تاریخ از کالندر
             const date = moment(selectedDate, ['YYYY-MM-DD', 'jYYYY/jMM/jDD']);
             if (date.isValid()) {
                 setDueDate(date.format('YYYY-MM-DD'));
@@ -162,21 +169,13 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
     const increaseCount = () => {
         setSubtaskCount(c => c + 1);
-        setSubtasks(prev => [
-            ...prev,
-            { id: null, title: '', isExisting: false } // علامت‌گذاری به عنوان ساب‌تسک جدید
-        ]);
-        console.log('ساب‌تسک جدید اضافه شد');
+        setSubtasks(prev => [...prev, { id: null, title: '', isExisting: false }]);
     };
 
     const decreaseCount = () => {
         if (subtaskCount > 0) {
             setSubtaskCount(c => c - 1);
-            setSubtasks(prev => {
-                const removed = prev[prev.length - 1];
-                console.log('ساب‌تسک حذف شد:', removed);
-                return prev.slice(0, -1);
-            });
+            setSubtasks(prev => prev.slice(0, -1));
         }
     };
 
@@ -203,10 +202,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
     const getJalaliDate = (dateStr) => {
         if (!dateStr) return '';
         const m = moment(dateStr, 'YYYY-MM-DD', true);
-        if (!m.isValid()) {
-            console.log('تاریخ نامعتبر برای تبدیل:', dateStr);
-            return '';
-        }
+        if (!m.isValid()) return '';
         return m.locale('fa').format('jYYYY/jMM/jDD');
     };
 
@@ -223,7 +219,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         const deadline = moment(dueDate, 'YYYY-MM-DD');
         return deadline.isAfter(today);
     };
-
     /* ------------------- ارسال فرم ------------------- */
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -231,34 +226,25 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
         const newErrors = { name: '', dueDate: '', doneDate: '', form: '' };
 
         if (!name.trim()) newErrors.name = 'این فیلد الزامی است';
-
-        // اگر "قبلاً انجام دادی" تیک خورده، تاریخ انجام الزامی است
-        if (isDoneAlready && !doneDate) {
-            newErrors.doneDate = 'تاریخ انجام الزامی است';
-        }
+        if (isDoneAlready && !doneDate) newErrors.doneDate = 'تاریخ انجام الزامی است';
 
         if (newErrors.name || newErrors.doneDate) {
             setErrors(newErrors);
             return;
         }
 
-        // تبدیل روزهای فارسی به اعداد
         const repeatDaysNumbers = isRoutine && selectedDays.length > 0
             ? selectedDays.map(day => dayMapping[day]).filter(Boolean)
             : [];
 
-        // فقط دسته‌های انتخاب‌شده را ارسال کن (فقط name)
         const selectedCategories = categories
             .filter(c => c.selected)
             .map(c => ({ name: c.name }));
 
-        // تاریخ done_date
         let finalDoneDate = null;
         if (isDoneAlready && doneDate) {
             const doneDateMoment = moment(doneDate, 'YYYY-MM-DD');
             const today = moment().startOf('day');
-
-            // فقط اگر تاریخ انجام امروز یا گذشته باشد
             if (doneDateMoment.isSameOrBefore(today)) {
                 finalDoneDate = doneDateMoment.format('YYYY-MM-DD');
             }
@@ -266,20 +252,8 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
         const processedSubtasks = subtasks
             .filter(s => s.title && s.title.trim() !== '')
-            .filter(s => {
-                // اگر در حالت ویرایش هستیم، فقط ساب‌تسک‌های جدید را ارسال کن
-                if (initialTask) {
-                    return !s.isExisting; // فقط ساب‌تسک‌های جدید
-                }
-                return true; // در حالت افزودن، همه را ارسال کن
-            })
-            .map(s => ({
-                title: s.title.trim(),
-            }));
-
-        console.log('ساب‌تسک‌های پردازش‌شده برای ارسال:', processedSubtasks);
-        console.log('تعداد ساب‌تسک‌های موجود:', subtasks.filter(s => s.isExisting).length);
-        console.log('تعداد ساب‌تسک‌های جدید:', processedSubtasks.length);
+            .filter(s => (initialTask ? !s.isExisting : true))
+            .map(s => ({ title: s.title.trim() }));
 
         const taskData = {
             id: initialTask?.id,
@@ -297,8 +271,6 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             duration: isDoneAlready && duration ? duration : '00:00:00',
             routine_father: initialTask?.routine_father || null,
         };
-
-        console.log('Sending task data to API:', taskData);
 
         const result = initialTask ? await editTask(taskData) : await addTask(taskData);
 
@@ -349,10 +321,19 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
     const routineDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
 
     if (!isOpen) return null;
-
     return (
         <div className="AddTaskModal" ref={modalRef}>
             <div className="AddTaskModal-border"></div>
+
+            <button
+                type="button"
+                className="AddTaskModal-close"
+                onClick={onClose}
+                aria-label="بستن"
+            >
+                <CloseIcon />
+            </button>
+
             <span className="AddTaskModal-title">
                 {initialTask ? 'ویرایش تسک' : 'اضافه کردن تسک جدید'}
             </span>
@@ -360,21 +341,26 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
             <form className="AddTaskModal-form" onSubmit={handleSubmit}>
                 {/* نام تسک */}
                 <div className="form-group">
-                    <label>نام <span className="required-star">★</span></label>
+                    <label htmlFor="task-name">
+                        نام <span className="required-star">★</span>
+                    </label>
                     <input
+                        id="task-name"
                         type="text"
                         className="form-control"
                         value={name}
                         onChange={e => setName(e.target.value)}
                         placeholder="چیکار میخوای بکنی؟"
+                        aria-invalid={!!errors.name}
                     />
                     {errors.name && <span className="error-message">{errors.name}</span>}
                 </div>
 
                 {/* توضیحات */}
                 <div className="form-group">
-                    <label>توضیحات</label>
+                    <label htmlFor="task-desc">توضیحات</label>
                     <textarea
+                        id="task-desc"
                         className="form-control"
                         rows="2"
                         value={description}
@@ -403,8 +389,12 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                             {routineDays.map(day => (
                                 <div
                                     key={day}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-pressed={selectedDays.includes(day)}
                                     className={`day-circle ${selectedDays.includes(day) ? 'selected' : ''}`}
                                     onClick={() => toggleDay(day)}
+                                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleDay(day)}
                                 >
                                     {day.charAt(0)}
                                 </div>
@@ -416,9 +406,11 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                 {/* تاریخ و ساعت انقضا */}
                 <div className="d-flex justify-content-between gap-3 mt-3">
                     <div className="form-group flex-grow-1">
-                        <label>تاریخ انقضا</label>
+                        <label htmlFor="due-date">تاریخ انقضا</label>
                         <div className="date-input-wrapper">
+                            <CalendarIcon />
                             <input
+                                id="due-date"
                                 type="text"
                                 className="form-control date-display"
                                 value={getJalaliDate(dueDate)}
@@ -430,8 +422,9 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                         {errors.dueDate && <span className="error-message">{errors.dueDate}</span>}
                     </div>
                     <div className="form-group flex-grow-1">
-                        <label>ساعت</label>
+                        <label htmlFor="due-time">ساعت</label>
                         <input
+                            id="due-time"
                             type="time"
                             className="form-control"
                             value={time}
@@ -464,15 +457,19 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                         </label>
                     </div>
                 )}
-
                 {/* گزینه‌های بیشتر */}
-                <div className="toggle-advanced mt-3" onClick={() => setShowAdvanced(!showAdvanced)}>
+                <button
+                    type="button"
+                    className="toggle-advanced mt-3"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    aria-expanded={showAdvanced}
+                >
                     <span className="toggle-text">گزینه‌های بیشتر</span>
-                    <span className="toggle-arrow">{showAdvanced ? '↓' : '↑'}</span>
-                </div>
+                    <span className={`toggle-arrow ${showAdvanced ? 'open' : ''}`}>⌄</span>
+                </button>
 
                 {showAdvanced && (
-                    <div className="mt-3">
+                    <div className="advanced-section mt-3">
                         {/* قبلاً انجام دادی؟ */}
                         <div className="checkbox-group">
                             <label>
@@ -490,15 +487,20 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                         {isDoneAlready && (
                             <div className="mt-3">
                                 <div className="form-group">
-                                    <label>تاریخ انجام <span className="required-star">★</span></label>
+                                    <label htmlFor="done-date">
+                                        تاریخ انجام <span className="required-star">★</span>
+                                    </label>
                                     <div className="date-input-wrapper">
+                                        <CalendarIcon />
                                         <input
+                                            id="done-date"
                                             type="text"
                                             className="form-control date-display"
                                             value={getJalaliDate(doneDate)}
                                             onClick={() => setShowDoneDateCalendar(!showDoneDateCalendar)}
                                             readOnly
                                             placeholder="انتخاب تاریخ انجام"
+                                            aria-invalid={!!errors.doneDate}
                                         />
                                     </div>
                                     {errors.doneDate && <span className="error-message">{errors.doneDate}</span>}
@@ -515,13 +517,13 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                                 )}
 
                                 <div className="form-group">
-                                    <label>مدت زمان انجام</label>
+                                    <label htmlFor="duration">مدت زمان انجام</label>
                                     <input
+                                        id="duration"
                                         type="time"
                                         className="form-control"
                                         value={duration}
                                         onChange={e => setDuration(e.target.value)}
-                                        placeholder="HH:MM:SS"
                                         step="1"
                                     />
                                 </div>
@@ -530,12 +532,14 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
 
                         {/* ساب‌تسک‌ها */}
                         <div className="mt-3">
-                            <label className="subtask-label">
-                                کارت رو به چند بخش تقسیم میکنی؟
-                                <button type="button" className="btn-circle btn-decrease" onClick={decreaseCount}>-</button>
+                            <div className="subtask-label">
+                                <span>کارت رو به چند بخش تقسیم میکنی؟</span>
+                                <button type="button" className="btn-circle btn-decrease"
+                                        onClick={decreaseCount} aria-label="کاهش زیرتسک">−</button>
                                 <span className="subtask-count">{subtaskCount}</span>
-                                <button type="button" className="btn-circle btn-increase" onClick={increaseCount}>+</button>
-                            </label>
+                                <button type="button" className="btn-circle btn-increase"
+                                        onClick={increaseCount} aria-label="افزودن زیرتسک">+</button>
+                            </div>
 
                             {subtasks.map((subtask, index) => (
                                 <div className="form-group" key={index}>
@@ -550,17 +554,22 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                             ))}
                         </div>
 
-                        {/* دسته‌بندی‌ها - Fixed categories */}
+                        {/* دسته‌بندی‌ها */}
                         <div className="tag-section mt-3">
                             <label>این کار عضو چه دسته‌ای از فعالیت‌هاته؟</label>
                             <div className="tag-container">
                                 {categories.map((cat, i) => (
                                     <div
                                         key={cat.id}
+                                        role="button"
+                                        tabIndex={0}
+                                        aria-pressed={cat.selected}
                                         className={`tag ${cat.selected ? 'selected' : ''}`}
                                         style={{ backgroundColor: cat.color }}
                                         onClick={() => toggleCategory(i)}
+                                        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCategory(i)}
                                     >
+                                        {cat.selected && <CheckIcon />}
                                         <span>{cat.name}</span>
                                     </div>
                                 ))}
@@ -569,7 +578,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded, initialTask, selectedDate 
                     </div>
                 )}
 
-                {errors.form && <div className="error-message mt-3">{errors.form}</div>}
+                {errors.form && <div className="error-message form-error mt-3">{errors.form}</div>}
 
                 <div className="d-flex justify-content-end mt-4 gap-2">
                     <button type="button" className="btn btn-secondary" onClick={onClose}>بستن</button>

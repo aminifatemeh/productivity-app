@@ -9,15 +9,8 @@
   cursor: pointer;
   border: 1px solid rgba(0, 0, 0, 0.05);
 
-  @media (max-width: 768px) {
-    height: 160px;
-    border-radius: 18px;
-  }
-
-  @media (max-width: 576px) {
-    height: 150px;
-    border-radius: 15px;
-  }
+  @media (max-width: 768px) { height: 160px; border-radius: 18px; }
+  @media (max-width: 576px) { height: 150px; border-radius: 15px; }
 
   &:hover {
     transform: translateY(-4px);
@@ -25,18 +18,23 @@
   }
 
   &.done {
-    background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
-    opacity: 0.75;
+    background: linear-gradient(135deg, #eef0ef 0%, #dde0df 100%);
+    opacity: 0.9;
     pointer-events: auto;
 
-    .TaskCard__description-titles,
-    .TaskCard__description-labels .task-label,
-    .TaskCard__progressBar {
-      opacity: 0.7;
+    .TaskCard__description-titles span:nth-child(1) {
+      text-decoration: line-through;
     }
 
-    .task-icons img:not([alt="تکمیل"]) {
-      opacity: 0.5;
+    .TaskCard__description-titles,
+    .TaskCard__progressBar {
+      opacity: 0.75;
+    }
+
+    // تگ‌ها رنگشان را حفظ می‌کنند
+    .task-icons .task-icon--edit,
+    .task-icons .task-icon--delete {
+      opacity: 0.55;
     }
 
     &:hover {
@@ -53,13 +51,8 @@
     gap: 10px;
     height: calc(100% - 60px);
 
-    @media (max-width: 768px) {
-      padding: 12px 15px;
-    }
-
-    @media (max-width: 576px) {
-      padding: 10px 12px;
-    }
+    @media (max-width: 768px) { padding: 12px 15px; }
+    @media (max-width: 576px) { padding: 10px 12px; }
 
     &-titles {
       display: flex;
@@ -78,42 +71,24 @@
         font-size: 18px;
         font-weight: 600;
         color: #01575c;
-
-        @media (max-width: 768px) {
-          font-size: 16px;
-        }
-
-        @media (max-width: 576px) {
-          font-size: 15px;
-        }
+        @media (max-width: 768px) { font-size: 16px; }
+        @media (max-width: 576px) { font-size: 15px; }
       }
 
       span:nth-child(2) {
         font-size: 13px;
         color: #7C7C7C;
         font-weight: 400;
-
-        @media (max-width: 768px) {
-          font-size: 12px;
-        }
-
-        @media (max-width: 576px) {
-          font-size: 11px;
-        }
+        @media (max-width: 768px) { font-size: 12px; }
+        @media (max-width: 576px) { font-size: 11px; }
       }
 
       span:nth-child(3) {
         font-size: 12px;
         color: #01575c;
         font-weight: 500;
-
-        @media (max-width: 768px) {
-          font-size: 11px;
-        }
-
-        @media (max-width: 576px) {
-          font-size: 10px;
-        }
+        @media (max-width: 768px) { font-size: 11px; }
+        @media (max-width: 576px) { font-size: 10px; }
       }
     }
 
@@ -122,72 +97,74 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: flex-end;
-      gap: 20px;
+      gap: 14px;
       flex-shrink: 0;
 
-      @media (max-width: 768px) {
-        gap: 15px;
-      }
-
-      @media (max-width: 576px) {
-        gap: 12px;
-      }
+      @media (max-width: 768px) { gap: 12px; }
+      @media (max-width: 576px) { gap: 10px; }
 
       .task-icons {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
 
-        @media (max-width: 768px) {
-          gap: 8px;
-        }
+        @media (max-width: 768px) { gap: 6px; }
+        @media (max-width: 576px) { gap: 5px; }
 
-        @media (max-width: 576px) {
-          gap: 6px;
-        }
-
-        img {
-          transition: all 0.3s ease;
+        .task-icon {
+          width: 28px;
+          height: 28px;
+          border: none;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           cursor: pointer;
+          padding: 0;
+          transition: all 0.25s ease;
 
-          &:hover {
-            transform: scale(1.15);
-            filter: brightness(1.2);
+          svg { width: 16px; height: 16px; }
+
+          &:hover { transform: scale(1.12); }
+          &:active { transform: scale(0.94); }
+
+          &--edit {
+            color: #01575c;
+            background: rgba(1, 87, 92, 0.08);
+            &:hover { background: rgba(1, 87, 92, 0.16); }
           }
 
-          &:active {
-            transform: scale(0.95);
+          &--delete {
+            color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+            &:hover { background: rgba(255, 107, 107, 0.2); }
           }
-        }
 
-        img:nth-child(1) {
-          width: 20px;
-          height: 20px;
+          &--done {
+            color: #9aa0a6;
+            background: rgba(0, 0, 0, 0.05);
+            svg { width: 18px; height: 18px; }
+
+            &:hover { color: #34AA7B; background: rgba(52, 170, 123, 0.15); }
+
+            &.is-done {
+              color: #ffffff;
+              background: linear-gradient(135deg, #34AA7B, #57CC99);
+              box-shadow: 0 3px 8px rgba(52, 170, 123, 0.35);
+            }
+            &.is-done:hover { color: #ffffff; }
+          }
 
           @media (max-width: 768px) {
-            width: 18px;
-            height: 18px;
+            width: 25px;
+            height: 25px;
+            svg { width: 14px; height: 14px; }
+            &--done svg { width: 16px; height: 16px; }
           }
-
           @media (max-width: 576px) {
-            width: 16px;
-            height: 16px;
-          }
-        }
-
-        img:nth-child(2),
-        img:nth-child(3) {
-          width: 25px;
-          height: 25px;
-
-          @media (max-width: 768px) {
             width: 22px;
             height: 22px;
-          }
-
-          @media (max-width: 576px) {
-            width: 20px;
-            height: 20px;
+            border-radius: 7px;
           }
         }
       }
@@ -195,21 +172,12 @@
       .task-label {
         display: flex;
         flex-wrap: wrap;
-        max-width: 90px;
+        max-width: 140px;
         gap: 5px;
-        background-color: transparent;
-        padding: 0;
         justify-content: flex-end;
 
-        @media (max-width: 768px) {
-          max-width: 80px;
-          gap: 4px;
-        }
-
-        @media (max-width: 576px) {
-          max-width: 70px;
-          gap: 3px;
-        }
+        @media (max-width: 768px) { max-width: 120px; gap: 4px; }
+        @media (max-width: 576px) { max-width: 100px; gap: 3px; }
       }
     }
   }
@@ -221,10 +189,7 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(127, 116, 116, 0.3), transparent);
     z-index: 1;
-
-    @media (max-width: 576px) {
-      bottom: 55px;
-    }
+    @media (max-width: 576px) { bottom: 55px; }
   }
 
   &__divider--top {
@@ -235,10 +200,7 @@
     top: calc(100% - 60px);
     transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
-
-    @media (max-width: 576px) {
-      top: calc(100% - 55px);
-    }
+    @media (max-width: 576px) { top: calc(100% - 55px); }
   }
 
   &__expanded-area {
@@ -252,7 +214,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     transform: scale(0.95);
     opacity: 0;
     animation: expandIn 0.4s ease forwards;
@@ -260,47 +222,23 @@
     box-sizing: border-box;
     z-index: 0;
 
-    @media (max-width: 768px) {
-      top: 105px;
-      padding: 8px 12px 16px 12px;
-      gap: 10px;
-    }
+    @media (max-width: 768px) { top: 105px; padding: 8px 12px 16px 12px; gap: 8px; }
+    @media (max-width: 576px) { top: 100px; padding: 6px 10px 14px 10px; gap: 7px; }
 
-    @media (max-width: 576px) {
-      top: 100px;
-      padding: 6px 10px 14px 10px;
-      gap: 8px;
-    }
-
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-      border-radius: 10px;
-    }
-
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
     &::-webkit-scrollbar-thumb {
       background: rgba(1, 87, 92, 0.3);
       border-radius: 10px;
-
-      &:hover {
-        background: rgba(1, 87, 92, 0.5);
-      }
+      &:hover { background: rgba(1, 87, 92, 0.5); }
     }
 
-    & > div:last-child {
-      margin-bottom: 15px;
-    }
+    & > div:last-child { margin-bottom: 15px; }
   }
 
   .task-label-spacer {
     height: 10px;
-
-    @media (max-width: 576px) {
-      height: 5px;
-    }
+    @media (max-width: 576px) { height: 5px; }
   }
 
   .TaskCard__progressBar {
@@ -310,103 +248,56 @@
     left: 20px;
     z-index: 1;
 
-    @media (max-width: 768px) {
-      bottom: 22px;
-      width: calc(100% - 30px);
-      left: 15px;
-    }
-
-    @media (max-width: 576px) {
-      bottom: 20px;
-      width: calc(100% - 24px);
-      left: 12px;
-    }
+    @media (max-width: 768px) { bottom: 22px; width: calc(100% - 30px); left: 15px; }
+    @media (max-width: 576px) { bottom: 20px; width: calc(100% - 24px); left: 12px; }
   }
 
   &.expanded {
     height: 320px;
-
-    @media (max-width: 768px) {
-      height: 300px;
-    }
-
-    @media (max-width: 576px) {
-      height: 280px;
-    }
+    @media (max-width: 768px) { height: 300px; }
+    @media (max-width: 576px) { height: 280px; }
 
     .TaskCard__divider--top {
       top: 110px;
-
-      @media (max-width: 768px) {
-        top: 100px;
-      }
-
-      @media (max-width: 576px) {
-        top: 95px;
-      }
+      @media (max-width: 768px) { top: 100px; }
+      @media (max-width: 576px) { top: 95px; }
     }
 
     @keyframes expandIn {
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+      to { opacity: 1; transform: scale(1); }
     }
   }
 
   .task-tag {
-    display: inline-block;
-    width: 70px;
-    height: 21px;
-    padding: 2px 8px;
-    border-radius: 5px;
-    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    padding: 2px 9px;
+    border-radius: 6px;
+    color: #ffffff;
     font-size: 10px;
-    font-weight: 500;
-    text-align: center;
-    margin-inline-end: 5px;
-    opacity: inherit;
-    line-height: 17px;
+    font-weight: 600;
+    white-space: nowrap;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease;
 
-    @media (max-width: 768px) {
-      width: 65px;
-      height: 20px;
-      font-size: 9px;
-      line-height: 16px;
+    &:hover { transform: scale(1.05); }
+
+    &--more {
+      background: #7C7C7C !important;
     }
 
-    @media (max-width: 576px) {
-      width: 60px;
-      height: 18px;
-      font-size: 8px;
-      line-height: 14px;
-      padding: 2px 6px;
-    }
-
-    &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
+    @media (max-width: 768px) { height: 18px; font-size: 9px; padding: 2px 7px; }
+    @media (max-width: 576px) { height: 17px; font-size: 8px; padding: 1px 6px; border-radius: 5px; }
   }
 
   &[dir="rtl"] {
-    .TaskCard__description-labels .task-icons {
-      flex-direction: row-reverse;
-    }
-
     .TaskCard__progressBar {
       right: 20px;
       left: auto;
-
-      @media (max-width: 768px) {
-        right: 15px;
-      }
-
-      @media (max-width: 576px) {
-        right: 12px;
-      }
+      @media (max-width: 768px) { right: 15px; }
+      @media (max-width: 576px) { right: 12px; }
     }
   }
 }
