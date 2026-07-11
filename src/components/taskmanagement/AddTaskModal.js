@@ -1,8 +1,8 @@
-// components/AddTaskModal.js
 import React, { useState, useEffect, useRef } from 'react';
 import './AddTaskModal.scss';
 import moment from 'jalali-moment';
 import CompactCalendar from '../CompactClendar';
+import { categoriesAPI } from '../../api/apiService';
 
 /* آیکون تقویم برای ورودی‌های تاریخ */
 const CalendarIcon = () => (
@@ -35,9 +35,17 @@ const CloseIcon = () => (
     </svg>
 );
 
+/* آیکون پلاس */
+const PlusIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" strokeWidth="2.5"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+);
+
 const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) => {
-
-
 
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [subtaskCount, setSubtaskCount] = useState(0);
@@ -51,21 +59,18 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
     const [showDoneDateCalendar, setShowDoneDateCalendar] = useState(false);
     const modalRef = useRef(null);
 
-    // Fixed categories - cannot be modified by user
-    const [categories, setCategories] = useState([
-        { id: 1, name: 'درس', color: '#4690E4', selected: false },
-        { id: 2, name: 'کار', color: '#DA348D', selected: false },
-        { id: 3, name: 'کلاس', color: '#FFA500', selected: false },
-        { id: 4, name: 'ورزش', color: '#34AA7B', selected: false },
-        { id: 5, name: 'سلامتی', color: '#FF6B6B', selected: false },
-    ]);
+    // Categories - fetched from API + user-created ones
+    const [availableCategories, setAvailableCategories] = useState([]);
+    const [selectedCategoryNames, setSelectedCategoryNames] = useState([]);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     const [name, setName] = useState('');
     const [time, setTime] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [description, setDescription] = useState('');
     const [duration, setDuration] = useState('');
-    const [errors, setErrors] = useState({ name: '', dueDate: '', doneDate: '', form: '' });
+    const [errors, setErrors] = useState({ name: '', dueDate: '', doneDate: '', form: '', category: '' });
 
     // Mapping روزهای فارسی به اعداد 1-7
     const dayMapping = {
@@ -77,6 +82,30 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
         1: 'شنبه', 2: 'یکشنبه', 3: 'دوشنبه', 4: 'سه‌شنبه',
         5: 'چهارشنبه', 6: 'پنج‌شنبه', 7: 'جمعه'
     };
+
+    /* ------------------- Fetch categories from API ------------------- */
+    const fetchCategories = async () => {
+        setCategoriesLoading(true);
+        try {
+            const data = await categoriesAPI.getMyCategories();
+            const categoriesList = Array.isArray(data)
+                ? data.map(cat => cat.name || cat)
+                : [];
+            setAvailableCategories(categoriesList);
+        } catch (err) {
+            console.error('Error fetching categories:', err);
+            setAvailableCategories([]);
+        } finally {
+            setCategoriesLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchCategories();
+        }
+    }, [isOpen]);
+
     /* ------------------- پر کردن فرم برای ویرایش ------------------- */
     useEffect(() => {
         if (initialTask) {
@@ -113,22 +142,11 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
             setSubtasks(serverSubtasks);
             setSubtaskCount(serverSubtasks.length);
 
-
+            // Extract category names from task's categories
             const taskCategories = Array.isArray(initialTask.categories)
-                ? initialTask.categories
+                ? initialTask.categories.map(c => c.name || c).filter(Boolean)
                 : [];
-
-            setCategories(prev =>
-                prev.map(cat => ({
-                    ...cat,
-                    selected: taskCategories.some(c =>
-                        c?.id === cat.id || c?.name === cat.name
-                    ),
-                }))
-            );
-
-
-
+            setSelectedCategoryNames(taskCategories);
 
             if (initialTask.done_date) {
                 setIsDoneAlready(true);
@@ -166,8 +184,9 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
         setSelectedDays([]);
         setIsDoneAlready(false);
         setDoneDate('');
-        setCategories(prev => prev.map(c => ({ ...c, selected: false })));
-        setErrors({ name: '', dueDate: '', doneDate: '', form: '' });
+        setSelectedCategoryNames([]);
+        setNewCategoryName('');
+        setErrors({ name: '', dueDate: '', doneDate: '', form: '', category: '' });
         setShowCalendar(false);
         setShowDoneDateCalendar(false);
     };
@@ -202,10 +221,40 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
     };
 
     /* ------------------- دسته‌بندی‌ها ------------------- */
-    const toggleCategory = (i) => {
-        const newCategories = [...categories];
-        newCategories[i].selected = !newCategories[i].selected;
-        setCategories(newCategories);
+    const toggleCategorySelection = (categoryName) => {
+        setSelectedCategoryNames(prev =>
+            prev.includes(categoryName)
+                ? prev.filter(name => name !== categoryName)
+                : [...prev, categoryName]
+        );
+    };
+
+    const handleAddNewCategory = () => {
+        const trimmed = newCategoryName.trim();
+        if (!trimmed) return;
+
+        // Check if already exists (in available or selected)
+        const allExisting = [...availableCategories, ...selectedCategoryNames];
+        if (allExisting.includes(trimmed)) {
+            // If exists but not selected, select it
+            if (!selectedCategoryNames.includes(trimmed)) {
+                setSelectedCategoryNames(prev => [...prev, trimmed]);
+            }
+            setNewCategoryName('');
+            return;
+        }
+
+        // Add to available and select it
+        setAvailableCategories(prev => [...prev, trimmed]);
+        setSelectedCategoryNames(prev => [...prev, trimmed]);
+        setNewCategoryName('');
+    };
+
+    const handleCategoryKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleAddNewCategory();
+        }
     };
 
     /* ------------------- تقویم deadline ------------------- */
@@ -234,11 +283,12 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
         const deadline = moment(dueDate, 'YYYY-MM-DD');
         return deadline.isAfter(today);
     };
+
     /* ------------------- ارسال فرم ------------------- */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const newErrors = { name: '', dueDate: '', doneDate: '', form: '' };
+        const newErrors = { name: '', dueDate: '', doneDate: '', form: '', category: '' };
 
         if (!name.trim()) newErrors.name = 'این فیلد الزامی است';
         if (isDoneAlready && !doneDate) newErrors.doneDate = 'تاریخ انجام الزامی است';
@@ -252,13 +302,10 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
             ? selectedDays.map(day => dayMapping[day]).filter(Boolean)
             : [];
 
-        const selectedCategories = categories
-            .filter(c => c.selected)
-            .map(c => ({
-                id: c.id,
-                name: c.name,
-                color: c.color,
-            }));
+        // Categories as array of { name: "..." }
+        const selectedCategories = selectedCategoryNames.map(catName => ({
+            name: catName,
+        }));
 
         let finalDoneDate = null;
 
@@ -320,8 +367,6 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
         }
     };
 
-
-
     /* ------------------- ارتفاع خط کنار مودال ------------------- */
     useEffect(() => {
         const updateHeight = () => {
@@ -333,7 +378,7 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
         updateHeight();
         window.addEventListener('resize', updateHeight);
         return () => window.removeEventListener('resize', updateHeight);
-    }, [showAdvanced, subtaskCount, subtasks, isRoutine, selectedDays, showCalendar, isDoneAlready, showDoneDateCalendar]);
+    }, [showAdvanced, subtaskCount, subtasks, isRoutine, selectedDays, showCalendar, isDoneAlready, showDoneDateCalendar, availableCategories, selectedCategoryNames]);
 
     const routineDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
 
@@ -474,6 +519,7 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
                         </label>
                     </div>
                 )}
+
                 {/* گزینه‌های بیشتر */}
                 <button
                     type="button"
@@ -574,23 +620,56 @@ const AddTaskModal = ({ isOpen, onClose, onSave, initialTask, selectedDate }) =>
                         {/* دسته‌بندی‌ها */}
                         <div className="tag-section mt-3">
                             <label>این کار عضو چه دسته‌ای از فعالیت‌هاته؟</label>
-                            <div className="tag-container">
-                                {categories.map((cat, i) => (
-                                    <div
-                                        key={cat.id}
-                                        role="button"
-                                        tabIndex={0}
-                                        aria-pressed={cat.selected}
-                                        className={`tag ${cat.selected ? 'selected' : ''}`}
-                                        style={{ backgroundColor: cat.color }}
-                                        onClick={() => toggleCategory(i)}
-                                        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCategory(i)}
-                                    >
-                                        {cat.selected && <CheckIcon />}
-                                        <span>{cat.name}</span>
-                                    </div>
-                                ))}
+
+                            {/* Input to add new category */}
+                            <div className="category-input-row">
+                                <input
+                                    type="text"
+                                    className="form-control category-input"
+                                    value={newCategoryName}
+                                    onChange={e => setNewCategoryName(e.target.value)}
+                                    onKeyDown={handleCategoryKeyDown}
+                                    placeholder="نام دسته جدید..."
+                                />
+                                <button
+                                    type="button"
+                                    className="btn-add-category"
+                                    onClick={handleAddNewCategory}
+                                    disabled={!newCategoryName.trim()}
+                                    aria-label="اضافه کردن دسته"
+                                >
+                                    <PlusIcon />
+                                </button>
                             </div>
+
+                            {/* Loading state */}
+                            {categoriesLoading ? (
+                                <div className="categories-loading">در حال بارگذاری...</div>
+                            ) : (
+                                /* Category tags */
+                                <div className="tag-container">
+                                    {availableCategories.map((catName, i) => (
+                                        <div
+                                            key={`${catName}-${i}`}
+                                            role="button"
+                                            tabIndex={0}
+                                            aria-pressed={selectedCategoryNames.includes(catName)}
+                                            className={`tag ${selectedCategoryNames.includes(catName) ? 'selected' : ''}`}
+                                            onClick={() => toggleCategorySelection(catName)}
+                                            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && toggleCategorySelection(catName)}
+                                        >
+                                            {selectedCategoryNames.includes(catName) && <CheckIcon />}
+                                            <span>{catName}</span>
+                                        </div>
+                                    ))}
+
+                                    {availableCategories.length === 0 && !categoriesLoading && (
+                                        <div className="no-categories-hint">
+                                            هنوز دسته‌ای نساختی! از بالا یه دسته جدید بساز
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

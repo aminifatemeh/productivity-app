@@ -68,6 +68,14 @@ export const authAPI = {
     },
 };
 
+export const categoriesAPI = {
+    getMyCategories: async () => {
+        const response = await apiClient.get('/categories/my_categories/');
+        return response.data;
+    },
+};
+
+
 export const tasksAPI = {
     getAllTasks: async () => {
         const response = await apiClient.get('/tasks/all_tasks/');

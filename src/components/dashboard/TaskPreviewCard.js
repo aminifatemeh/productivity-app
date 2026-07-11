@@ -7,14 +7,14 @@ import { KhakKhordeIcon, NobateshMisheIcon, RumizIcon, PlayIcon, PauseIcon } fro
 const cardConfigs = {
     active: {
         color: "#38A3A5",
-        icon: <RumizIcon size={36} color="white" />,
+        icon: <NobateshMisheIcon size={36} color="white" />,
         labelKey: "taskPreviewCard.active",
         gradient: "linear-gradient(135deg, #38A3A5 0%, #4AB8BB 100%)",
         endpoint: "nobatesh_mishe",
     },
     upNext: {
         color: "#57CC99",
-        icon: <NobateshMisheIcon size={36} color="white" />,
+        icon: <RumizIcon size={36} color="white" />,
         labelKey: "taskPreviewCard.upNext",
         gradient: "linear-gradient(135deg, #57CC99 0%, #6DE2AF 100%)",
         endpoint: "rumiz",

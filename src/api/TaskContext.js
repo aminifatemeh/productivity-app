@@ -174,11 +174,14 @@ export const TaskProvider = ({ children }) => {
 
     const addTask = async (taskData) => {
         try {
+            const getTodayDateStr = () => new Date().toISOString().split('T')[0];
+
             const validSubtasks = (taskData.subtasks || [])
                 .filter(sub => sub.title && sub.title.trim() !== '')
                 .map(sub => ({
+                    id: sub.id != null ? Number(sub.id) : null,
                     title: sub.title.trim(),
-                    done_date: null
+                    done_date: sub.isDone ? getTodayDateStr() : null
                 }));
 
             const repeatDays = Array.isArray(taskData.repeat_days) ? taskData.repeat_days : [];
@@ -213,17 +216,29 @@ export const TaskProvider = ({ children }) => {
         }
     };
 
-    const editTask = async (updatedTask) => {
+    const editTask = async (updatedTask, { silent = false } = {}) => {
         try {
+            const getTodayDateStr = () => new Date().toISOString().split('T')[0];
+
+            // ✅ Define repeatDays
+            const repeatDays = Array.isArray(updatedTask.repeat_days) ? updatedTask.repeat_days : [];
+
+            // ✅ Define taskDoneDate
+            const taskDoneDate = updatedTask.isDone ? getTodayDateStr() : null;
+
             const validSubtasks = (updatedTask.subtasks || [])
                 .filter(sub => sub.title && sub.title.trim() !== '')
                 .map(sub => ({
-                    id: typeof sub.id === 'number' ? sub.id : null,
+                    id: sub.id != null ? Number(sub.id) : null,
                     title: sub.title.trim(),
-                    done_date: sub.done_date || null
+                    done_date: sub.isDone ? getTodayDateStr() : null
                 }));
 
-            const repeatDays = Array.isArray(updatedTask.repeat_days) ? updatedTask.repeat_days : [];
+            // ⚠️ TEMP DEBUG - Remove after finding issue
+            if (silent) {
+                console.log('🔍 SILENT EDIT - Subtasks being sent:', validSubtasks);
+                console.log('🔍 SILENT EDIT - Subtask IDs:', validSubtasks.map(s => s.id));
+            }
 
             const response = await tasksAPI.updateTask(updatedTask.id, {
                 title: updatedTask.title,
@@ -235,14 +250,36 @@ export const TaskProvider = ({ children }) => {
                 repeat_days: repeatDays,
                 subtasks: validSubtasks,
                 categories: updatedTask.categories || [],
-                done_date: updatedTask.done_date || null,
-                done_time: updatedTask.done_time || null,
+                done_date: taskDoneDate,
+                done_time: taskDoneDate ? (updatedTask.deadline_time || '23:59:00') : null,
                 duration: updatedTask.duration || '00:00:00',
                 routine_father: updatedTask.routine_father || null,
             });
 
+            // ✅ Normalize the edited task
             const editedTask = normalizeTask(response, updatedTask.originalIndex || 0);
-            await refreshAllCategories();
+
+            // ⚠️ TEMP DEBUG - Check what backend returned
+            if (silent) {
+                console.log('🔍 SILENT EDIT - Response subtasks:', response.subtasks);
+            }
+
+            // ✅ FIXED: Correct if/else logic
+            if (silent) {
+                // Patch just this one task in local state — no network re-fetch
+                setTasksByCategory(prev => {
+                    const patch = (list) =>
+                        list.map(t => t.id === editedTask.id ? editedTask : t);
+                    return {
+                        khak_khorde: patch(prev.khak_khorde),
+                        rumiz: patch(prev.rumiz),
+                        nobatesh_mishe: patch(prev.nobatesh_mishe),
+                    };
+                });
+            } else {
+                // Full refresh from server
+                await refreshAllCategories();
+            }
 
             return { success: true, task: editedTask };
 

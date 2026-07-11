@@ -6,51 +6,41 @@ import ConfirmDeleteModal from "../ConfirmDeleteModal";
 import { EditIcon, DeleteIcon, CheckIcon } from "../Icons"; // <-- Import Icons
 import moment from "jalali-moment";
 
-// رنگ دسته‌بندی‌ها مطابق با AddTaskModal
-const CATEGORY_COLORS = {
-  "درس": "#4690E4",
-  "کار": "#DA348D",
-  "کلاس": "#FFA500",
-  "ورزش": "#34AA7B",
-  "سلامتی": "#FF6B6B",
-};
-
-const DEFAULT_TAG_COLOR = "#38A3A5";
+const TAG_COLOR = "#01575C"; // Matches your app's primary dark color
 const MAX_VISIBLE_TAGS = 3;
 
-const getTagColor = (tag) =>
-    tag?.color || CATEGORY_COLORS[tag?.name] || DEFAULT_TAG_COLOR;
+const getTagColor = () => TAG_COLOR;
 
 function TaskCard({
-                    task,
-                    onUpdateTask,
-                    onDeleteTask,
-                    onEditTask,
-                    onToggleTask,
-                    originalIndex,
-                  }) {
+  task,
+  onUpdateTask,
+  onDeleteTask,
+  onEditTask,
+  onToggleTask,
+  originalIndex,
+}) {
   const [expanded, setExpanded] = useState(false);
   const [subtasks, setSubtasks] = useState(
-      Array.isArray(task.subtasks)
-          ? task.subtasks.map((subtask) => ({
-            id: subtask.id,
-            title: subtask.title,
-            isDone: !!subtask.done_date,
-          }))
-          : []
+    Array.isArray(task.subtasks)
+      ? task.subtasks.map((subtask) => ({
+          id: subtask.id,
+          title: subtask.title,
+          isDone: !!subtask.done_date,
+        }))
+      : []
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // همگام‌سازی subtasks لوکال وقتی task تغییر می‌کند
   useEffect(() => {
     setSubtasks(
-        Array.isArray(task.subtasks)
-            ? task.subtasks.map((subtask) => ({
-              id: subtask.id,
-              title: subtask.title,
-              isDone: !!subtask.done_date,
-            }))
-            : []
+      Array.isArray(task.subtasks)
+        ? task.subtasks.map((subtask) => ({
+            id: subtask.id,
+            title: subtask.title,
+            isDone: !!subtask.done_date,
+          }))
+        : []
     );
   }, [task.subtasks]);
 
@@ -65,27 +55,44 @@ function TaskCard({
     return m.locale("fa").format("jYYYY/jMM/jDD");
   };
 
-  useEffect(() => {
-    if (task.isDone !== undefined) {
-      const isAllDone = task.isDone;
-      setSubtasks((prevSubtasks) =>
-          prevSubtasks.map((subtask) => ({
-            ...subtask,
-            isDone: isAllDone,
-          }))
-      );
-    }
-  }, [task.isDone]);
 
-  const toggleSubtaskDone = (index) => {
-    const updated = [...subtasks];
-    updated[index].isDone = !updated[index].isDone;
+
+  const toggleSubtaskDone = async (index) => {
+    const originalSubtasks = [...subtasks];
+
+    // 1. Update local state immediately
+    const updated = subtasks.map((s, i) =>
+        i === index ? { ...s, isDone: !s.isDone } : s
+    );
     setSubtasks(updated);
 
-    const newDoneCount = updated.filter((t) => t.isDone).length;
-    const isTaskDone = updated.length > 0 && newDoneCount === updated.length;
+    const doneCount = updated.filter((t) => t.isDone).length;
+    const allDone = updated.length > 0 && doneCount === updated.length;
 
-    onUpdateTask({ ...task, subtasks: updated, isDone: isTaskDone });
+    // 2. Persist subtasks silently
+    const result = await onUpdateTask(
+        {
+          ...task,
+          subtasks: updated,
+          isDone: task.isDone,
+        },
+        { silent: true }
+    );
+
+    if (!result?.success) {
+      setSubtasks(originalSubtasks);
+      return;
+    }
+
+    // 3. Toggle parent task when ALL subtasks just became done
+    if (allDone && !task.isDone) {
+      await onToggleTask(task.id);
+    }
+
+    // ✅ NEW: Untoggle parent task when it WAS done but now isn't 100%
+    if (!allDone && task.isDone) {
+      await onToggleTask(task.id);
+    }
   };
 
   const handleDeleteSubtask = (index) => {
@@ -131,10 +138,10 @@ function TaskCard({
     if (!result.success) {
       console.error("Error toggling task:", result.error);
       setSubtasks((prev) =>
-          prev.map((subtask) => ({
-            ...subtask,
-            isDone: !isBecomingDone,
-          }))
+        prev.map((subtask) => ({
+          ...subtask,
+          isDone: !isBecomingDone,
+        }))
       );
       alert(result.error || "خطایی در تغییر وضعیت تسک رخ داد");
     }
@@ -142,129 +149,131 @@ function TaskCard({
 
   const doneCount = subtasks.filter((t) => t.isDone).length;
   const progressPercent = task.isDone
-      ? 100
-      : subtasks.length === 0
-          ? 0
-          : Math.round((doneCount / subtasks.length) * 100);
+    ? 100
+    : subtasks.length === 0
+    ? 0
+    : Math.round((doneCount / subtasks.length) * 100);
 
   const visibleCategories = Array.isArray(task.categories)
-      ? task.categories.slice(0, MAX_VISIBLE_TAGS)
-      : [];
+    ? task.categories.slice(0, MAX_VISIBLE_TAGS)
+    : [];
 
   const hiddenCategoriesCount = Array.isArray(task.categories)
-      ? Math.max(task.categories.length - MAX_VISIBLE_TAGS, 0)
-      : 0;
+    ? Math.max(task.categories.length - MAX_VISIBLE_TAGS, 0)
+    : 0;
 
   return (
-      <>
-        <div
-            className={`TaskCard ${expanded ? "expanded" : ""} ${
-                task.isDone ? "done" : ""
-            }`}
-            onClick={toggleCard}
-        >
-          <div className="TaskCard__description">
-            <div className="TaskCard__description-titles">
-              <span>{task.title}</span>
-              <span>{task.description}</span>
-              {task.deadline_date && (
-                  <span>تاریخ انقضا: {formatDateForDisplay(task.deadline_date)}</span>
-              )}
-            </div>
-
-            <div className="TaskCard__description-labels">
-              <div className="task-icons">
-                <button
-                    type="button"
-                    className="task-icon task-icon--edit"
-                    aria-label="ویرایش"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit();
-                    }}
-                >
-                    <EditIcon />
-                </button>
-
-                <button
-                    type="button"
-                    className="task-icon task-icon--delete"
-                    aria-label="حذف"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete();
-                    }}
-                >
-                    <DeleteIcon />
-                </button>
-
-                <button
-                    type="button"
-                    className={`task-icon task-icon--done ${
-                        task.isDone ? "is-done" : ""
-                    }`}
-                    aria-label="تکمیل"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleDone();
-                    }}
-                >
-                    <CheckIcon />
-                </button>
-              </div>
-
-              <div className="task-label">
-                {visibleCategories.map((category) => (
-                    <span
-                        key={category.id || category.name}
-                        className="task-tag"
-                        style={{ backgroundColor: getTagColor(category) }}
-                    >
-                  {category.name}
-                </span>
-                ))}
-
-                {hiddenCategoriesCount > 0 && (
-                    <span className="task-tag task-tag--more">
-                  +{hiddenCategoriesCount}
-                </span>
-                )}
-              </div>
-            </div>
+    <>
+      <div
+        className={`TaskCard ${expanded ? "expanded" : ""} ${
+          task.isDone ? "done" : ""
+        }`}
+        onClick={toggleCard}
+      >
+        <div className="TaskCard__description">
+          <div className="TaskCard__description-titles">
+            <span>{task.title}</span>
+            <span>{task.description}</span>
+            {task.deadline_date && (
+              <span>
+                تاریخ انقضا: {formatDateForDisplay(task.deadline_date)}
+              </span>
+            )}
           </div>
 
-          <div className="TaskCard__divider--top" />
-          <div className="TaskCard__divider" />
+          <div className="TaskCard__description-labels">
+            <div className="task-icons">
+              <button
+                type="button"
+                className="task-icon task-icon--edit"
+                aria-label="ویرایش"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit();
+                }}
+              >
+                <EditIcon />
+              </button>
 
-          {expanded && subtasks.length > 0 && (
-              <div className="TaskCard__expanded-area">
-                <div className="task-label-spacer" />
-                {subtasks.map((subtask, index) => (
-                    <div key={subtask.id || index} className="w-100">
-                      <SubtaskBar
-                          title={subtask.title}
-                          isDone={subtask.isDone}
-                          onToggle={() => toggleSubtaskDone(index)}
-                          onDelete={() => handleDeleteSubtask(index)}
-                      />
-                    </div>
-                ))}
-              </div>
-          )}
+              <button
+                type="button"
+                className="task-icon task-icon--delete"
+                aria-label="حذف"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete();
+                }}
+              >
+                <DeleteIcon />
+              </button>
 
-          <ProgressBar
-              className="TaskCard__progressBar"
-              progress={`${progressPercent}%`}
-          />
+              <button
+                type="button"
+                className={`task-icon task-icon--done ${
+                  task.isDone ? "is-done" : ""
+                }`}
+                aria-label="تکمیل"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleToggleDone();
+                }}
+              >
+                <CheckIcon />
+              </button>
+            </div>
+
+            <div className="task-label">
+              {visibleCategories.map((category) => (
+                <span
+                  key={category.id || category.name}
+                  className="task-tag"
+                  style={{ backgroundColor: getTagColor(category) }}
+                >
+                  {category.name}
+                </span>
+              ))}
+
+              {hiddenCategoriesCount > 0 && (
+                <span className="task-tag task-tag--more">
+                  +{hiddenCategoriesCount}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
-        <ConfirmDeleteModal
-            isOpen={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-            onConfirm={handleConfirmDelete}
-            taskTitle={task.title}
+        <div className="TaskCard__divider--top" />
+        <div className="TaskCard__divider" />
+
+        {expanded && subtasks.length > 0 && (
+          <div className="TaskCard__expanded-area">
+            <div className="task-label-spacer" />
+            {subtasks.map((subtask, index) => (
+              <div key={subtask.id || index} className="w-100">
+                <SubtaskBar
+                  title={subtask.title}
+                  isDone={subtask.isDone}
+                  onToggle={() => toggleSubtaskDone(index)}
+                  onDelete={() => handleDeleteSubtask(index)}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        <ProgressBar
+          className="TaskCard__progressBar"
+          progress={`${progressPercent}%`}
         />
-      </>
+      </div>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        taskTitle={task.title}
+      />
+    </>
   );
 }
 

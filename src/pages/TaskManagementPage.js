@@ -81,17 +81,8 @@ function TaskManagementPage() {
 
     const handleSaveTask = async (taskData) => {
         try {
-// Map categories to an array of objects containing ONLY the ID
-            const categoryPayload = Array.isArray(taskData.categories)
-                ? taskData.categories.map(cat => {
-                    const id = typeof cat === 'object' ? cat.id : cat;
-                    return { id: id }; // Yields [{"id": 4}] instead of [4] or full objects
-                })
-                : [];
-
             const payload = {
                 ...taskData,
-                categories: categoryPayload,
             };
 
 

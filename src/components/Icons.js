@@ -28,7 +28,7 @@ export const KhakKhordeIcon = ({ size, color, ...props }) => (
     </IconWrapper>
 );
 
-export const NobateshMisheIcon = ({ size, color, ...props }) => (
+export const RumizIcon = ({ size, color, ...props }) => (
     <IconWrapper size={size} color={color} {...props}>
         <rect x="2" y="10" width="20" height="2.5" rx="1.2" stroke={color} strokeWidth="1.5" />
         <line x1="6" y1="12.5" x2="5" y2="20" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
@@ -37,7 +37,7 @@ export const NobateshMisheIcon = ({ size, color, ...props }) => (
     </IconWrapper>
 );
 
-export const RumizIcon = ({ size, color, ...props }) => (
+export const NobateshMisheIcon = ({ size, color, ...props }) => (
     <IconWrapper size={size} color={color} {...props}>
         <line x1="7" y1="3" x2="17" y2="3" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
         <line x1="7" y1="21" x2="17" y2="21" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
