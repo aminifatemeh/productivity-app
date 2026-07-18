@@ -11,7 +11,7 @@ import { LanguageContext } from "../context/LanguageContext";
 import "./DashboardPage.scss";
 
 function DashboardPage() {
-    const { timers, addTask, refreshAllCategories } = useContext(TaskContext);
+    const { addTask, refreshAllCategories } = useContext(TaskContext);
     const { t } = useContext(LanguageContext);
     const location = useLocation();
     const navigate = useNavigate();

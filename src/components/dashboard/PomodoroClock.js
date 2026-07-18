@@ -1,37 +1,37 @@
 import React, { useContext, useEffect } from "react";
 import "./PomodoroClock.scss";
 import { TaskContext } from "../../api/TaskContext";
-import { PomodoroPauseIcon, PomodoroPlayIcon, PomodoroStopIcon } from "../Icons"; // adjust path if needed
-
+import { PomodoroPauseIcon, PomodoroPlayIcon, PomodoroStopIcon } from "../Icons";
 
 const PomodoroClock = ({ selectedTask }) => {
-    const { timers, startTimer, stopTimer, resetTimerForTask, setTimers, tasksByCategory } = useContext(TaskContext);
+    const { timers, startTimer, pauseTimer, resetTimerForTask, setTimers, tasksByCategory } = useContext(TaskContext);
 
     useEffect(() => {
         if (selectedTask && !timers[selectedTask.id]) {
             setTimers(prev => ({
                 ...prev,
-                [selectedTask.id]: { elapsed: 0, isRunning: false }
+                [selectedTask.id]: { elapsed: 0, isRunning: false, sessionElapsed: 0 }
             }));
         }
     }, [selectedTask, timers, setTimers]);
 
     const currentTimer = selectedTask && timers[selectedTask.id]
         ? timers[selectedTask.id]
-        : { elapsed: 0, isRunning: false };
+        : { elapsed: 0, isRunning: false, sessionElapsed: 0 };
 
-    const time = currentTimer.elapsed;
+    const time = currentTimer.elapsed || 0;
     const isActive = currentTimer.isRunning;
 
     const currentTask =
         tasksByCategory.khak_khorde?.find(t => t.id === selectedTask?.id) ||
         tasksByCategory.rumiz?.find(t => t.id === selectedTask?.id) ||
-        tasksByCategory.nobatesh_mishe?.find(t => t.id === selectedTask?.id);    const totalTime = (currentTask?.totalDuration || 0) + time;
+        tasksByCategory.nobatesh_mishe?.find(t => t.id === selectedTask?.id);
 
+    const totalTime = (currentTask?.totalDuration || 0) + (currentTimer.elapsed || 0);
     const toggleTimer = () => {
         if (!selectedTask) return;
         if (isActive) {
-            stopTimer(selectedTask.id);
+            pauseTimer(selectedTask.id);
         } else {
             startTimer(selectedTask.id);
         }
@@ -53,7 +53,7 @@ const PomodoroClock = ({ selectedTask }) => {
         return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     };
 
-    const progressPercentage = isActive ? Math.min((time % 1500) / 1500 * 100, 100) : 0;
+    const progressPercentage = isActive ? Math.min((currentTimer.elapsed % 1500) / 1500 * 100, 100) : 0;
 
     return (
         <div className="pomodoro-clock">
@@ -89,7 +89,6 @@ const PomodoroClock = ({ selectedTask }) => {
                     disabled={!selectedTask}
                 >
                     {isActive ? <PomodoroPauseIcon /> : <PomodoroPlayIcon />}
-
                 </button>
                 <button
                     className="pomodoro-clock__button pomodoro-clock__stop"

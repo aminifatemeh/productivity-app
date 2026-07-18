@@ -1,14 +1,11 @@
-import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext } from "react";
 import "./UtilitySidebar.scss";
 import PomodoroClock from "./PomodoroClock";
 import { LanguageContext } from "../../context/LanguageContext";
 import { CheckSquareIcon, PlusIcon } from "../Icons";
 
 function UtilitySidebar({ selectedTask, selectedDate, onAddTaskClick }) {
-    const { t, language } = useContext(LanguageContext);
-
-    const navigate = useNavigate();
+    const { t } = useContext(LanguageContext);
 
     return (
         <nav className="utility-sidebar">

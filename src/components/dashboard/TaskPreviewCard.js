@@ -32,7 +32,7 @@ function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
     const {
         timers,
         startTimer,
-        stopTimer,
+        pauseTimer,
         setTimers,
         tasksByCategory,
         loadingByCategory,
@@ -57,22 +57,19 @@ function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
 
     const handleTaskClick = (task) => {
         if (!task?.id) return;
-
-        // ✅ Toggle: unclick if already selected
         if (selectedTask?.id === task.id) {
             setSelectedTask?.(null);
             return;
         }
-
         if (!timers[task.id])
             setTimers((prev) => ({
                 ...prev,
-                [task.id]: { elapsed: 0, isRunning: false },
+                [task.id]: { elapsed: 0, isRunning: false, sessionElapsed: 0 },
             }));
         setSelectedTask?.(task);
     };
 
-    const handlePlayPause = async (e, task) => {
+    const handlePlayPause = (e, task) => {
         e.stopPropagation();
         if (!task?.id) return;
 
@@ -81,20 +78,13 @@ function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
         if (!timers[task.id]) {
             setTimers((prev) => ({
                 ...prev,
-                [task.id]: { elapsed: 0, isRunning: false },
+                [task.id]: { elapsed: 0, isRunning: false, sessionElapsed: 0 },
             }));
         }
 
-        const timer = timers[task.id] || { elapsed: 0, isRunning: false };
+        const timer = timers[task.id] || { elapsed: 0, isRunning: false, sessionElapsed: 0 };
         if (timer.isRunning) {
-            const result = await stopTimer(task.id);
-            if (result?.success) {
-                setSelectedTask?.({
-                    ...task,
-                    totalDuration: result.totalDuration,
-                    duration: result.duration,
-                });
-            }
+            pauseTimer(task.id);
         } else {
             startTimer(task.id);
         }
@@ -122,7 +112,7 @@ function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
                 ) : (
                     visibleTasks.map((task) => {
                         if (!task?.id) return null;
-                        const timer = timers[task.id] || { elapsed: 0, isRunning: false };
+                        const timer = timers[task.id] || { elapsed: 0, isRunning: false, sessionElapsed: 0 };
                         const totalTime = (task.totalDuration || 0) + timer.elapsed;
                         const progress = Math.min((totalTime / 3600) * 100, 100);
                         const isSelected = selectedTask?.id === task.id;

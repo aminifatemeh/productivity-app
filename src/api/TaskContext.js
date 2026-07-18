@@ -1,4 +1,3 @@
-// components/TaskContext.js
 import React, { createContext, useState, useEffect } from "react";
 import { tasksAPI } from "./apiService";
 
@@ -19,7 +18,6 @@ export const TaskProvider = ({ children }) => {
 
     const [timers, setTimers] = useState({});
     const [currentCategory, setCurrentCategory] = useState('khak_khorde');
-
 
     const generateUniqueId = () =>
         Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
@@ -135,9 +133,6 @@ export const TaskProvider = ({ children }) => {
         ]);
     };
 
-
-
-    // Kept for compatibility
     const fetchAllTasks = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
@@ -166,11 +161,9 @@ export const TaskProvider = ({ children }) => {
         }
     };
 
-
     useEffect(() => {
         refreshAllCategories();
     }, []);
-
 
     const addTask = async (taskData) => {
         try {
@@ -219,11 +212,7 @@ export const TaskProvider = ({ children }) => {
     const editTask = async (updatedTask, { silent = false } = {}) => {
         try {
             const getTodayDateStr = () => new Date().toISOString().split('T')[0];
-
-            // ✅ Define repeatDays
             const repeatDays = Array.isArray(updatedTask.repeat_days) ? updatedTask.repeat_days : [];
-
-            // ✅ Define taskDoneDate
             const taskDoneDate = updatedTask.isDone ? getTodayDateStr() : null;
 
             const validSubtasks = (updatedTask.subtasks || [])
@@ -234,7 +223,6 @@ export const TaskProvider = ({ children }) => {
                     done_date: sub.isDone ? getTodayDateStr() : null
                 }));
 
-            // ⚠️ TEMP DEBUG - Remove after finding issue
             if (silent) {
                 console.log('🔍 SILENT EDIT - Subtasks being sent:', validSubtasks);
                 console.log('🔍 SILENT EDIT - Subtask IDs:', validSubtasks.map(s => s.id));
@@ -256,17 +244,13 @@ export const TaskProvider = ({ children }) => {
                 routine_father: updatedTask.routine_father || null,
             });
 
-            // ✅ Normalize the edited task
             const editedTask = normalizeTask(response, updatedTask.originalIndex || 0);
 
-            // ⚠️ TEMP DEBUG - Check what backend returned
             if (silent) {
                 console.log('🔍 SILENT EDIT - Response subtasks:', response.subtasks);
             }
 
-            // ✅ FIXED: Correct if/else logic
             if (silent) {
-                // Patch just this one task in local state — no network re-fetch
                 setTasksByCategory(prev => {
                     const patch = (list) =>
                         list.map(t => t.id === editedTask.id ? editedTask : t);
@@ -277,7 +261,6 @@ export const TaskProvider = ({ children }) => {
                     };
                 });
             } else {
-                // Full refresh from server
                 await refreshAllCategories();
             }
 
@@ -340,13 +323,23 @@ export const TaskProvider = ({ children }) => {
         }
     };
 
-
     const startTimer = (taskId) => {
         setTimers(prev => ({
             ...prev,
             [taskId]: {
-                elapsed: prev[taskId]?.elapsed || 0,
-                isRunning: true
+                ...prev[taskId],
+                isRunning: true,
+                sessionElapsed: 0
+            }
+        }));
+    };
+
+    const pauseTimer = (taskId) => {
+        setTimers(prev => ({
+            ...prev,
+            [taskId]: {
+                ...prev[taskId],
+                isRunning: false
             }
         }));
     };
@@ -390,7 +383,7 @@ export const TaskProvider = ({ children }) => {
 
             setTimers(prev => ({
                 ...prev,
-                [taskId]: { elapsed: 0, isRunning: false }
+                [taskId]: { elapsed: 0, isRunning: false, sessionElapsed: 0 }
             }));
 
             return {
@@ -407,18 +400,53 @@ export const TaskProvider = ({ children }) => {
         }
     };
 
-
-
     const resetTimerForTask = async (taskId) => {
         const currentTimer = timers[taskId];
 
-        if (currentTimer?.isRunning && currentTimer.elapsed > 0) {
-            await stopTimer(taskId);
+        if (currentTimer?.elapsed > 0) {
+            try {
+                const currentTask =
+                    tasksByCategory.khak_khorde.find(t => t.id === taskId) ||
+                    tasksByCategory.rumiz.find(t => t.id === taskId) ||
+                    tasksByCategory.nobatesh_mishe.find(t => t.id === taskId);
+
+                const previousDuration = currentTask?.totalDuration || 0;
+                const newTotalDuration = previousDuration + currentTimer.elapsed;
+
+                const formattedDuration = formatDurationForAPI(newTotalDuration);
+                await tasksAPI.setTaskDuration(taskId, formattedDuration);
+
+                setTasksByCategory(prev => {
+                    const updateList = (list) =>
+                        list.map(t =>
+                            t.id === taskId
+                                ? {
+                                    ...t,
+                                    totalDuration: newTotalDuration,
+                                    duration: formattedDuration
+                                }
+                                : t
+                        );
+
+                    return {
+                        khak_khorde: updateList(prev.khak_khorde),
+                        rumiz: updateList(prev.rumiz),
+                        nobatesh_mishe: updateList(prev.nobatesh_mishe),
+                    };
+                });
+            } catch (err) {
+                console.error('Error sending duration:', err.message);
+            }
         }
 
         setTimers(prev => ({
             ...prev,
-            [taskId]: { elapsed: 0, isRunning: false }
+            [taskId]: {
+                ...prev[taskId],
+                elapsed: 0,
+                isRunning: false,
+                sessionElapsed: currentTimer?.elapsed || 0
+            }
         }));
     };
 
@@ -464,14 +492,11 @@ export const TaskProvider = ({ children }) => {
         return tasksByCategory[category] || [];
     };
 
-
-
-
     return (
         <TaskContext.Provider value={{
-            tasks, // backward compatible
-            setTasks, // compatibility wrapper if needed
-            isLoading, // backward compatible
+            tasks,
+            setTasks,
+            isLoading,
             tasksByCategory,
             loadingByCategory,
             timers,
@@ -483,6 +508,7 @@ export const TaskProvider = ({ children }) => {
             deleteTask,
             toggleTask,
             startTimer,
+            pauseTimer,
             stopTimer,
             resetTimerForTask,
             generateUniqueId,
@@ -491,7 +517,6 @@ export const TaskProvider = ({ children }) => {
             refreshAllCategories,
             getTasksByCategory,
         }}>
-
             {children}
         </TaskContext.Provider>
     );

@@ -4,14 +4,14 @@ import { PlusIcon } from "../Icons";
 import "./MobileBottomBar.scss";
 
 const MobileBottomBar = ({ selectedTask, onAddTaskClick }) => {
-  const { timers, startTimer, stopTimer, resetTimerForTask, tasksByCategory } = useContext(TaskContext);
+  const { timers, startTimer, pauseTimer, resetTimerForTask, tasksByCategory } = useContext(TaskContext);
 
   const currentTimer =
       selectedTask && timers[selectedTask.id]
           ? timers[selectedTask.id]
-          : { elapsed: 0, isRunning: false };
+          : { elapsed: 0, isRunning: false, sessionElapsed: 0 };
 
-  const time = currentTimer.elapsed;
+  const time = currentTimer.elapsed || 0;
   const isActive = currentTimer.isRunning;
 
   const currentTask =
@@ -19,12 +19,11 @@ const MobileBottomBar = ({ selectedTask, onAddTaskClick }) => {
       tasksByCategory.rumiz?.find(t => t.id === selectedTask?.id) ||
       tasksByCategory.nobatesh_mishe?.find(t => t.id === selectedTask?.id);
 
-  const totalTime = (currentTask?.totalDuration || 0) + time;
-
+  const totalTime = (currentTask?.totalDuration || 0) + (currentTimer.elapsed || 0);
   const toggleTimer = () => {
     if (!selectedTask) return;
     if (isActive) {
-      stopTimer(selectedTask.id);
+      pauseTimer(selectedTask.id);
     } else {
       startTimer(selectedTask.id);
     }
