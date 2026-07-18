@@ -35,7 +35,7 @@
     text-overflow: ellipsis;
   }
 
-  &__times{
+  &__times {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -51,7 +51,7 @@
     line-height: 1.1;
   }
 
-  &__total-time{
+  &__total-time {
     font-size: 12px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.85);
@@ -60,20 +60,20 @@
   }
 
   &__placeholder {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
-    font-style: italic;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
   }
 
   &__controls {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
   }
 
   &__button {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     border: none;
     display: flex;
@@ -82,6 +82,25 @@
     cursor: pointer;
     transition: all 0.3s ease;
     color: white;
+
+    &--add {
+      background: linear-gradient(135deg, #F4A261 0%, #E9C46A 100%);
+      box-shadow: 0 4px 12px rgba(244, 162, 97, 0.3);
+
+      &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(244, 162, 97, 0.4);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
 
     &--play {
       background: linear-gradient(135deg, #57CC99 0%, #6DE2AF 100%);
@@ -123,7 +142,6 @@
   }
 }
 
-// نمایش نوار موبایل در صفحات کوچک
 @media (max-width: 992px) {
   .mobile-timer-bar {
     display: block;
@@ -145,21 +163,22 @@
     &__time {
       font-size: 16px;
     }
+
     &__total-time {
       font-size: 11px;
     }
 
     &__placeholder {
-      font-size: 13px;
+      font-size: 14px;
     }
 
     &__controls {
-      gap: 10px;
+      gap: 8px;
     }
 
     &__button {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
 
       svg {
         width: 18px;

@@ -5,7 +5,7 @@ import { PomodoroPauseIcon, PomodoroPlayIcon, PomodoroStopIcon } from "../Icons"
 
 
 const PomodoroClock = ({ selectedTask }) => {
-    const { timers, startTimer, stopTimer, resetTimerForTask, setTimers, tasks } = useContext(TaskContext);
+    const { timers, startTimer, stopTimer, resetTimerForTask, setTimers, tasksByCategory } = useContext(TaskContext);
 
     useEffect(() => {
         if (selectedTask && !timers[selectedTask.id]) {
@@ -23,8 +23,10 @@ const PomodoroClock = ({ selectedTask }) => {
     const time = currentTimer.elapsed;
     const isActive = currentTimer.isRunning;
 
-    const currentTask = tasks.find(t => t.id === selectedTask?.id);
-    const totalTime = (currentTask?.totalDuration || 0) + time;
+    const currentTask =
+        tasksByCategory.khak_khorde?.find(t => t.id === selectedTask?.id) ||
+        tasksByCategory.rumiz?.find(t => t.id === selectedTask?.id) ||
+        tasksByCategory.nobatesh_mishe?.find(t => t.id === selectedTask?.id);    const totalTime = (currentTask?.totalDuration || 0) + time;
 
     const toggleTimer = () => {
         if (!selectedTask) return;

@@ -75,6 +75,13 @@
   margin: 0;
   line-height: 1.6;
 }
+.charts-page .performance-card__bottom-stat {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323434;
+  margin-top: 15px;
+  line-height: 1.6;
+}
 .charts-page .performance-card .stat-item {
   display: flex;
   gap: 10px;
@@ -123,51 +130,40 @@
   min-height: 300px;
   direction: ltr;
 }
-.charts-page .delay-content {
+.charts-page .delay-content-single {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
-  gap: 40px;
-  margin-top: 20px;
-}
-.charts-page .delay-item {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex: 1;
-  padding: 20px;
+  gap: 30px;
+  margin-top: 30px;
+  padding: 25px;
   background-color: #f9f9f9;
-  border-radius: 12px;
+  border-radius: 16px;
   transition: transform 0.2s ease;
 }
-.charts-page .delay-item:hover {
-  transform: translateY(-5px);
+.charts-page .delay-content-single:hover {
+  transform: translateY(-3px);
 }
-.charts-page .delay-icon {
-  width: 64px;
-  height: 64px;
+.charts-page .delay-icon-single {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-.charts-page .delay-info {
+.charts-page .delay-info-single {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
   flex: 1;
 }
-.charts-page .delay-label {
-  font-size: 16px;
-  color: #7C7C7C;
-  font-weight: 500;
-}
-.charts-page .delay-time {
-  font-size: 24px;
+.charts-page .delay-message-text {
+  font-size: 20px;
   font-weight: bold;
   color: #2C868B;
-  line-height: 1.2;
+  line-height: 1.5;
 }
 .charts-page .focus-cards-container {
   display: grid;
@@ -259,12 +255,17 @@
   .charts-page .main-content {
     padding: 30px 40px;
   }
-  .charts-page .delay-content {
+  .charts-page .delay-content-single {
     flex-direction: column;
+    text-align: center;
+    padding: 20px;
     gap: 20px;
   }
-  .charts-page .delay-item {
-    width: 100%;
+  .charts-page .delay-info-single {
+    justify-content: center;
+  }
+  .charts-page .delay-message-text {
+    font-size: 18px;
   }
   .charts-page .focus-cards-container {
     grid-template-columns: repeat(3, 1fr);
@@ -315,6 +316,9 @@
   .charts-page .performance-card__description {
     font-size: 14px;
   }
+  .charts-page .performance-card__bottom-stat {
+    font-size: 15px;
+  }
   .charts-page .performance-card__chart {
     width: 160px;
     height: 160px;
@@ -337,16 +341,16 @@
   .charts-page .performance-card .stat-item-inline {
     justify-content: center;
   }
-  .charts-page .delay-time {
-    font-size: 18px;
+  .charts-page .delay-icon-single {
+    width: 60px;
+    height: 60px;
   }
-  .charts-page .delay-icon {
-    width: 48px;
-    height: 48px;
+  .charts-page .delay-icon-single svg {
+    width: 30px;
+    height: 30px;
   }
-  .charts-page .delay-icon svg {
-    width: 24px;
-    height: 24px;
+  .charts-page .delay-message-text {
+    font-size: 16px;
   }
   .charts-page .focus-cards-container {
     grid-template-columns: 1fr;
@@ -384,6 +388,9 @@
   .charts-page .focus-card__chart {
     width: 140px;
     height: 140px;
+  }
+  .charts-page .delay-message-text {
+    font-size: 15px;
   }
 }
 

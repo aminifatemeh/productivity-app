@@ -54,18 +54,18 @@
   line-height: 1.1;
 }
 .mobile-timer-bar__placeholder {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-  font-style: italic;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
 }
 .mobile-timer-bar__controls {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 }
 .mobile-timer-bar__button {
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   border: none;
   display: flex;
@@ -74,6 +74,21 @@
   cursor: pointer;
   transition: all 0.3s ease;
   color: white;
+}
+.mobile-timer-bar__button--add {
+  background: linear-gradient(135deg, #F4A261 0%, #E9C46A 100%);
+  box-shadow: 0 4px 12px rgba(244, 162, 97, 0.3);
+}
+.mobile-timer-bar__button--add:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(244, 162, 97, 0.4);
+}
+.mobile-timer-bar__button--add:active {
+  transform: scale(0.95);
+}
+.mobile-timer-bar__button--add svg {
+  width: 20px;
+  height: 20px;
 }
 .mobile-timer-bar__button--play {
   background: linear-gradient(135deg, #57CC99 0%, #6DE2AF 100%);
@@ -128,14 +143,14 @@
     font-size: 11px;
   }
   .mobile-timer-bar__placeholder {
-    font-size: 13px;
+    font-size: 14px;
   }
   .mobile-timer-bar__controls {
-    gap: 10px;
+    gap: 8px;
   }
   .mobile-timer-bar__button {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
   }
   .mobile-timer-bar__button svg {
     width: 18px;
@@ -143,4 +158,4 @@
   }
 }
 
-/*# sourceMappingURL=MobileTimerBar.css.map */
+/*# sourceMappingURL=MobileBottomBar.css.map */

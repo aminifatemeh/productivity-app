@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AddTaskModal.scss';
 import moment from 'jalali-moment';
-import CompactCalendar from '../CompactClendar';
+import CompactCalendar from './CompactClendar';
 import { categoriesAPI } from '../../api/apiService';
 
 /* آیکون تقویم برای ورودی‌های تاریخ */

@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import "./TaskPreviewCard.scss";
 import { TaskContext } from "../../api/TaskContext";
 import { LanguageContext } from "../../context/LanguageContext";
-import { KhakKhordeIcon, NobateshMisheIcon, RumizIcon, PlayIcon, PauseIcon } from "../Icons"; // Update path if needed
+import { KhakKhordeIcon, NobateshMisheIcon, RumizIcon, PlayIcon, PauseIcon } from "../Icons";
 
 const cardConfigs = {
     active: {
@@ -28,7 +28,6 @@ const cardConfigs = {
     },
 };
 
-
 function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
     const {
         timers,
@@ -47,122 +46,119 @@ function TaskPreviewCard({ cardName, setSelectedTask, selectedTask }) {
     const loading = loadingByCategory[categoryKey];
     const visibleTasks = tasks.filter(task => !task?.isDone);
 
-
-
-
     const formatTime = (seconds) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    if (h > 0)
-      return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  };
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        if (h > 0)
+            return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    };
 
-  const handleTaskClick = (task) => {
-    if (!task?.id) return;
-    if (!timers[task.id])
-      setTimers((prev) => ({
-        ...prev,
-        [task.id]: { elapsed: 0, isRunning: false },
-      }));
-    setSelectedTask?.(task);
-  };
+    const handleTaskClick = (task) => {
+        if (!task?.id) return;
 
-  const handlePlayPause = async (e, task) => {
-    e.stopPropagation();
-    if (!task?.id) return;
+        // ✅ Toggle: unclick if already selected
+        if (selectedTask?.id === task.id) {
+            setSelectedTask?.(null);
+            return;
+        }
 
-    setSelectedTask?.(task);
+        if (!timers[task.id])
+            setTimers((prev) => ({
+                ...prev,
+                [task.id]: { elapsed: 0, isRunning: false },
+            }));
+        setSelectedTask?.(task);
+    };
 
-    if (!timers[task.id]) {
-      setTimers((prev) => ({
-        ...prev,
-        [task.id]: { elapsed: 0, isRunning: false },
-      }));
-    }
+    const handlePlayPause = async (e, task) => {
+        e.stopPropagation();
+        if (!task?.id) return;
 
-    const timer = timers[task.id] || { elapsed: 0, isRunning: false };
-      if (timer.isRunning) {
-          const result = await stopTimer(task.id);
+        setSelectedTask?.(task);
 
-          if (result?.success) {
-              setSelectedTask?.({
-                  ...task,
-                  totalDuration: result.totalDuration,
-                  duration: result.duration,
-              });
-          }
-      } else {
-          startTimer(task.id);
-      }
+        if (!timers[task.id]) {
+            setTimers((prev) => ({
+                ...prev,
+                [task.id]: { elapsed: 0, isRunning: false },
+            }));
+        }
 
-  };
+        const timer = timers[task.id] || { elapsed: 0, isRunning: false };
+        if (timer.isRunning) {
+            const result = await stopTimer(task.id);
+            if (result?.success) {
+                setSelectedTask?.({
+                    ...task,
+                    totalDuration: result.totalDuration,
+                    duration: result.duration,
+                });
+            }
+        } else {
+            startTimer(task.id);
+        }
+    };
 
-  return (
-    <div className="task-preview__card" style={{ background: config.gradient }}>
-      <div className="task-preview__card-header">
-        <div className="header-content">
-          <div className="header-icon">{config.icon}</div>
-          <span className="header-title">{t(config.labelKey)}</span>
-        </div>
-        <div className="task-count-badge">{loading ? "..." : visibleTasks.length}
-        </div>
-      </div>
-
-      <div className="task-preview__card-tasks">
-        {loading ? (
-          <div className="empty-state">
-            <span>در حال بارگذاری...</span>
-          </div>
-        ) : visibleTasks.length === 0 ? (
-          <div className="empty-state">
-            <span>{t("taskPreviewCard.noTasks")}</span>
-          </div>
-        ) : (
-            visibleTasks.map((task) => {
-            if (!task?.id) return null;
-            const timer = timers[task.id] || { elapsed: 0, isRunning: false };
-            const totalTime = (task.totalDuration || 0) + timer.elapsed;
-            const progress = Math.min((totalTime / 3600) * 100, 100);
-            const isSelected = selectedTask?.id === task.id;
-
-            return (
-              <div
-                key={task.id}
-                className={`task-preview__card-task ${
-                  timer.isRunning ? "is-running" : ""
-                } ${isSelected ? "is-selected" : ""}`}
-                style={{ "--progress": `${progress}%` }}
-                onClick={() => handleTaskClick(task)}
-              >
-                <div className="task-content">
-                  <div className="task-indicator"></div>
-                  <div className="task-info">
-                    <span className="task-title" title={task.title}>
-                      {task.title}
-                    </span>
-                    {totalTime > 0 && (
-                      <span className="task-time">{formatTime(totalTime)}</span>
-                    )}
-                  </div>
+    return (
+        <div className="task-preview__card" style={{ background: config.gradient }}>
+            <div className="task-preview__card-header">
+                <div className="header-content">
+                    <div className="header-icon">{config.icon}</div>
+                    <span className="header-title">{t(config.labelKey)}</span>
                 </div>
-                <button
-                  className={`task-action-btn ${
-                    timer.isRunning ? "is-active" : ""
-                  }`}
-                  onClick={(e) => handlePlayPause(e, task)}
-                  aria-label={timer.isRunning ? "Pause" : "Play"}
-                >
-                    {timer.isRunning ? <PauseIcon /> : <PlayIcon />}
-                </button>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </div>
-  );
+                <div className="task-count-badge">{loading ? "..." : visibleTasks.length}</div>
+            </div>
+
+            <div className="task-preview__card-tasks">
+                {loading ? (
+                    <div className="empty-state">
+                        <span>در حال بارگذاری...</span>
+                    </div>
+                ) : visibleTasks.length === 0 ? (
+                    <div className="empty-state">
+                        <span>{t("taskPreviewCard.noTasks")}</span>
+                    </div>
+                ) : (
+                    visibleTasks.map((task) => {
+                        if (!task?.id) return null;
+                        const timer = timers[task.id] || { elapsed: 0, isRunning: false };
+                        const totalTime = (task.totalDuration || 0) + timer.elapsed;
+                        const progress = Math.min((totalTime / 3600) * 100, 100);
+                        const isSelected = selectedTask?.id === task.id;
+
+                        return (
+                            <div
+                                key={task.id}
+                                className={`task-preview__card-task ${timer.isRunning ? "is-running" : ""} ${isSelected ? "is-selected" : ""}`}
+                                style={{ "--progress": `${progress}%` }}
+                                onClick={() => handleTaskClick(task)}
+                            >
+                                <div className="task-content">
+                                    <div className="task-indicator"></div>
+                                    <div className="task-info">
+                                        <span className="task-title" title={task.title}>
+                                            {task.title}
+                                        </span>
+                                        {totalTime > 0 && (
+                                            <span className="task-time">{formatTime(totalTime)}</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    className={`task-action-btn ${timer.isRunning ? "is-active" : ""}`}
+                                    onClick={(e) => handlePlayPause(e, task)}
+                                    aria-label={timer.isRunning ? "Pause" : "Play"}
+                                >
+                                    {timer.isRunning ? <PauseIcon /> : <PlayIcon />}
+                                </button>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+        </div>
+    );
 }
 
 export default TaskPreviewCard;

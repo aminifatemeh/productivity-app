@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./TaskCard.scss";
 import SubtaskBar from "./SubtaskBar";
-import ProgressBar from "../ProgressBar";
-import ConfirmDeleteModal from "../ConfirmDeleteModal";
+import ProgressBar from "./ProgressBar";
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { EditIcon, DeleteIcon, CheckIcon } from "../Icons"; // <-- Import Icons
 import moment from "jalali-moment";
 

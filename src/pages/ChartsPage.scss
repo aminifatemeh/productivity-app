@@ -4,12 +4,6 @@
   direction: rtl;
 
   .main-content {
-    // ❌ این خطوط رو حذف کن:
-    // margin-right: 321px;
-    // margin-left: 0;
-    // width: calc(100% - 321px);
-
-    // ✅ فقط اینا بمونن:
     justify-content: flex-start;
     padding: 30px 40px;
     overflow-y: auto;
@@ -94,6 +88,15 @@
       line-height: 1.6;
     }
 
+    // استایل جدید برای متن پایین نمودار امروز
+    &__bottom-stat {
+      font-size: 16px;
+      font-weight: 600;
+      color: #323434;
+      margin-top: 15px;
+      line-height: 1.6;
+    }
+
     .stat-item {
       display: flex;
       gap: 10px;
@@ -153,57 +156,45 @@
     }
   }
 
-  .delay-content {
+  // استایل‌های جدید برای نمودار اهمال‌کاری (تغییر یافته به حالت تک آیتمی)
+  .delay-content-single {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
-    gap: 40px;
-    margin-top: 20px;
-  }
-
-  .delay-item {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex: 1;
-    padding: 20px;
+    gap: 30px;
+    margin-top: 30px;
+    padding: 25px;
     background-color: #f9f9f9;
-    border-radius: 12px;
+    border-radius: 16px;
     transition: transform 0.2s ease;
 
     &:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
     }
   }
 
-  .delay-icon {
-    width: 64px;
-    height: 64px;
+  .delay-icon-single {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
 
-  .delay-info {
+  .delay-info-single {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
     flex: 1;
   }
 
-  .delay-label {
-    font-size: 16px;
-    color: #7C7C7C;
-    font-weight: 500;
-  }
-
-  .delay-time {
-    font-size: 24px;
+  .delay-message-text {
+    font-size: 20px;
     font-weight: bold;
     color: #2C868B;
-    line-height: 1.2;
+    line-height: 1.5;
   }
 
   .focus-cards-container {
@@ -314,13 +305,20 @@
       padding: 30px 40px;
     }
 
-    .delay-content {
+    // ریسپانسیو نمودار اهمال‌کاری جدید
+    .delay-content-single {
       flex-direction: column;
+      text-align: center;
+      padding: 20px;
       gap: 20px;
     }
 
-    .delay-item {
-      width: 100%;
+    .delay-info-single {
+      justify-content: center;
+    }
+
+    .delay-message-text {
+      font-size: 18px;
     }
 
     .focus-cards-container {
@@ -387,6 +385,10 @@
         font-size: 14px;
       }
 
+      &__bottom-stat {
+        font-size: 15px;
+      }
+
       &__chart {
         width: 160px;
         height: 160px;
@@ -417,18 +419,18 @@
       }
     }
 
-    .delay-time {
-      font-size: 18px;
-    }
-
-    .delay-icon {
-      width: 48px;
-      height: 48px;
+    .delay-icon-single {
+      width: 60px;
+      height: 60px;
 
       svg {
-        width: 24px;
-        height: 24px;
+        width: 30px;
+        height: 30px;
       }
+    }
+
+    .delay-message-text {
+      font-size: 16px;
     }
 
     .focus-cards-container {
@@ -475,6 +477,10 @@
         width: 140px;
         height: 140px;
       }
+    }
+
+    .delay-message-text {
+      font-size: 15px;
     }
   }
 }
